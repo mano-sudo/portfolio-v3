@@ -4,7 +4,7 @@ import Marquee from "./components/sections/marquee";
 import Experience from "./components/sections/experience";
 import Projects from "./components/sections/projects";
 import Skills from "./components/sections/skills";
-import Education from "./components/sections/education";
+import Achievements from "./components/sections/achievements";
 import Testimonials from "./components/sections/testimonials";
 import Blog from "./components/sections/blog";
 import Contact from "./components/sections/contact";
@@ -26,9 +26,9 @@ export default function Home() {
       <ScrollSection><Experience /></ScrollSection>
       <ScrollSection><Projects /></ScrollSection>
       <ScrollSection><Skills /></ScrollSection>
-      <ScrollSection><Education /></ScrollSection>
+      <ScrollSection><Achievements /></ScrollSection>
       <ScrollSection><Testimonials /></ScrollSection>
-      <ScrollSection><Blog /></ScrollSection>
+    
       <ScrollSection><Contact /></ScrollSection>
       
       <Footer />

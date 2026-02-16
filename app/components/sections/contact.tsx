@@ -1,66 +1,179 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { useGSAP } from "@/app/hooks/useGSAP";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Mail, Github, Linkedin, Twitter } from "lucide-react";
+import { Mail, Github, Linkedin, Twitter, ArrowUpRight, Copy, Check } from "lucide-react";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
 
 export default function Contact() {
-    const sectionRef = useGSAP(() => {
-        gsap.from(".contact-item", {
+    const [copied, setCopied] = useState(false);
+    const emailRef = useRef<HTMLAnchorElement>(null);
+
+    const socialLinks = [
+        { name: "GitHub", icon: Github, url: "#" },
+        { name: "LinkedIn", icon: Linkedin, url: "#" },
+        { name: "Twitter", icon: Twitter, url: "#" }
+    ];
+
+    const copyEmail = (e: React.MouseEvent) => {
+        e.preventDefault();
+        navigator.clipboard.writeText("romancaseres929@gmail.com");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const containerRef = useGSAP(() => {
+        const tl = gsap.timeline({
             scrollTrigger: {
-                trigger: ".contact-section",
-                start: "top 80%",
-            },
-            opacity: 0,
-            scale: 0.9,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: "back.out(1.7)"
+                trigger: containerRef.current,
+                start: "top 70%",
+                end: "bottom 80%",
+            }
         });
+
+        // Split text reveal effect for header
+        tl.from(".contact-header-text", {
+            y: 100,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power4.out"
+        });
+
+        // Content reveal
+        tl.from(".contact-content", {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out"
+        }, "-=0.5");
+
+        // Email card animation
+        tl.from(".email-card", {
+            scale: 0.9,
+            opacity: 0,
+            duration: 0.8,
+            ease: "back.out(1.2)"
+        }, "-=0.6");
+
+        // Hover effect for email card using GSAP
+        const emailCard = emailRef.current;
+        if(emailCard) {
+            emailCard.addEventListener("mouseenter", () => {
+                gsap.to(emailCard, { scale: 1.02, duration: 0.3, ease: "power2.out" });
+                gsap.to(".email-icon", { x: 5, y: -5, duration: 0.3 }); // slightly move arrow
+            });
+            emailCard.addEventListener("mouseleave", () => {
+                gsap.to(emailCard, { scale: 1, duration: 0.3, ease: "power2.out" });
+                gsap.to(".email-icon", { x: 0, y: 0, duration: 0.3 });
+            });
+        }
+
     }, []);
 
     return (
-        <section id="contact" ref={sectionRef} className="contact-section max-w-3xl mx-auto px-6 py-20">
-            <div className="mb-12">
-                <span className="text-sm text-gray-300 uppercase tracking-wider">Contact</span>
-                <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">Get In Touch</h2>
-            </div>
-            
-            <div className="prose prose-invert max-w-none mb-12">
-                <p className="text-lg text-gray-300 leading-relaxed mb-8">
-                    I'm always open to discussing new projects, creative ideas, or opportunities to be part of your visions.
-                </p>
-                
-                <a 
-                    href="mailto:romancaseres929@gmail.com"
-                    aria-label="Send email to romancaseres929@gmail.com"
-                    className="inline-flex items-center gap-2 text-lg text-gray-300 hover:text-purple-400 transition-colors border-b border-gray-700 hover:border-purple-400 pb-1"
-                >
-                    <Mail className="w-5 h-5" aria-hidden="true" />
-                    <span>romancaseres929@gmail.com</span>
-                </a>
-            </div>
+        <section ref={containerRef} id="contact" className="contact-section relative w-full py-32 bg-black overflow-hidden">
+            {/* Background Atmosphere */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-900/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-900/5 blur-[100px] rounded-full pointer-events-none mix-blend-screen" />
 
-            <div className="flex gap-6 pt-8 border-t border-gray-800">
-                <a href="mailto:romancaseres929@gmail.com" aria-label="Email" className="contact-item text-gray-400 hover:text-white transition-colors">
-                    <Mail className="w-5 h-5" aria-hidden="true" />
-                </a>
-                <a href="#" aria-label="GitHub profile" className="contact-item text-gray-400 hover:text-white transition-colors">
-                    <Github className="w-5 h-5" aria-hidden="true" />
-                </a>
-                <a href="#" aria-label="LinkedIn profile" className="contact-item text-gray-400 hover:text-white transition-colors">
-                    <Linkedin className="w-5 h-5" aria-hidden="true" />
-                </a>
-                <a href="#" aria-label="Twitter profile" className="contact-item text-gray-400 hover:text-white transition-colors">
-                    <Twitter className="w-5 h-5" aria-hidden="true" />
-                </a>
+            <div className="max-w-[1920px] mx-auto px-4 sm:px-6 md:px-12 lg:px-20 relative z-10">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
+                    
+                    {/* Left Column: Heading & Context */}
+                    <div className="space-y-12">
+                        <div className="space-y-2 overflow-hidden">
+                            <div className="overflow-hidden">
+                                <span className="contact-header-text block text-xs uppercase tracking-[0.3em] text-white/40 font-medium mb-4">
+                                    Contact
+                                </span>
+                            </div>
+                            <div className="overflow-hidden">
+                                <h2 className="contact-header-text block text-[clamp(3.5rem,9vw,8rem)] font-black uppercase leading-[0.9] text-white">
+                                    Let's Work
+                                </h2>
+                            </div>
+                            <div className="overflow-hidden">
+                                <h2 className="contact-header-text block text-[clamp(3.5rem,9vw,8rem)] font-black uppercase leading-[0.9] text-white/30">
+                                    Together
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div className="space-y-8 max-w-md">
+                            <p className="contact-content text-lg text-white/60 leading-relaxed font-light">
+                                Have a project in mind? Looking for a partner to help build your next big idea? 
+                                I'm always open to discussing new opportunities and challenges.
+                            </p>
+
+                            <div className="contact-content flex gap-4">
+                                {socialLinks.map((link) => (
+                                    <a 
+                                        key={link.name}
+                                        href={link.url}
+                                        className="group flex items-center justify-center w-12 h-12 rounded-full border border-white/10 bg-white/5 hover:bg-white hover:border-transparent transition-all duration-300"
+                                        aria-label={link.name}
+                                    >
+                                        <link.icon className="w-5 h-5 text-white/60 group-hover:text-black transition-colors duration-300" />
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column: Interactive Email Card */}
+                    <div className="w-full h-full flex flex-col justify-center lg:pt-12">
+                        <a 
+                            ref={emailRef}
+                            href="mailto:romancaseres929@gmail.com"
+                            className="email-card group relative block w-full h-[300px] lg:h-[400px] overflow-hidden bg-transparent border-t border-white/20 hover:border-white/50 transition-colors duration-500 pt-8 sm:pt-12"
+                        >
+                            <div className="relative h-full flex flex-col justify-between z-10 px-2 sm:px-0">
+                                <div className="flex justify-between items-start">
+                                    <div className="p-0">
+                                        <Mail className="w-8 h-8 text-white/40 group-hover:text-white transition-colors duration-500" />
+                                    </div>
+                                    <div className="email-icon">
+                                        <ArrowUpRight className="w-8 h-8 text-white/30 group-hover:text-white group-hover:rotate-45 transition-all duration-300" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <span className="text-xs uppercase tracking-[0.2em] text-white/40 mb-4 block">Drop me a line</span>
+                                    <h3 className="flex flex-col text-xl sm:text-3xl md:text-4xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-black uppercase text-white mb-8 leading-[0.9]">
+                                        <span>romancaseres929</span>
+                                        <span className="text-white/50">@gmail.com</span>
+                                    </h3>
+                                    
+                                    <button 
+                                        onClick={copyEmail}
+                                        className="inline-flex items-center gap-3 text-sm uppercase tracking-wider text-white/40 hover:text-white transition-all group/btn"
+                                    >
+                                        {copied ? (
+                                            <>
+                                                <Check className="w-4 h-4 text-green-400" />
+                                                <span className="text-green-400">Email Copied</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Copy className="w-4 h-4" />
+                                                <span className="group-hover/btn:underline decoration-white/30 underline-offset-4">Copy Address</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                </div>
             </div>
         </section>
     );
 }
-
