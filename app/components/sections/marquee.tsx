@@ -19,34 +19,38 @@ export default function Marquee() {
         if (!sectionRef.current) return;
 
         const ctx = gsap.context(() => {
-            const isMobile = window.innerWidth < 768;
+            const mm = gsap.matchMedia();
 
-            if (isMobile) {
-                // MOBILE STYLE: Split rows moving in opposite directions (Parallax)
-                // No heavy pinning, just scroll-triggered movement
-                gsap.to(mobileRow1Ref.current, {
-                    x: -100,
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top bottom",
-                        end: "bottom top",
-                        scrub: true
-                    }
-                });
+            mm.add("(max-width: 767px)", () => {
+                // MOBILE: two rows, opposite directions, light scroll parallax
+                if (mobileRow1Ref.current) {
+                    gsap.to(mobileRow1Ref.current, {
+                        x: -120,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: sectionRef.current,
+                            start: "top bottom",
+                            end: "bottom top",
+                            scrub: true,
+                            invalidateOnRefresh: true,
+                        },
+                    });
+                }
 
-                gsap.to(mobileRow2Ref.current, {
-                    x: 100,
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top bottom",
-                        end: "bottom top",
-                        scrub: true
-                    }
-                });
+                if (mobileRow2Ref.current) {
+                    gsap.to(mobileRow2Ref.current, {
+                        x: 120,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: sectionRef.current,
+                            start: "top bottom",
+                            end: "bottom top",
+                            scrub: true,
+                            invalidateOnRefresh: true,
+                        },
+                    });
+                }
 
-                // Services fade in
                 gsap.from(".mobile-service-item", {
                     opacity: 0,
                     y: 20,
@@ -56,53 +60,73 @@ export default function Marquee() {
                     scrollTrigger: {
                         trigger: ".mobile-services-grid",
                         start: "top 85%",
-                    }
+                    },
                 });
 
-            } else {
-                // DESKTOP STYLE: Two horizontal marquees pinned, opposite directions
-                const trackTop = trackTopRef.current!;
-                const trackBottom = trackBottomRef.current!;
+                return () => {};
+            });
+
+            mm.add("(min-width: 768px)", () => {
+                const trackTop = trackTopRef.current;
+                const trackBottom = trackBottomRef.current;
+                if (!trackTop || !trackBottom) return () => {};
 
                 const calculateValues = (trackEl: HTMLDivElement) => {
-                    // Start slightly offscreen for a cleaner first frame
-                    const startX = window.innerWidth * 0.25;
-                    // Don't force the entire track to pass; keeps composition readable
-                    const endX = -(trackEl.scrollWidth - window.innerWidth * 0.85);
-                    return { startX, endX };
+                    const viewport = window.innerWidth;
+                    const maxTravel = Math.max(trackEl.scrollWidth - viewport, 0);
+
+                    // Start positions: push content fully to edges.
+                    // Top row: start offscreen right (positive x).
+                    const offscreenRight = Math.min(viewport * 0.9, 900);
+                    // Bottom row: start offscreen left (negative x).
+                    const offscreenLeft = -Math.min(maxTravel + viewport * 0.2, maxTravel + 900);
+
+                    // End positions: travel far enough to feel like a marquee but keep some content visible.
+                    const endLeft = -Math.min(maxTravel, viewport * 0.95);
+                    const endRight = Math.min(viewport * 0.9, 900);
+
+                    return { offscreenRight, offscreenLeft, endLeft, endRight };
                 };
 
-                const getTop = () => calculateValues(trackTop);
-                const getBottom = () => calculateValues(trackBottom);
-
-                // Single ScrollTrigger drives both rows (prevents pin/desync issues)
-                const tl = gsap.timeline({
+                const topTl = gsap.timeline({
                     scrollTrigger: {
                         trigger: sectionRef.current,
-                        // Start as soon as the section begins to enter the viewport
                         start: "top bottom",
                         end: "bottom top",
-                        scrub: 0.12,
+                        scrub: 0.15,
                         invalidateOnRefresh: true,
                     },
                 });
 
                 // Top row: right -> left
-                tl.fromTo(
+                topTl.fromTo(
                     trackTop,
-                    { x: () => getTop().startX },
-                    { x: () => getTop().endX, ease: "none" },
-                    0
+                    { x: () => calculateValues(trackTop).offscreenRight },
+                    { x: () => calculateValues(trackTop).endLeft, ease: "none" }
                 );
 
+                const bottomTl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: "top bottom",
+                        end: "bottom top",
+                        scrub: 0.18,
+                        invalidateOnRefresh: true,
+                    },
+                });
+
                 // Bottom row: left -> right
-                tl.fromTo(
+                bottomTl.fromTo(
                     trackBottom,
-                    { x: () => getBottom().endX },
-                    { x: () => getBottom().startX, ease: "none" },
-                    0
+                    { x: () => calculateValues(trackBottom).offscreenLeft },
+                    { x: () => calculateValues(trackBottom).endRight, ease: "none" }
                 );
-            }
+
+                return () => {
+                    topTl.scrollTrigger?.kill();
+                    bottomTl.scrollTrigger?.kill();
+                };
+            });
         }, sectionRef);
 
         return () => ctx.revert();
@@ -144,7 +168,30 @@ export default function Marquee() {
                         </div>
                     </div>
 
-                
+                    {/* Row 2 (left -> right) */}
+                    <div
+                        ref={trackBottomRef}
+                        className="flex items-center whitespace-nowrap will-change-transform"
+                    >
+                        <span className="text-[clamp(6rem,12vw,14rem)] font-black text-white leading-[0.9] tracking-tighter select-none">
+                            UI
+                        </span>
+                        <span className="text-[clamp(3rem,5vw,5rem)] text-white/20 mx-14 select-none font-light italic">
+                            &
+                        </span>
+                        <span className="text-[clamp(6rem,12vw,14rem)] font-black text-white leading-[0.9] tracking-tighter select-none">
+                            Systems
+                        </span>
+
+                        <div className="ml-24 pr-32 flex flex-col gap-2 text-right">
+                            <span className="text-base text-white/40 font-mono uppercase tracking-[0.2em]">Focus</span>
+                            <div className="ml-auto h-px w-8 bg-white/20 mb-2" />
+                            <span className="text-xl text-white/70 font-bold uppercase tracking-tight">Performance</span>
+                            <span className="text-xl text-white/70 font-bold uppercase tracking-tight">Accessibility</span>
+                            <span className="text-xl text-white/70 font-bold uppercase tracking-tight">Clean UI</span>
+                            <span className="text-xl text-white/70 font-bold uppercase tracking-tight">Great UX</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
