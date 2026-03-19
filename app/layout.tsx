@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppNavbar from "./components/navbar/app-navbar";
 import SmoothScroll from "./components/smooth-scroll";
+import PageTransition from "./components/page-transition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,8 +18,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "devbyroman",
-  description: "devbyroman",
+  title: "Roman Caseres | Full Stack Developer",
+  description: "Roman Caseres is a full stack developer with a passion for building web applications.",
+  icons: {
+    icon: "/favicon.ico",
+  },
+  openGraph: {
+    title: "Roman Caseres | Full Stack Developer",
+    description: "Roman Caseres is a full stack developer with a passion for building web applications.",
+    images: "/og-image.png",
+  },
 };
 
 export default function RootLayout({
@@ -33,7 +42,9 @@ export default function RootLayout({
       >
         <AppNavbar />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <SmoothScroll>{children}</SmoothScroll>
+          <SmoothScroll>
+            <PageTransition>{children}</PageTransition>
+          </SmoothScroll>
         </ThemeProvider>
       </body>
     </html>

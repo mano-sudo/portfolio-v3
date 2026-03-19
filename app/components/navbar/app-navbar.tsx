@@ -107,7 +107,7 @@ export default function AppNavbar() {
                 {/* Mobile - Hamburger Button */}
                 <button
                     onClick={() => setMenuOpen(!menuOpen)}
-                    className="lg:hidden relative z-[60] flex flex-col items-center justify-center w-10 h-10 gap-[6px]"
+                    className="lg:hidden relative z-60 flex flex-col items-center justify-center w-10 h-10 gap-[6px]"
                     aria-label="Toggle menu"
                 >
                     <span
@@ -130,7 +130,7 @@ export default function AppNavbar() {
 
             {/* Mobile Full-Screen Menu Overlay */}
             <div
-                className={`fixed inset-0 z-[55] lg:hidden transition-all duration-500 ${
+                className={`fixed inset-0 z-55 lg:hidden transition-all duration-500 ${
                     menuOpen
                         ? "opacity-100 pointer-events-auto"
                         : "opacity-0 pointer-events-none"
@@ -180,7 +180,7 @@ export default function AppNavbar() {
                                     {item.name}
                                 </span>
                                 {isActive && (
-                                    <span className="absolute -bottom-0 left-0 w-full h-[2px] bg-white" />
+                                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-white" />
                                 )}
                             </Link>
                         );

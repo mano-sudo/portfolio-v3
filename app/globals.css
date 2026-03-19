@@ -220,3 +220,27 @@
   animation: gradient 3s ease infinite;
   background-size: 200% auto;
 }
+
+/* Hard-disable all scrollbar visuals during route transition overlay */
+html.route-transition-lock,
+body.route-transition-lock {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html.route-transition-lock::-webkit-scrollbar,
+body.route-transition-lock::-webkit-scrollbar {
+  display: none !important;
+}
+
+html.route-transition-lock *,
+body.route-transition-lock * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html.route-transition-lock *::-webkit-scrollbar,
+body.route-transition-lock *::-webkit-scrollbar {
+  display: none !important;
+}

@@ -2,61 +2,23 @@
 
 import { ExternalLink, Github } from "lucide-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-
-type Project = {
-    title: string;
-    description: string;
-    tech: readonly string[];
-    github: string;
-    live: string;
-    featured: boolean;
-    year: string;
-    image: string;
-};
-
-const projects: readonly Project[] = [
-    {
-        title: "Attendance Monitoring System",
-        description: "A web-based attendance monitoring system built with PHP, MySQL, Bootstrap, and JavaScript. Enables real-time logging of employee time-in/out, automated attendance tracking, and report generation. Features an intuitive admin dashboard for employee and schedule management, with a responsive UI and efficient backend integration for streamlined workforce monitoring.",
-        tech: ["html", "css", "php", "mysql", "bootstrap", "javascript"],
-        github: "https://github.com/mano-sudo/AMS",
-        live: "https://ams.manosudo.com",
-        featured: true,
-        year: "2024",
-        image: "/images/AMS.png"
-    },
-    {
-        title: "OutfitHaven: Responsive E-Commerce Platform",
-        description: "A Web-Based E-Commerce Platform for Local Fashion Brands in the Philippines Fashion Depot is a modern web-based e-commerce system built with React, Tailwind CSS, PHP, and MySQL, designed to showcase and support Philippine local fashion brands. The platform offers a smooth and dynamic shopping experience, enabling customers to browse collections in real-time, securely place orders, and engage directly with their favorite local designers.",
-        tech: ["react", "tailwind", "Node.js", "mongoDB"],
-        github: "https://github.com/mano-sudo/OutfitHaven",
-        live: "https://outfithat.manosudo.com",
-        featured: true,
-        year: "2024",
-        image: "/images/otf.png"
-    },
-    {
-        title: "Burger Ka Samen Ordering System",
-        description: "A full-stack burger ordering system built with PHP, MySQL, Tailwind CSS, and JavaScript. Supports customer ordering with cart and checkout features, and includes an admin dashboard for managing products, orders, and users. Designed with a responsive UI and efficient backend.",
-        tech: ["html", "css", "php", "mysql", "tailwind", "javascript"],
-        github: "https://github.com/mano-sudo/Ordering-System",
-        live: "https://ordering.manosudo.com",
-        featured: false,
-        year: "2023",
-        image: "/images/bks.png"
-    },
-   
-];
+import { useRouter } from "next/navigation";
+import { projects, type Project } from "@/app/data/projects";
+import { motion } from "framer-motion";
 
 export default function Projects() {
+    const router = useRouter();
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [previewTop, setPreviewTop] = useState<number>(0);
     const [lastProject, setLastProject] = useState<Project | null>(null);
     const [mobileVisible, setMobileVisible] = useState<number>(3);
     const [desktopVisible, setDesktopVisible] = useState<number>(6);
+    const [isNavigatingToProject, setIsNavigatingToProject] = useState(false);
+    const [transitionKey, setTransitionKey] = useState(0);
 
     const layoutRef = useRef<HTMLDivElement | null>(null);
     const previewRef = useRef<HTMLDivElement | null>(null);
+    const navTimeoutRef = useRef<number | null>(null);
 
     const activeProject = useMemo<Project | null>(() => {
         if (activeIndex === null) return null;
@@ -96,8 +58,73 @@ export default function Projects() {
         return projects.slice(0, desktopVisible);
     }, [desktopVisible]);
 
+    const navigateToProject = useCallback((slug: string) => {
+        if (isNavigatingToProject) return;
+        setIsNavigatingToProject(true);
+        setTransitionKey((value) => value + 1);
+        navTimeoutRef.current = window.setTimeout(() => {
+            window.sessionStorage.setItem("route-transition-lock", "1");
+            window.sessionStorage.setItem("project-transition-reveal", "1");
+            router.push(`/projects/${slug}`);
+        }, 620);
+    }, [isNavigatingToProject, router]);
+
+    React.useEffect(() => {
+        projects.forEach((project) => {
+            router.prefetch(`/projects/${project.slug}`);
+        });
+    }, [router]);
+
+    React.useEffect(() => {
+        return () => {
+            if (navTimeoutRef.current !== null) {
+                window.clearTimeout(navTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    React.useEffect(() => {
+        if (!isNavigatingToProject) return;
+
+        const previousHtmlOverflow = document.documentElement.style.overflow;
+        const previousBodyOverflow = document.body.style.overflow;
+        document.documentElement.classList.add("route-transition-lock");
+        document.body.classList.add("route-transition-lock");
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            const keepLockForNextRoute = window.sessionStorage.getItem("route-transition-lock") === "1";
+            if (keepLockForNextRoute) {
+                return;
+            }
+            document.documentElement.classList.remove("route-transition-lock");
+            document.body.classList.remove("route-transition-lock");
+            document.documentElement.style.overflow = previousHtmlOverflow;
+            document.body.style.overflow = previousBodyOverflow;
+        };
+    }, [isNavigatingToProject]);
+
     return (
-        <section className="projects-section relative bg-black overflow-hidden">
+        <section id="projects" className="projects-section relative bg-black overflow-hidden scroll-mt-24">
+            {isNavigatingToProject && (
+                <div className="pointer-events-none fixed inset-0 z-9999 overflow-hidden">
+                    <motion.div
+                        key={transitionKey}
+                        className="absolute inset-0"
+                        initial={{ y: "100%" }}
+                        animate={{
+                            y: ["100%", "0%", "0%"],
+                            backgroundColor: ["#0a0a0a", "#0a0a0a", "#0a0a0a"],
+                        }}
+                        transition={{
+                            duration: 1.25,
+                            times: [0, 0.24, 1],
+                            ease: "easeInOut",
+                        }}
+                    />
+                </div>
+            )}
             <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 xl:px-32">
                 <div className="projects-header pt-12 lg:pt-20 pb-8 lg:pb-12">
                     <span className="text-[10px] uppercase tracking-[0.3em] font-mono text-white/30 mb-2 lg:mb-4 block">Selected Projects</span>
@@ -115,15 +142,24 @@ export default function Projects() {
                         <div className="grid grid-cols-1 gap-8 md:gap-10">
                             {mobileProjects.map((project) => (
                                 <article
-                                    key={project.title}
-                                    className="rounded-sm border border-white/10 bg-white/5 overflow-hidden"
+                                    key={project.slug}
+                                    className="rounded-sm border border-white/10 bg-white/5 overflow-hidden cursor-pointer"
+                                    onClick={() => navigateToProject(project.slug)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === "Enter" || event.key === " ") {
+                                            event.preventDefault();
+                                            navigateToProject(project.slug);
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
                                 >
                                     <div className="relative w-full aspect-16/10 bg-black/20">
                                         <img
                                             src={project.image}
                                             alt={project.title}
                                             loading="lazy"
-                                            className="absolute inset-0 w-full h-full object-contain opacity-95"
+                                            className="absolute inset-0 w-full h-full object-cover opacity-95"
                                         />
                                         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
                                     </div>
@@ -148,6 +184,7 @@ export default function Projects() {
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     aria-label={`View ${project.title} source code on GitHub`}
+                                                    onClick={(event) => event.stopPropagation()}
                                                     className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center text-white/70 active:text-white active:border-white/35 transition-colors"
                                                 >
                                                     <Github className="w-5 h-5" />
@@ -157,6 +194,7 @@ export default function Projects() {
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     aria-label={`View ${project.title} live demo`}
+                                                    onClick={(event) => event.stopPropagation()}
                                                     className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center text-white/70 active:text-white active:border-white/35 transition-colors"
                                                 >
                                                     <ExternalLink className="w-5 h-5" />
@@ -209,19 +247,21 @@ export default function Projects() {
                                     const isActive = activeIndex !== null && index === activeIndex;
                                     return (
                                         <button
-                                            key={project.title}
+                                            key={project.slug}
                                             type="button"
                                             onMouseEnter={(e) => {
                                                 setActiveIndex(index);
                                                 setLastProject(projects[index] ?? null);
                                                 updatePreviewPosition(e.currentTarget);
+                                                router.prefetch(`/projects/${project.slug}`);
                                             }}
                                             onFocus={(e) => {
                                                 setActiveIndex(index);
                                                 setLastProject(projects[index] ?? null);
                                                 updatePreviewPosition(e.currentTarget);
+                                                router.prefetch(`/projects/${project.slug}`);
                                             }}
-                                            onClick={() => setActiveIndex(index)}
+                                            onClick={() => navigateToProject(project.slug)}
                                             className="group w-full text-left border-b border-white/10 py-4 md:py-5 lg:py-6"
                                         >
                                             <div className="flex items-start gap-5 md:gap-7">
@@ -308,7 +348,7 @@ export default function Projects() {
                                             src={renderProject.image}
                                             alt={renderProject.title}
                                             loading="lazy"
-                                            className="absolute inset-0 w-full h-full object-contain opacity-95"
+                                            className="absolute inset-0 w-full h-full object-cover opacity-95"
                                         />
                                         <div className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent" />
                                     </div>

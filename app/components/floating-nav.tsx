@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import anime from "animejs";
+import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
     { name: "Home", href: "#home" },
@@ -12,6 +13,8 @@ const navItems = [
 ];
 
 export default function FloatingNav() {
+    const pathname = usePathname();
+    const router = useRouter();
     const [activeSection, setActiveSection] = useState("home");
     const [isVisible, setIsVisible] = useState(false);
 
@@ -24,6 +27,36 @@ export default function FloatingNav() {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    useEffect(() => {
+        if (pathname !== "/") return;
+
+        const sectionIds = navItems.map((item) => item.href.replace("#", ""));
+        const observers: IntersectionObserver[] = [];
+
+        sectionIds.forEach((id) => {
+            const target = document.getElementById(id);
+            if (!target) return;
+
+            const observer = new IntersectionObserver(
+                ([entry]) => {
+                    if (entry?.isIntersecting) {
+                        setActiveSection(id);
+                    }
+                },
+                {
+                    threshold: 0.45,
+                }
+            );
+
+            observer.observe(target);
+            observers.push(observer);
+        });
+
+        return () => {
+            observers.forEach((observer) => observer.disconnect());
+        };
+    }, [pathname]);
 
     useEffect(() => {
         // Animate nav appearance
@@ -39,9 +72,17 @@ export default function FloatingNav() {
     }, [isVisible]);
 
     const handleClick = (href: string) => {
-        const element = document.querySelector(href);
+        const sectionId = href.replace("#", "");
+        setActiveSection(sectionId);
+
+        if (pathname !== "/") {
+            router.push(`/${href}`);
+            return;
+        }
+
+        const element = document.getElementById(sectionId);
         if (element) {
-            element.scrollIntoView({ behavior: "smooth" });
+            element.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     };
 
