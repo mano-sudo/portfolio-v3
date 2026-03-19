@@ -50,7 +50,7 @@ export default function Hero() {
             {/* ── Main content ── */}
             <div className="w-full max-w-[1920px] mx-auto relative">
                 {/* Mobile layout (reference style) */}
-                <div className="md:hidden min-h-dvh px-6 pt-6 pb-6 flex flex-col">
+                <div className="md:hidden min-h-dvh px-4 sm:px-6 pt-6 pb-6 flex flex-col">
                     {/* Top mini header */}
                     <div className="flex items-start justify-between gap-6">
                         <div className="min-w-0">
@@ -69,11 +69,11 @@ export default function Hero() {
 
                     {/* Big stacked title */}
                     <div className="flex-1 flex items-center py-6">
-                        <div className="leading-[0.82] font-black uppercase tracking-tight text-[clamp(4.75rem,20vw,10.25rem)] sm:text-[clamp(6rem,22vw,11rem)] text-white/55 select-none">
+                        <div className="w-full max-w-full pr-1 leading-[0.82] font-black uppercase tracking-tight text-[clamp(3.9rem,18vw,9.25rem)] sm:text-[clamp(4.8rem,20vw,9.8rem)] text-white/55 select-none">
                             <div className="max-w-full">Full</div>
                             <div className="relative max-w-full">
-                                <div className="absolute left-0 top-[0.62em] h-2 w-[clamp(3rem,12vw,6.5rem)] bg-white/25" />
-                                <div className="pl-[clamp(3.75rem,14vw,7.25rem)]">Stack</div>
+                                <div className="absolute left-0 top-[0.62em] h-2 w-[clamp(2.2rem,10vw,4.6rem)] bg-white/25" />
+                                <div className="pl-[clamp(2.7rem,11vw,5.2rem)]">Stack</div>
                             </div>
                             <div className="max-w-full">Develop</div>
                             <div className="max-w-full">Er</div>
