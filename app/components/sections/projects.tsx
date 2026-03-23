@@ -3,56 +3,45 @@
 import { ExternalLink, Github } from "lucide-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { projects, type Project } from "@/app/data/projects";
 import { releaseDocumentScroll } from "@/app/utils/release-document-scroll";
 import {
     prefersHardNavigationToProjectDetail,
     projectDetailPath,
 } from "@/app/utils/project-detail-navigation";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function Projects() {
     const router = useRouter();
-    const [activeIndex, setActiveIndex] = useState<number | null>(null);
-    const [previewTop, setPreviewTop] = useState<number>(0);
-    const [lastProject, setLastProject] = useState<Project | null>(null);
+    const [isDesktop, setIsDesktop] = useState<boolean>(false);
+    const [hoveredDesktopSlug, setHoveredDesktopSlug] = useState<string | null>(null);
+    const [previewAnchorY, setPreviewAnchorY] = useState<number>(180);
+    const [isPreviewImageLoaded, setIsPreviewImageLoaded] = useState<boolean>(false);
     const [mobileVisible, setMobileVisible] = useState<number>(3);
     const [desktopVisible, setDesktopVisible] = useState<number>(6);
     const [isNavigatingToProject, setIsNavigatingToProject] = useState(false);
     const [transitionKey, setTransitionKey] = useState(0);
 
-    const layoutRef = useRef<HTMLDivElement | null>(null);
-    const previewRef = useRef<HTMLDivElement | null>(null);
     const navTimeoutRef = useRef<number | null>(null);
+    const hoverResumeTimeoutRef = useRef<number | null>(null);
+    const isScrollHoverLockedRef = useRef<boolean>(false);
+    const prefetchedProjectSlugsRef = useRef<Set<string>>(new Set());
 
-    const activeProject = useMemo<Project | null>(() => {
-        if (activeIndex === null) return null;
-        return projects[Math.min(Math.max(activeIndex, 0), projects.length - 1)] ?? null;
-    }, [activeIndex]);
+    const prefetchProject = useCallback((slug: string) => {
+        if (prefetchedProjectSlugsRef.current.has(slug)) return;
+        prefetchedProjectSlugsRef.current.add(slug);
+        router.prefetch(projectDetailPath(slug));
+    }, [router]);
 
-    const renderProject = activeProject ?? lastProject;
-    const isPreviewVisible = renderProject !== null && activeProject !== null;
-
-    const updatePreviewPosition = useCallback((anchorEl: HTMLElement) => {
-        const layoutEl = layoutRef.current;
-        const previewEl = previewRef.current;
-        if (!layoutEl || !previewEl) return;
-
-        const layoutRect = layoutEl.getBoundingClientRect();
-        const anchorRect = anchorEl.getBoundingClientRect();
-        const previewRect = previewEl.getBoundingClientRect();
-
-        // Desired: align preview center with the hovered row center.
-        const desiredCenterY = (anchorRect.top - layoutRect.top) + (anchorRect.height / 2);
-
-        // Clamp so the preview never cuts out (top/bottom).
-        const padding = 12;
-        const halfPreview = previewRect.height / 2;
-        const minCenter = halfPreview + padding;
-        const maxCenter = layoutRect.height - halfPreview - padding;
-        const clampedCenterY = Math.min(Math.max(desiredCenterY, minCenter), maxCenter);
-
-        setPreviewTop(clampedCenterY);
+    const updatePreviewAnchorFromElement = useCallback((element: HTMLElement) => {
+        const rect = element.getBoundingClientRect();
+        const centerY = rect.top + (rect.height / 2);
+        const estimatedHalfCard = 210;
+        const minY = 120 + estimatedHalfCard;
+        const maxY = window.innerHeight - 24 - estimatedHalfCard;
+        const clampedY = Math.min(Math.max(centerY, minY), maxY);
+        setPreviewAnchorY(clampedY);
     }, []);
 
     const mobileProjects = useMemo<readonly Project[]>(() => {
@@ -63,8 +52,18 @@ export default function Projects() {
         return projects.slice(0, desktopVisible);
     }, [desktopVisible]);
 
+    const hoveredDesktopProject = useMemo<Project | null>(() => {
+        if (!hoveredDesktopSlug) return null;
+        return desktopProjects.find((project) => project.slug === hoveredDesktopSlug) ?? null;
+    }, [desktopProjects, hoveredDesktopSlug]);
+
+    React.useEffect(() => {
+        setIsPreviewImageLoaded(false);
+    }, [hoveredDesktopProject?.image]);
+
     const navigateToProject = useCallback((slug: string) => {
         if (isNavigatingToProject) return;
+        prefetchProject(slug);
 
         if (prefersHardNavigationToProjectDetail()) {
             window.location.assign(projectDetailPath(slug));
@@ -78,21 +77,59 @@ export default function Projects() {
             window.sessionStorage.setItem("project-transition-reveal", "1");
             router.push(projectDetailPath(slug));
         }, 620);
-    }, [isNavigatingToProject, router]);
+    }, [isNavigatingToProject, prefetchProject, router]);
 
     React.useEffect(() => {
-        projects.forEach((project) => {
-            router.prefetch(`/projects/${project.slug}`);
-        });
-    }, [router]);
+        const mediaQuery = window.matchMedia("(min-width: 1024px)");
+        const handleViewportChange = (event: MediaQueryListEvent) => {
+            setIsDesktop(event.matches);
+        };
+
+        setIsDesktop(mediaQuery.matches);
+        mediaQuery.addEventListener("change", handleViewportChange);
+
+        return () => {
+            mediaQuery.removeEventListener("change", handleViewportChange);
+        };
+    }, []);
 
     React.useEffect(() => {
         return () => {
             if (navTimeoutRef.current !== null) {
                 window.clearTimeout(navTimeoutRef.current);
             }
+            if (hoverResumeTimeoutRef.current !== null) {
+                window.clearTimeout(hoverResumeTimeoutRef.current);
+            }
         };
     }, []);
+
+    React.useEffect(() => {
+        if (!isDesktop) return;
+
+        const lockHoverDuringScroll = () => {
+            // Prevent row-hover churn while scrolling passes items under a fixed cursor.
+            if (!isScrollHoverLockedRef.current) {
+                isScrollHoverLockedRef.current = true;
+                setHoveredDesktopSlug(null);
+            }
+            if (hoverResumeTimeoutRef.current !== null) {
+                window.clearTimeout(hoverResumeTimeoutRef.current);
+            }
+            hoverResumeTimeoutRef.current = window.setTimeout(() => {
+                isScrollHoverLockedRef.current = false;
+                hoverResumeTimeoutRef.current = null;
+            }, 140);
+        };
+
+        window.addEventListener("scroll", lockHoverDuringScroll, { passive: true });
+        window.addEventListener("wheel", lockHoverDuringScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener("scroll", lockHoverDuringScroll);
+            window.removeEventListener("wheel", lockHoverDuringScroll);
+        };
+    }, [isDesktop]);
 
     React.useEffect(() => {
         if (!isNavigatingToProject) return;
@@ -140,12 +177,14 @@ export default function Projects() {
 
                 <div className="projects-content-wrapper relative z-10 pb-10 md:pb-14 lg:pb-20">
                     {/* Mobile & Tablet: stacked cards (touch-friendly) */}
-                    <div className="lg:hidden">
+                    {!isDesktop && (
+                        <>
                         <div className="grid grid-cols-1 gap-8 md:gap-10">
                             {mobileProjects.map((project) => (
                                 <article
                                     key={project.slug}
                                     className="rounded-sm border border-white/10 bg-white/5 overflow-hidden cursor-pointer"
+                                    style={{ contentVisibility: "auto", containIntrinsicSize: "640px" }}
                                     onClick={() => navigateToProject(project.slug)}
                                     onKeyDown={(event) => {
                                         if (event.key === "Enter" || event.key === " ") {
@@ -157,11 +196,14 @@ export default function Projects() {
                                     tabIndex={0}
                                 >
                                     <div className="relative w-full aspect-16/10 bg-black/20">
-                                        <img
+                                        <Image
                                             src={project.image}
                                             alt={project.title}
+                                            fill
+                                            sizes="(max-width: 768px) 100vw, 50vw"
                                             loading="lazy"
-                                            className="absolute inset-0 w-full h-full object-cover opacity-95"
+                                            quality={65}
+                                            className="absolute inset-0 h-full w-full object-cover opacity-95"
                                         />
                                         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
                                     </div>
@@ -234,37 +276,42 @@ export default function Projects() {
                                 </button>
                             </div>
                         )}
-                    </div>
+                        </>
+                    )}
 
-                    {/* Desktop: title list + floating hover preview */}
-                    <div
-                        className="hidden lg:grid relative grid-cols-12 gap-12 items-start"
-                        onMouseLeave={() => setActiveIndex(null)}
-                        ref={layoutRef}
-                    >
+                    {/* Desktop: title list + lightweight preview */}
+                    {isDesktop && (
+                        <div
+                            className="relative grid grid-cols-12 items-start gap-12"
+                            onMouseLeave={() => setHoveredDesktopSlug(null)}
+                        >
                         {/* Left: list */}
-                        <div className="col-span-12">
+                        <div className="col-span-12 xl:col-span-7">
                             <div className="border-t border-white/10">
                                 {desktopProjects.map((project, index) => {
-                                    const isActive = activeIndex !== null && index === activeIndex;
+                                    const isHovered = hoveredDesktopSlug === project.slug;
                                     return (
                                         <button
                                             key={project.slug}
                                             type="button"
-                                            onMouseEnter={(e) => {
-                                                setActiveIndex(index);
-                                                setLastProject(projects[index] ?? null);
-                                                updatePreviewPosition(e.currentTarget);
-                                                router.prefetch(`/projects/${project.slug}`);
+                                            onMouseEnter={() => {
+                                                if (isScrollHoverLockedRef.current) return;
+                                                setHoveredDesktopSlug(project.slug);
+                                                prefetchProject(project.slug);
                                             }}
-                                            onFocus={(e) => {
-                                                setActiveIndex(index);
-                                                setLastProject(projects[index] ?? null);
-                                                updatePreviewPosition(e.currentTarget);
-                                                router.prefetch(`/projects/${project.slug}`);
+                                            onMouseMove={(event) => {
+                                                if (isScrollHoverLockedRef.current) return;
+                                                updatePreviewAnchorFromElement(event.currentTarget);
+                                            }}
+                                            onFocus={(event) => {
+                                                if (isScrollHoverLockedRef.current) return;
+                                                setHoveredDesktopSlug(project.slug);
+                                                prefetchProject(project.slug);
+                                                updatePreviewAnchorFromElement(event.currentTarget);
                                             }}
                                             onClick={() => navigateToProject(project.slug)}
                                             className="group w-full text-left border-b border-white/10 py-4 md:py-5 lg:py-6"
+                                            style={{ contentVisibility: "auto", containIntrinsicSize: "120px" }}
                                         >
                                             <div className="flex items-start gap-5 md:gap-7">
                                                 <div className="pt-1 w-10 shrink-0">
@@ -278,15 +325,15 @@ export default function Projects() {
                                                         <h3
                                                             className={[
                                                                 "text-xl md:text-2xl lg:text-3xl font-black uppercase leading-tight tracking-tight italic transition-colors",
-                                                                isActive ? "text-white" : "text-white/45 group-hover:text-white/80"
+                                                                isHovered ? "text-white" : "text-white/45 group-hover:text-white/80",
                                                             ].join(" ")}
                                                         >
                                                             {project.title}
                                                         </h3>
                                                         <span
                                                             className={[
-                                                                "opacity-0 group-hover:opacity-100 transition-opacity text-white/40",
-                                                                isActive ? "opacity-100" : ""
+                                                                "transition-opacity text-white/40",
+                                                                isHovered ? "opacity-100" : "opacity-0 group-hover:opacity-100",
                                                             ].join(" ")}
                                                             aria-hidden="true"
                                                         >
@@ -325,91 +372,100 @@ export default function Projects() {
                             )}
                         </div>
 
-                        {/* Floating preview (desktop hover) */}
-                        <div
-                            className={[
-                                "absolute right-0 -translate-y-1/2",
-                                "w-[380px] xl:w-[420px] pointer-events-none",
-                                "transition-[opacity,transform] duration-200 ease-out",
-                                isPreviewVisible ? "opacity-100 translate-x-0 scale-100" : "opacity-0 translate-x-3 scale-[0.98]"
-                            ].join(" ")}
-                            style={{ top: previewTop }}
-                            aria-hidden={isPreviewVisible ? undefined : true}
-                        >
-                            {renderProject && (
-                                <div
-                                    ref={previewRef}
-                                    className="pointer-events-auto rounded-sm border border-white/10 bg-black/70 backdrop-blur-md overflow-hidden shadow-2xl shadow-black/50"
-                                    onTransitionEnd={() => {
-                                        if (activeProject === null) setLastProject(null);
-                                    }}
-                                >
-                                    <div className="relative w-full aspect-16/10 bg-black/20">
-                                        <img
-                                            key={renderProject.image}
-                                            src={renderProject.image}
-                                            alt={renderProject.title}
-                                            loading="lazy"
-                                            className="absolute inset-0 w-full h-full object-cover opacity-95"
-                                        />
-                                        <div className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent" />
-                                    </div>
+                        {/* Right: floating viewport preview */}
+                        <div className="hidden xl:block xl:col-span-5">
+                            <motion.div
+                                className="fixed xl:left-[56%] 2xl:left-[58%] z-40 w-[340px] 2xl:w-[380px] -translate-y-1/2"
+                                initial={false}
+                                animate={{ top: previewAnchorY }}
+                                transition={{ type: "spring", stiffness: 260, damping: 28, mass: 0.65 }}
+                            >
+                                <AnimatePresence mode="wait" initial={false}>
+                                    {hoveredDesktopProject ? (
+                                        <motion.article
+                                            key={hoveredDesktopProject.slug}
+                                            initial={{ opacity: 0, y: 10, scale: 0.985 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: -8, scale: 0.99 }}
+                                            transition={{ duration: 0.22, ease: "easeOut" }}
+                                            className="rounded-sm border border-white/10 bg-white/5 overflow-hidden shadow-2xl shadow-black/40 will-change-transform"
+                                            style={{ contentVisibility: "auto", containIntrinsicSize: "560px" }}
+                                        >
+                                            <div className="relative w-full aspect-16/10 bg-black/20">
+                                                {!isPreviewImageLoaded && (
+                                                    <div className="absolute inset-0 z-10 animate-pulse bg-white/8" />
+                                                )}
+                                                <Image
+                                                    src={hoveredDesktopProject.image}
+                                                    alt={hoveredDesktopProject.title}
+                                                    fill
+                                                    sizes="(max-width: 1536px) 40vw, 560px"
+                                                    loading="lazy"
+                                                    quality={62}
+                                                    className="absolute inset-0 h-full w-full object-cover opacity-95"
+                                                    onLoadingComplete={() => setIsPreviewImageLoaded(true)}
+                                                />
+                                                <div className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent" />
+                                            </div>
 
-                                    <div className="p-4 md:p-5">
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="min-w-0">
-                                                <div className="flex items-center gap-3 text-white/30 font-mono text-[10px] uppercase tracking-widest mb-2">
-                                                    <span>{renderProject.year}</span>
-                                                    {renderProject.featured && (
-                                                        <span className="text-white/40">Featured</span>
-                                                    )}
+                                            <div className="p-5">
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div className="min-w-0">
+                                                        <div className="flex items-center gap-3 text-white/30 font-mono text-[10px] uppercase tracking-widest mb-2">
+                                                            <span>{hoveredDesktopProject.year}</span>
+                                                            {hoveredDesktopProject.featured && (
+                                                                <span className="text-white/40">Featured</span>
+                                                            )}
+                                                        </div>
+                                                        <h4 className="text-white font-black uppercase tracking-tight text-lg leading-tight truncate">
+                                                            {hoveredDesktopProject.title}
+                                                        </h4>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3 shrink-0">
+                                                        <a
+                                                            href={hoveredDesktopProject.github}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            aria-label={`View ${hoveredDesktopProject.title} source code on GitHub`}
+                                                            className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:border-white/35 transition-colors"
+                                                        >
+                                                            <Github className="w-4 h-4" />
+                                                        </a>
+                                                        <a
+                                                            href={hoveredDesktopProject.live}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            aria-label={`View ${hoveredDesktopProject.title} live demo`}
+                                                            className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:border-white/35 transition-colors"
+                                                        >
+                                                            <ExternalLink className="w-4 h-4" />
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                                <h4 className="text-white font-black uppercase tracking-tight text-base md:text-lg leading-tight truncate">
-                                                    {renderProject.title}
-                                                </h4>
+
+                                                <p className="mt-3 text-white/55 text-sm italic leading-relaxed line-clamp-3">
+                                                    {hoveredDesktopProject.description}
+                                                </p>
+
+                                                <div className="mt-4 flex flex-wrap gap-2">
+                                                    {hoveredDesktopProject.tech.map((tech) => (
+                                                        <span
+                                                            key={tech}
+                                                            className="text-[10px] px-2.5 py-1 bg-white/4 text-white/60 rounded-full border border-white/10 font-mono uppercase tracking-widest"
+                                                        >
+                                                            {tech}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
-
-                                            <div className="flex items-center gap-3 shrink-0">
-                                                <a
-                                                    href={renderProject.github}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    aria-label={`View ${renderProject.title} source code on GitHub`}
-                                                    className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:border-white/35 transition-colors"
-                                                >
-                                                    <Github className="w-4 h-4" />
-                                                </a>
-                                                <a
-                                                    href={renderProject.live}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    aria-label={`View ${renderProject.title} live demo`}
-                                                    className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:border-white/35 transition-colors"
-                                                >
-                                                    <ExternalLink className="w-4 h-4" />
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <p className="mt-3 text-white/55 text-xs md:text-sm italic leading-relaxed line-clamp-3">
-                                            {renderProject.description}
-                                        </p>
-
-                                        <div className="mt-4 flex flex-wrap gap-2">
-                                            {renderProject.tech.map((tech) => (
-                                                <span
-                                                    key={tech}
-                                                    className="text-[10px] px-2.5 py-1 bg-white/4 text-white/60 rounded-full border border-white/10 font-mono uppercase tracking-widest"
-                                                >
-                                                    {tech}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                                        </motion.article>
+                                    ) : null}
+                                </AnimatePresence>
+                            </motion.div>
                         </div>
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </section>

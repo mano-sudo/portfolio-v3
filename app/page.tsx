@@ -1,36 +1,55 @@
 import Hero from "./components/hero/hero";
 import Stats from "./components/sections/stats";
 import Marquee from "./components/sections/marquee";
-import Experience from "./components/sections/experience";
-import Projects from "./components/sections/projects";
-import Skills from "./components/sections/skills";
-import Achievements from "./components/sections/achievements";
-import Testimonials from "./components/sections/testimonials";
-import Blog from "./components/sections/blog";
-import Contact from "./components/sections/contact";
 import Footer from "./components/footer";
+import dynamic from "next/dynamic";
 
 import FloatingSocials from "./components/floating-socials";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
 import ScrollSection from "./components/scroll-section";
 
+const Projects = dynamic(() => import("./components/sections/projects"));
+const Skills = dynamic(() => import("./components/sections/skills"));
+const Achievements = dynamic(() => import("./components/sections/achievements"));
+const Testimonials = dynamic(() => import("./components/sections/testimonials"));
+const Contact = dynamic(() => import("./components/sections/contact"));
+
 export default function Home() {
   return (
-    <main className="w-full min-h-screen overflow-x-hidden relative bg-black" style={{ scrollbarGutter: 'stable' }}>
+    <main
+      className="relative min-h-screen w-full overflow-x-hidden bg-black"
+      style={{ scrollbarGutter: "stable" }}
+    >
       <ScrollProgress />
       <FloatingSocials />
       
-      <ScrollSection><Hero /></ScrollSection>
-      <ScrollSection><Marquee /></ScrollSection>
-      <ScrollSection><Stats /></ScrollSection>
+      <ScrollSection>
+        <Hero />
+      </ScrollSection>
+      <ScrollSection>
+        <Marquee />
+      </ScrollSection>
+      <ScrollSection>
+        <Stats />
+      </ScrollSection>
       
       {/* <ScrollSection><Experience /></ScrollSection> */}
-      <ScrollSection><Projects /></ScrollSection>
-      <ScrollSection><Skills /></ScrollSection>
-      <ScrollSection><Achievements /></ScrollSection>
-      <ScrollSection><Testimonials /></ScrollSection>
+      <ScrollSection>
+        <Projects />
+      </ScrollSection>
+      <ScrollSection>
+        <Skills />
+      </ScrollSection>
+      <ScrollSection>
+        <Achievements />
+      </ScrollSection>
+      <ScrollSection>
+        <Testimonials />
+      </ScrollSection>
     
-      <ScrollSection><Contact /></ScrollSection>
+      <ScrollSection>
+        <Contact />
+      </ScrollSection>
       
       <Footer />
     </main>
