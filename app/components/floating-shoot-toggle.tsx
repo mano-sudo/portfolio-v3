@@ -134,6 +134,7 @@ function writeStateToStorage(isOn: boolean): void {
 
 export default function FloatingShootToggle(): React.JSX.Element {
     const [isOn, setIsOn] = React.useState<boolean>(false);
+    const [showGunCursor, setShowGunCursor] = React.useState<boolean>(false);
     const [dateTimeText, setDateTimeText] = React.useState<string>("");
     const [aimX, setAimX] = React.useState<number>(0);
     const [aimY, setAimY] = React.useState<number>(0);
@@ -141,9 +142,25 @@ export default function FloatingShootToggle(): React.JSX.Element {
     const [cursorY, setCursorY] = React.useState<number>(0);
     const [splats, setSplats] = React.useState<PaintSplat[]>([]);
     const pointerRef = React.useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+    const updateAimFromPoint = React.useCallback((x: number, y: number) => {
+        setCursorX(x);
+        setCursorY(y);
+        pointerRef.current = { x, y };
+        setAimX(Math.max(-1, Math.min(1, (x / window.innerWidth) * 2 - 1)));
+        setAimY(Math.max(-1, Math.min(1, (y / window.innerHeight) * 2 - 1)));
+    }, []);
 
     React.useEffect(() => {
         setIsOn(readInitialState());
+    }, []);
+
+    React.useEffect(() => {
+        const mediaQuery = window.matchMedia("(min-width: 1024px)");
+        const apply = (matches: boolean) => setShowGunCursor(matches);
+        apply(mediaQuery.matches);
+        const onChange = (event: MediaQueryListEvent) => apply(event.matches);
+        mediaQuery.addEventListener("change", onChange);
+        return () => mediaQuery.removeEventListener("change", onChange);
     }, []);
 
     React.useEffect(() => {
@@ -178,18 +195,22 @@ export default function FloatingShootToggle(): React.JSX.Element {
         setCursorY(window.innerHeight / 2);
 
         const onPointerMove = (event: PointerEvent) => {
-            const nx = (event.clientX / window.innerWidth) * 2 - 1;
-            const ny = (event.clientY / window.innerHeight) * 2 - 1;
-            setAimX(Math.max(-1, Math.min(1, nx)));
-            setAimY(Math.max(-1, Math.min(1, ny)));
-            setCursorX(event.clientX);
-            setCursorY(event.clientY);
-            pointerRef.current = { x: event.clientX, y: event.clientY };
+            updateAimFromPoint(event.clientX, event.clientY);
+        };
+
+        const onTouchMove = (event: TouchEvent) => {
+            const touch = event.touches[0];
+            if (!touch) return;
+            updateAimFromPoint(touch.clientX, touch.clientY);
         };
 
         window.addEventListener("pointermove", onPointerMove, { passive: true });
-        return () => window.removeEventListener("pointermove", onPointerMove);
-    }, [isOn]);
+        window.addEventListener("touchmove", onTouchMove, { passive: true });
+        return () => {
+            window.removeEventListener("pointermove", onPointerMove);
+            window.removeEventListener("touchmove", onTouchMove);
+        };
+    }, [isOn, updateAimFromPoint]);
 
     React.useEffect(() => {
         if (!isOn) return;
@@ -298,11 +319,12 @@ export default function FloatingShootToggle(): React.JSX.Element {
         };
 
         const onPointerDown = (event: PointerEvent) => {
-            if (event.button !== 0) return;
+            if (!event.isPrimary) return;
+            if (event.pointerType === "mouse" && event.button !== 0) return;
             if ((event.target as Element | null)?.closest("[data-shoot-ui]")) return;
             event.preventDefault();
             window.getSelection()?.removeAllRanges();
-            pointerRef.current = { x: event.clientX, y: event.clientY };
+            updateAimFromPoint(event.clientX, event.clientY);
 
             fireShot(event.clientX, event.clientY);
 
@@ -315,7 +337,8 @@ export default function FloatingShootToggle(): React.JSX.Element {
         };
 
         const onPointerUp = (event: PointerEvent) => {
-            if (event.button !== 0) return;
+            if (!event.isPrimary) return;
+            if (event.pointerType === "mouse" && event.button !== 0) return;
             stopHoldFire();
         };
 
@@ -342,23 +365,35 @@ export default function FloatingShootToggle(): React.JSX.Element {
             window.removeEventListener("pointercancel", onPointerCancel);
             window.removeEventListener("blur", onWindowBlur);
         };
-    }, [isOn]);
+    }, [isOn, updateAimFromPoint]);
 
     React.useEffect(() => {
-        const className = "shoot-cursor-hidden";
+        const cursorClassName = "shoot-cursor-hidden";
+        const shootModeClassName = "shoot-mode-active";
+
         if (isOn) {
-            document.documentElement.classList.add(className);
-            document.body.classList.add(className);
+            document.documentElement.classList.add(shootModeClassName);
+            document.body.classList.add(shootModeClassName);
         } else {
-            document.documentElement.classList.remove(className);
-            document.body.classList.remove(className);
+            document.documentElement.classList.remove(shootModeClassName);
+            document.body.classList.remove(shootModeClassName);
+        }
+
+        if (isOn && showGunCursor) {
+            document.documentElement.classList.add(cursorClassName);
+            document.body.classList.add(cursorClassName);
+        } else {
+            document.documentElement.classList.remove(cursorClassName);
+            document.body.classList.remove(cursorClassName);
         }
 
         return () => {
-            document.documentElement.classList.remove(className);
-            document.body.classList.remove(className);
+            document.documentElement.classList.remove(cursorClassName);
+            document.body.classList.remove(cursorClassName);
+            document.documentElement.classList.remove(shootModeClassName);
+            document.body.classList.remove(shootModeClassName);
         };
-    }, [isOn]);
+    }, [isOn, showGunCursor]);
 
     return (
         <>
@@ -429,7 +464,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
             )}
 
             {/* Custom gun cursor */}
-            {isOn && (
+            {isOn && showGunCursor && (
                 <div
                     className="fixed z-9999 pointer-events-none"
                     style={{ left: cursorX, top: cursorY, transform: "translate(-50%, -50%)" }}

@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function AppNavbar() {
     const pathname = usePathname();
+    const navRef = useRef<HTMLElement | null>(null);
     const [currentTime, setCurrentTime] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
     const [navHidden, setNavHidden] = useState(false);
@@ -58,6 +59,30 @@ export default function AppNavbar() {
         return () => window.removeEventListener("scroll", onScroll);
     }, [menuOpen]);
 
+    useEffect(() => {
+        const applyHeaderHeight = () => {
+            const nav = navRef.current;
+            if (!nav) return;
+            const height = Math.ceil(nav.getBoundingClientRect().height);
+            document.documentElement.style.setProperty("--app-header-h", `${height}px`);
+        };
+
+        applyHeaderHeight();
+        window.addEventListener("resize", applyHeaderHeight, { passive: true });
+
+        const nav = navRef.current;
+        let observer: ResizeObserver | null = null;
+        if (nav && typeof ResizeObserver !== "undefined") {
+            observer = new ResizeObserver(() => applyHeaderHeight());
+            observer.observe(nav);
+        }
+
+        return () => {
+            window.removeEventListener("resize", applyHeaderHeight);
+            observer?.disconnect();
+        };
+    }, []);
+
     const navItems = [
         { name: "ABOUT", href: "/" },
         { name: "PROJECTS", href: "/projects" },
@@ -66,7 +91,10 @@ export default function AppNavbar() {
 
     return (
         <>
-            <nav className={`fixed top-0 w-full z-50 flex justify-between items-center p-6 px-8 md:px-12 lg:px-20 transition-transform duration-300 bg-background/80 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none ${navHidden && !menuOpen ? "-translate-y-full" : "translate-y-0"}`}>
+            <nav
+                ref={navRef}
+                className={`fixed top-0 w-full z-50 flex justify-between items-center p-6 px-8 md:px-12 lg:px-20 transition-transform duration-300 bg-background/80 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none ${navHidden && !menuOpen ? "-translate-y-full" : "translate-y-0"}`}
+            >
                 {/* Left - Dashboard */}
                 <div className="text-black uppercase tracking-wider text-xs md:text-sm font-medium">
                     DASHBOARD

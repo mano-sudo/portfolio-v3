@@ -243,6 +243,19 @@ body.route-transition-lock *::-webkit-scrollbar {
   display: none !important;
 }
 
+html.shoot-mode-active,
+html.shoot-mode-active *,
+body.shoot-mode-active,
+body.shoot-mode-active *,
+html.shoot-mode-active *::before,
+html.shoot-mode-active *::after,
+body.shoot-mode-active *::before,
+body.shoot-mode-active *::after {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  touch-action: none !important;
+}
+
 html.shoot-cursor-hidden,
 html.shoot-cursor-hidden *,
 body.shoot-cursor-hidden,
@@ -252,12 +265,10 @@ html.shoot-cursor-hidden *::after,
 body.shoot-cursor-hidden *::before,
 body.shoot-cursor-hidden *::after {
   cursor: none !important;
-  user-select: none !important;
-  -webkit-user-select: none !important;
 }
 
-html.shoot-cursor-hidden *::selection,
-body.shoot-cursor-hidden *::selection {
+html.shoot-mode-active *::selection,
+body.shoot-mode-active *::selection {
   background: transparent !important;
   color: inherit !important;
 }

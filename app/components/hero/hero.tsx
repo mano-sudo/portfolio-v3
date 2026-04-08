@@ -7,11 +7,15 @@ export default function Hero() {
         <section
             data-shoot-target="1"
             data-shoot-granularity="char"
-            className="relative w-full h-dvh min-h-screen bg-[#f4f3ee] overflow-hidden"
+            className="relative w-full bg-[#f4f3ee] overflow-hidden"
+            style={{
+                marginTop: "var(--app-header-h, 88px)",
+                minHeight: "calc(100svh - var(--app-header-h, 88px))",
+            }}
         >
-            <div className="mx-auto h-full w-full max-w-[1920px] px-6 md:px-10 lg:px-14 xl:px-20">
+            <div className="mx-auto h-full w-full max-w-[1920px] px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20">
                 {/* Mobile layout */}
-                <div className="md:hidden h-full flex flex-col justify-center py-6">
+                <div className="md:hidden h-full flex flex-col justify-center gap-4 py-4 sm:py-6">
                     {/* Top */}
                     <div>
                         <div className="flex items-start justify-between gap-6">
@@ -25,7 +29,7 @@ export default function Hero() {
                             </div>
                         </div>
 
-                        <div className="mt-5">
+                        <div className="mt-3 sm:mt-5">
                             <h1
                                 data-shoot-target="1"
                                 data-shoot-granularity="char"
@@ -39,7 +43,7 @@ export default function Hero() {
                     </div>
 
                     {/* Middle */}
-                    <div className="mt-4">
+                    <div className="mt-2 sm:mt-4">
                         <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-black/70 mb-2">
                             Dr &amp; Me
                         </div>
@@ -56,7 +60,7 @@ export default function Hero() {
                     </div>
 
                     {/* Bottom */}
-                    <div className="pt-4">
+                    <div className="pt-2 sm:pt-4">
                         <div className="mb-4 text-right">
                             <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-black/72">
                                 Building fast, clean web apps
@@ -105,12 +109,12 @@ export default function Hero() {
                 </div>
 
                 {/* Desktop/tablet layout */}
-                <div className="hidden md:flex h-full flex-col justify-center gap-8 md:gap-10 py-8 md:py-10">
+                <div className="hidden md:flex h-full flex-col justify-center gap-6 md:gap-8 lg:gap-10 py-6 md:py-8 lg:py-10">
                     {/* Top row */}
-                    <div className="grid grid-cols-12 gap-y-10 gap-x-10 items-start">
+                    <div className="grid grid-cols-12 gap-y-10 gap-x-6 items-start">
                         {/* Top-left meta */}
-                        <div className="col-span-12 md:col-span-5">
-                            <div className="font-mono uppercase tracking-[0.28em] text-[10px] text-black/70">
+                        <div className="col-span-12 md:col-span-5 md:order-2">
+                            <div className="font-mono uppercase tracking-[0.28em] text-[10px] text-black/70 md:text-right">
                                 <div>01/</div>
                                 <div className="mt-2 text-black/55 tracking-[0.26em]">
                                     From Philippines with
@@ -121,7 +125,7 @@ export default function Hero() {
                         </div>
 
                         {/* Top-right headline */}
-                        <div className="col-span-12 md:col-span-7 md:text-right">
+                        <div className="col-span-12 md:col-span-7 md:order-1 md:text-left">
                             <h1
                                 data-shoot-target="1"
                                 data-shoot-granularity="char"
@@ -135,10 +139,10 @@ export default function Hero() {
                     </div>
 
                     {/* Bottom row */}
-                    <div className="grid grid-cols-12 gap-y-8 gap-x-10 items-start">
+                    <div className="grid grid-cols-12 gap-y-8 gap-x-6 items-start">
                         {/* Bottom-left name */}
-                        <div className="col-span-12 md:col-span-5">
-                            <div className="mb-8 max-w-104">
+                        <div className="col-span-12 md:col-span-5 md:order-2">
+                            <div className="mb-8 max-w-104 md:ml-auto md:text-right">
                                 <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-black/72">
                                     Building fast, clean web apps
                                     <br />
@@ -154,22 +158,22 @@ export default function Hero() {
                             <div
                                 data-shoot-target="1"
                                 data-shoot-granularity="char"
-                                className="text-black font-black uppercase leading-[0.88] tracking-[-0.05em] text-[clamp(3.4rem,6.7vw,6.4rem)]"
+                                className="text-black font-black uppercase leading-[0.88] tracking-[-0.05em] text-[clamp(3.4rem,6.7vw,6.4rem)] md:text-right"
                             >
                                 Roman
                                 <br />
                                 Caseres
                             </div>
 
-                            <div className="mt-8 text-[10px] font-mono uppercase tracking-[0.26em] text-black/55">
+                            <div className="mt-8 text-[10px] font-mono uppercase tracking-[0.26em] text-black/55 md:text-right">
                                 {new Date().getFullYear()} Portfolio
                             </div>
                         </div>
 
                         {/* Right-side media + bio */}
-                        <div className="col-span-12 md:col-span-7">
-                            <div className="md:flex md:justify-end">
-                                <div className="w-full max-w-[640px]">
+                        <div className="col-span-12 md:col-span-7 md:order-1">
+                            <div className="md:flex md:justify-start">
+                                <div className="w-full max-w-[720px]">
                                     <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-black/70 mb-2">
                                         Dr &amp; Me
                                     </div>
@@ -202,7 +206,7 @@ export default function Hero() {
                                         </div>
                                     </div>
 
-                                    <div className="mt-10 text-right text-[10px] font-mono uppercase tracking-[0.28em] text-black/55">
+                                    <div className="mt-10 text-left text-[10px] font-mono uppercase tracking-[0.28em] text-black/55">
                                         Design &amp; code by Roman
                                     </div>
                                 </div>
