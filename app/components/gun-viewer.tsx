@@ -63,7 +63,7 @@ function GunRig({ aimX, aimY }: GunViewerProps): React.JSX.Element {
 
 export default function GunViewer({ aimX, aimY }: GunViewerProps): React.JSX.Element {
     return (
-        <div className="h-64 w-[min(92vw,30rem)] sm:h-80 sm:w-xl md:h-96 md:w-176 overflow-visible flex items-end justify-center sm:justify-start">
+        <div className="h-64 w-[min(92vw,30rem)] sm:h-80 sm:w-xl md:h-96 md:w-176 overflow-visible flex items-end justify-center">
             <div className="h-60 w-[min(88vw,24rem)] sm:h-72 sm:w-md md:h-88 md:w-xl">
                 <Canvas
                     dpr={[1, 1.5]}
