@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -95,10 +96,18 @@ export default function AppNavbar() {
                 ref={navRef}
                 className={`fixed top-0 w-full z-50 flex justify-between items-center p-6 px-8 md:px-12 lg:px-20 transition-transform duration-300 bg-background/80 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none ${navHidden && !menuOpen ? "-translate-y-full" : "translate-y-0"}`}
             >
-                {/* Left - Dashboard */}
-                <div className="text-black uppercase tracking-wider text-xs md:text-sm font-medium">
-                    DASHBOARD
-                </div>
+                {/* Left - Logo */}
+                <Link href="/" aria-label="Go to home" className="inline-flex items-center">
+                    <Image
+                        src="/images/roman.png"
+                        alt="Roman logo"
+                        width={168}
+                        height={48}
+                        sizes="(max-width: 768px) 130px, 168px"
+                        className="h-8 w-auto md:h-10"
+                        priority
+                    />
+                </Link>
 
                 {/* Center - Desktop Navigation */}
                 <div className="hidden lg:flex items-center gap-8 md:gap-12 lg:gap-16">
