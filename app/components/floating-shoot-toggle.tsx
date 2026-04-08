@@ -85,7 +85,7 @@ function pickHitWord(x: number, y: number, raw: Element | null): HTMLElement | n
     const directWord = raw.closest<HTMLElement>(".shoot-word");
     if (directWord) return directWord;
 
-    const target = raw.closest<HTMLElement>("[data-shoot-target],h1,h2,h3,h4,h5,h6,p,span,a,button,li,br");
+    const target = raw.closest<HTMLElement>("[data-shoot-target],h1,h2,h3,h4,h5,h6,p,span,a,button,li,br,img,div,article");
     if (!target || target.closest("[data-shoot-ui]")) return null;
 
     prepareShootWords(target);
@@ -260,13 +260,33 @@ export default function FloatingShootToggle(): React.JSX.Element {
 
             target.dataset.shotDown = "1";
             target.style.willChange = "transform, opacity";
-            gsap.to(target, {
-                y: window.innerHeight * 0.55,
-                rotation: gsap.utils.random(-24, 24, 1),
-                opacity: 0.15,
-                duration: 1.2,
-                ease: "power2.in",
-            });
+            const impactTilt = gsap.utils.random(-7, 7, 1);
+            const fallTilt = gsap.utils.random(-24, 24, 1);
+            const tl = gsap.timeline();
+            tl.to(target, {
+                x: gsap.utils.random(-6, 6, 1),
+                y: gsap.utils.random(-10, -4, 1),
+                rotation: impactTilt,
+                scale: 1.08,
+                duration: 0.09,
+                ease: "power2.out",
+            })
+                .to(target, {
+                    x: gsap.utils.random(-2, 2, 1),
+                    y: gsap.utils.random(-2, 2, 1),
+                    rotation: impactTilt * 0.45,
+                    scale: 0.96,
+                    duration: 0.08,
+                    ease: "power1.inOut",
+                })
+                .to(target, {
+                    y: window.innerHeight * 0.55,
+                    rotation: fallTilt,
+                    opacity: 0.15,
+                    scale: 1,
+                    duration: 1.05,
+                    ease: "power2.in",
+                });
         };
 
         const stopHoldFire = () => {

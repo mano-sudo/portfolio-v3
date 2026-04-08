@@ -57,6 +57,19 @@ export default function Hero() {
 
                     {/* Bottom */}
                     <div className="pt-4">
+                        <div className="mb-4 text-right">
+                            <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-black/72">
+                                Building fast, clean web apps
+                                <br />
+                                for real users.
+                            </p>
+                            <div className="mt-2 text-[10px] font-mono uppercase tracking-[0.24em] text-black/55">
+                                Open for freelance / full-time
+                                <br />
+                                Based in Quezon City, PH
+                            </div>
+                        </div>
+
                         <div
                             data-shoot-target="1"
                             data-shoot-granularity="char"
@@ -92,7 +105,7 @@ export default function Hero() {
                 </div>
 
                 {/* Desktop/tablet layout */}
-                <div className="hidden md:flex h-full flex-col justify-center gap-14 md:gap-20 py-10 md:py-14">
+                <div className="hidden md:flex h-full flex-col justify-center gap-8 md:gap-10 py-8 md:py-10">
                     {/* Top row */}
                     <div className="grid grid-cols-12 gap-y-10 gap-x-10 items-start">
                         {/* Top-left meta */}
@@ -122,9 +135,22 @@ export default function Hero() {
                     </div>
 
                     {/* Bottom row */}
-                    <div className="grid grid-cols-12 gap-y-10 gap-x-10 items-end">
+                    <div className="grid grid-cols-12 gap-y-8 gap-x-10 items-start">
                         {/* Bottom-left name */}
                         <div className="col-span-12 md:col-span-5">
+                            <div className="mb-8 max-w-104">
+                                <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-black/72">
+                                    Building fast, clean web apps
+                                    <br />
+                                    for real users.
+                                </p>
+                                <div className="mt-3 text-[10px] font-mono uppercase tracking-[0.24em] text-black/55">
+                                    Open for freelance / full-time
+                                    <br />
+                                    Based in Quezon City, PH
+                                </div>
+                            </div>
+
                             <div
                                 data-shoot-target="1"
                                 data-shoot-granularity="char"
