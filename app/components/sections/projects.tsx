@@ -145,7 +145,7 @@ export default function Projects() {
     }, [isNavigatingToProject]);
 
     return (
-        <section id="projects" className="projects-section relative bg-black overflow-hidden scroll-mt-24">
+        <section id="projects" className="projects-section relative bg-background overflow-hidden scroll-mt-24">
             {isNavigatingToProject && (
                 <div className="pointer-events-none fixed inset-0 z-9999 overflow-hidden">
                     <motion.div
@@ -154,7 +154,7 @@ export default function Projects() {
                         initial={{ y: "100%" }}
                         animate={{
                             y: ["100%", "0%", "0%"],
-                            backgroundColor: ["#0a0a0a", "#0a0a0a", "#0a0a0a"],
+                            backgroundColor: ["#f4f3ee", "#f4f3ee", "#f4f3ee"],
                         }}
                         transition={{
                             duration: 1.25,
@@ -166,11 +166,11 @@ export default function Projects() {
             )}
             <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 xl:px-32">
                 <div className="projects-header pt-12 lg:pt-20 pb-8 lg:pb-12">
-                    <span className="text-[10px] uppercase tracking-[0.3em] font-mono text-white/30 mb-2 lg:mb-4 block">Selected Projects</span>
-                    <h2 className="text-2xl md:text-5xl lg:text-7xl font-black text-white uppercase leading-[0.9] tracking-tighter italic mb-4">
+                    <span className="text-[10px] uppercase tracking-[0.3em] font-mono text-black/45 mb-2 lg:mb-4 block">Selected Projects</span>
+                    <h2 className="text-2xl md:text-5xl lg:text-7xl font-black text-black uppercase leading-[0.9] tracking-tighter italic mb-4">
                         Featured<br className="lg:hidden" /> <span className="lg:block">Work</span>
                     </h2>
-                    <p className="text-white/40 text-sm md:text-lg italic leading-relaxed max-w-2xl lg:max-w-xl">
+                    <p className="text-black/55 text-sm md:text-lg italic leading-relaxed max-w-2xl lg:max-w-xl">
                         A collection of projects showcasing full-stack development and modern design.
                     </p>
                 </div>
@@ -183,7 +183,7 @@ export default function Projects() {
                             {mobileProjects.map((project) => (
                                 <article
                                     key={project.slug}
-                                    className="rounded-sm border border-white/10 bg-white/5 overflow-hidden cursor-pointer"
+                                    className="rounded-sm border border-black/10 bg-black/2 overflow-hidden cursor-pointer"
                                     style={{ contentVisibility: "auto", containIntrinsicSize: "640px" }}
                                     onClick={() => navigateToProject(project.slug)}
                                     onKeyDown={(event) => {
@@ -195,7 +195,7 @@ export default function Projects() {
                                     role="button"
                                     tabIndex={0}
                                 >
-                                    <div className="relative w-full aspect-16/10 bg-black/20">
+                                    <div className="relative w-full aspect-16/10 bg-black/5">
                                         <Image
                                             src={project.image}
                                             alt={project.title}
@@ -205,19 +205,19 @@ export default function Projects() {
                                             quality={65}
                                             className="absolute inset-0 h-full w-full object-cover opacity-95"
                                         />
-                                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
+                                        <div className="absolute inset-0 bg-linear-to-t from-black/45 via-black/10 to-transparent" />
                                     </div>
 
                                     <div className="p-5">
                                         <div className="flex items-start justify-between gap-4">
                                             <div className="min-w-0">
-                                                <div className="flex items-center gap-3 text-white/30 font-mono text-[10px] uppercase tracking-widest mb-2">
+                                                <div className="flex items-center gap-3 text-black/50 font-mono text-[10px] uppercase tracking-widest mb-2">
                                                     <span>{project.year}</span>
                                                     {project.featured && (
-                                                        <span className="text-white/40">Featured</span>
+                                                        <span className="text-black/55">Featured</span>
                                                     )}
                                                 </div>
-                                                <h3 className="text-white font-black uppercase tracking-tight text-xl leading-tight">
+                                                <h3 className="text-black font-black uppercase tracking-tight text-xl leading-tight">
                                                     {project.title}
                                                 </h3>
                                             </div>
@@ -229,7 +229,7 @@ export default function Projects() {
                                                     rel="noopener noreferrer"
                                                     aria-label={`View ${project.title} source code on GitHub`}
                                                     onClick={(event) => event.stopPropagation()}
-                                                    className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center text-white/70 active:text-white active:border-white/35 transition-colors"
+                                                    className="w-10 h-10 rounded-full border border-black/15 flex items-center justify-center text-black/70 active:text-black active:border-black/35 transition-colors"
                                                 >
                                                     <Github className="w-5 h-5" />
                                                 </a>
@@ -239,14 +239,14 @@ export default function Projects() {
                                                     rel="noopener noreferrer"
                                                     aria-label={`View ${project.title} live demo`}
                                                     onClick={(event) => event.stopPropagation()}
-                                                    className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center text-white/70 active:text-white active:border-white/35 transition-colors"
+                                                    className="w-10 h-10 rounded-full border border-black/15 flex items-center justify-center text-black/70 active:text-black active:border-black/35 transition-colors"
                                                 >
                                                     <ExternalLink className="w-5 h-5" />
                                                 </a>
                                             </div>
                                         </div>
 
-                                        <p className="mt-4 text-white/55 text-sm italic leading-relaxed line-clamp-2">
+                                        <p className="mt-4 text-black/65 text-sm italic leading-relaxed line-clamp-2">
                                             {project.description}
                                         </p>
 
@@ -254,7 +254,7 @@ export default function Projects() {
                                             {project.tech.map((tech) => (
                                                 <span
                                                     key={tech}
-                                                    className="text-[10px] px-2.5 py-1 bg-white/4 text-white/60 rounded-full border border-white/10 font-mono uppercase tracking-widest"
+                                                    className="text-[10px] px-2.5 py-1 bg-black/3 text-black/60 rounded-full border border-black/10 font-mono uppercase tracking-widest"
                                                 >
                                                     {tech}
                                                 </span>
@@ -270,7 +270,7 @@ export default function Projects() {
                                 <button
                                     type="button"
                                     onClick={() => setMobileVisible((v) => Math.min(projects.length, v + 3))}
-                                    className="px-5 py-3 text-[11px] font-mono uppercase tracking-[0.35em] text-white/70 hover:text-white border border-white/15 hover:border-white/35 transition-colors bg-white/5"
+                                    className="px-5 py-3 text-[11px] font-mono uppercase tracking-[0.35em] text-black/70 hover:text-black border border-black/15 hover:border-black/35 transition-colors bg-black/2"
                                 >
                                     Show more projects
                                 </button>
@@ -287,7 +287,7 @@ export default function Projects() {
                         >
                         {/* Left: list */}
                         <div className="col-span-12 xl:col-span-7">
-                            <div className="border-t border-white/10">
+                            <div className="border-t border-black/10">
                                 {desktopProjects.map((project, index) => {
                                     const isHovered = hoveredDesktopSlug === project.slug;
                                     return (
@@ -310,12 +310,12 @@ export default function Projects() {
                                                 updatePreviewAnchorFromElement(event.currentTarget);
                                             }}
                                             onClick={() => navigateToProject(project.slug)}
-                                            className="group w-full text-left border-b border-white/10 py-4 md:py-5 lg:py-6"
+                                            className="group w-full text-left border-b border-black/10 py-4 md:py-5 lg:py-6"
                                             style={{ contentVisibility: "auto", containIntrinsicSize: "120px" }}
                                         >
                                             <div className="flex items-start gap-5 md:gap-7">
                                                 <div className="pt-1 w-10 shrink-0">
-                                                    <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/30">
+                                                    <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-black/45">
                                                         {String(index + 1).padStart(2, "0")}
                                                     </span>
                                                 </div>
@@ -325,14 +325,14 @@ export default function Projects() {
                                                         <h3
                                                             className={[
                                                                 "text-xl md:text-2xl lg:text-3xl font-black uppercase leading-tight tracking-tight italic transition-colors",
-                                                                isHovered ? "text-white" : "text-white/45 group-hover:text-white/80",
+                                                                isHovered ? "text-black" : "text-black/45 group-hover:text-black/80",
                                                             ].join(" ")}
                                                         >
                                                             {project.title}
                                                         </h3>
                                                         <span
                                                             className={[
-                                                                "transition-opacity text-white/40",
+                                                                "transition-opacity text-black/45",
                                                                 isHovered ? "opacity-100" : "opacity-0 group-hover:opacity-100",
                                                             ].join(" ")}
                                                             aria-hidden="true"
@@ -341,14 +341,14 @@ export default function Projects() {
                                                         </span>
                                                     </div>
 
-                                                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-white/30 font-mono text-[10px] uppercase tracking-widest">
+                                                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-black/50 font-mono text-[10px] uppercase tracking-widest">
                                                         <span>{project.year}</span>
-                                                        <span className="text-white/20">/</span>
+                                                        <span className="text-black/20">/</span>
                                                         <span className="truncate">{project.tech.join(" · ")}</span>
                                                         {project.featured && (
                                                             <>
-                                                                <span className="text-white/20">/</span>
-                                                                <span className="text-white/40">Featured</span>
+                                                                <span className="text-black/20">/</span>
+                                                                <span className="text-black/55">Featured</span>
                                                             </>
                                                         )}
                                                     </div>
@@ -364,7 +364,7 @@ export default function Projects() {
                                     <button
                                         type="button"
                                         onClick={() => setDesktopVisible((v) => Math.min(projects.length, v + 6))}
-                                        className="px-6 py-3 text-[11px] font-mono uppercase tracking-[0.35em] text-white/70 hover:text-white border border-white/15 hover:border-white/35 transition-colors bg-white/5"
+                                    className="px-6 py-3 text-[11px] font-mono uppercase tracking-[0.35em] text-black/70 hover:text-black border border-black/15 hover:border-black/35 transition-colors bg-black/2"
                                     >
                                         Show more projects
                                     </button>
@@ -388,12 +388,12 @@ export default function Projects() {
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: -8, scale: 0.99 }}
                                             transition={{ duration: 0.22, ease: "easeOut" }}
-                                            className="rounded-sm border border-white/10 bg-white/5 overflow-hidden shadow-2xl shadow-black/40 will-change-transform"
+                                            className="rounded-sm border border-black/10 bg-background overflow-hidden shadow-2xl shadow-black/10 will-change-transform"
                                             style={{ contentVisibility: "auto", containIntrinsicSize: "560px" }}
                                         >
-                                            <div className="relative w-full aspect-16/10 bg-black/20">
+                                            <div className="relative w-full aspect-16/10 bg-black/5">
                                                 {!isPreviewImageLoaded && (
-                                                    <div className="absolute inset-0 z-10 animate-pulse bg-white/8" />
+                                                    <div className="absolute inset-0 z-10 animate-pulse bg-black/5" />
                                                 )}
                                                 <Image
                                                     src={hoveredDesktopProject.image}
@@ -405,19 +405,19 @@ export default function Projects() {
                                                     className="absolute inset-0 h-full w-full object-cover opacity-95"
                                                     onLoadingComplete={() => setIsPreviewImageLoaded(true)}
                                                 />
-                                                <div className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent" />
+                                                <div className="absolute inset-0 bg-linear-to-t from-black/35 via-black/10 to-transparent" />
                                             </div>
 
                                             <div className="p-5">
                                                 <div className="flex items-start justify-between gap-4">
                                                     <div className="min-w-0">
-                                                        <div className="flex items-center gap-3 text-white/30 font-mono text-[10px] uppercase tracking-widest mb-2">
+                                                        <div className="flex items-center gap-3 text-black/50 font-mono text-[10px] uppercase tracking-widest mb-2">
                                                             <span>{hoveredDesktopProject.year}</span>
                                                             {hoveredDesktopProject.featured && (
-                                                                <span className="text-white/40">Featured</span>
+                                                                <span className="text-black/55">Featured</span>
                                                             )}
                                                         </div>
-                                                        <h4 className="text-white font-black uppercase tracking-tight text-lg leading-tight truncate">
+                                                        <h4 className="text-black font-black uppercase tracking-tight text-lg leading-tight truncate">
                                                             {hoveredDesktopProject.title}
                                                         </h4>
                                                     </div>
@@ -428,7 +428,7 @@ export default function Projects() {
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             aria-label={`View ${hoveredDesktopProject.title} source code on GitHub`}
-                                                            className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:border-white/35 transition-colors"
+                                                            className="w-9 h-9 rounded-full border border-black/15 flex items-center justify-center text-black/70 hover:text-black hover:border-black/35 transition-colors"
                                                         >
                                                             <Github className="w-4 h-4" />
                                                         </a>
@@ -437,14 +437,14 @@ export default function Projects() {
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             aria-label={`View ${hoveredDesktopProject.title} live demo`}
-                                                            className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:border-white/35 transition-colors"
+                                                            className="w-9 h-9 rounded-full border border-black/15 flex items-center justify-center text-black/70 hover:text-black hover:border-black/35 transition-colors"
                                                         >
                                                             <ExternalLink className="w-4 h-4" />
                                                         </a>
                                                     </div>
                                                 </div>
 
-                                                <p className="mt-3 text-white/55 text-sm italic leading-relaxed line-clamp-3">
+                                                <p className="mt-3 text-black/65 text-sm italic leading-relaxed line-clamp-3">
                                                     {hoveredDesktopProject.description}
                                                 </p>
 
@@ -452,7 +452,7 @@ export default function Projects() {
                                                     {hoveredDesktopProject.tech.map((tech) => (
                                                         <span
                                                             key={tech}
-                                                            className="text-[10px] px-2.5 py-1 bg-white/4 text-white/60 rounded-full border border-white/10 font-mono uppercase tracking-widest"
+                                                            className="text-[10px] px-2.5 py-1 bg-black/3 text-black/60 rounded-full border border-black/10 font-mono uppercase tracking-widest"
                                                         >
                                                             {tech}
                                                         </span>

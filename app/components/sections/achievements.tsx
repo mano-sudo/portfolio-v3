@@ -98,15 +98,15 @@ export default function Achievements() {
     }, []);
 
     return (
-        <section ref={sectionRef} className="achievements-section relative bg-black overflow-hidden py-16 sm:py-20 lg:py-28">
+        <section ref={sectionRef} className="achievements-section relative bg-background overflow-hidden py-16 sm:py-20 lg:py-28">
             <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 xl:px-32">
                 {/* Header */}
                 <div className="achievements-header mb-10 md:mb-14 lg:mb-16">
-                    <span className="text-[10px] uppercase tracking-[0.3em] font-mono text-white/30 mb-3 block">Achievements</span>
-                    <h2 className="text-3xl md:text-5xl lg:text-7xl font-black text-white uppercase leading-[0.9] tracking-tighter italic mb-4">
+                    <span className="text-[10px] uppercase tracking-[0.3em] font-mono text-black/45 mb-3 block">Achievements</span>
+                    <h2 className="text-3xl md:text-5xl lg:text-7xl font-black text-black uppercase leading-[0.9] tracking-tighter italic mb-4">
                         Recognition & Milestones
                     </h2>
-                    <p className="text-white/40 text-sm md:text-lg italic leading-relaxed max-w-2xl">
+                    <p className="text-black/55 text-sm md:text-lg italic leading-relaxed max-w-2xl">
                         A focused set of highlights that represent impact, delivery, and innovation.
                     </p>
                 </div>
@@ -118,29 +118,29 @@ export default function Achievements() {
                         return (
                             <article 
                                 key={index} 
-                                className={`achievement-card achievement-card-${index} group relative p-5 md:p-6 lg:p-7 rounded-sm border border-white/10 bg-white/5 hover:bg-white/8 hover:border-white/25 transition-colors duration-300`}
+                                className={`achievement-card achievement-card-${index} group relative p-5 md:p-6 lg:p-7 rounded-sm border border-black/10 bg-black/2 hover:bg-black/3 hover:border-black/25 transition-colors duration-300`}
                             >
                                 {/* Year and Category */}
-                                <div className="flex items-center justify-between gap-4 text-white/30 font-mono text-[10px] uppercase tracking-widest mb-5">
+                                <div className="flex items-center justify-between gap-4 text-black/50 font-mono text-[10px] uppercase tracking-widest mb-5">
                                     <span>{achievement.year}</span>
-                                    <div className="flex-1 h-px bg-white/10" />
-                                    <span className="text-white/40">{achievement.category}</span>
+                                    <div className="flex-1 h-px bg-black/10" />
+                                    <span className="text-black/55">{achievement.category}</span>
                                 </div>
 
                                 {/* Icon */}
                                 <div className="mb-5">
-                                    <div className="w-12 h-12 rounded-sm bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-white/25 transition-colors">
-                                        <Icon className="w-6 h-6 text-white" />
+                                    <div className="w-12 h-12 rounded-sm bg-black/3 flex items-center justify-center border border-black/10 group-hover:border-black/25 transition-colors">
+                                        <Icon className="w-6 h-6 text-black" />
                                     </div>
                                 </div>
 
                                 {/* Title */}
-                                <h3 className="text-lg md:text-xl lg:text-2xl font-black text-white uppercase tracking-tight leading-tight mb-3 group-hover:text-white/90 transition-colors">
+                                <h3 className="text-lg md:text-xl lg:text-2xl font-black text-black uppercase tracking-tight leading-tight mb-3 group-hover:text-black/90 transition-colors">
                                     {achievement.title}
                                 </h3>
 
                                 {/* Description */}
-                                <p className="text-white/55 text-sm md:text-base leading-relaxed italic">
+                                <p className="text-black/65 text-sm md:text-base leading-relaxed italic">
                                     {achievement.description}
                                 </p>
                             </article>

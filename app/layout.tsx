@@ -6,6 +6,7 @@ import "./globals.css";
 import AppNavbar from "./components/navbar/app-navbar";
 import SmoothScroll from "./components/smooth-scroll";
 import PageTransition from "./components/page-transition";
+import FloatingShootToggleHost from "./components/floating-shoot-toggle-host";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,7 +42,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppNavbar />
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <FloatingShootToggleHost />
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <SmoothScroll>
             <PageTransition>{children}</PageTransition>
           </SmoothScroll>

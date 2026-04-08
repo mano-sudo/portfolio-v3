@@ -57,7 +57,7 @@ function VelocityText({ children, baseVelocity = 50, isMobile = false }: { child
   const numCopies = isMobile ? 4 : 6;
   for (let i = 0; i < numCopies; i++) {
     spans.push(
-      <span key={i} ref={i === 0 ? copyRef : null} className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-white/20 hover:text-white/40 transition-colors duration-300 uppercase tracking-tighter italic whitespace-nowrap shrink-0">
+      <span key={i} ref={i === 0 ? copyRef : null} className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-black/20 hover:text-black/40 transition-colors duration-300 uppercase tracking-tighter italic whitespace-nowrap shrink-0">
         {children}
       </span>
     );
@@ -97,10 +97,10 @@ export default function Skills() {
     }, []);
 
     return (
-        <section ref={sectionRef} className="skills-section relative bg-black overflow-hidden py-8 sm:py-12 md:py-16 lg:py-24">
+        <section ref={sectionRef} className="skills-section relative bg-background overflow-hidden py-8 sm:py-12 md:py-16 lg:py-24">
             {/* Gradient overlays for fade effect - smaller on mobile */}
-            <div className="absolute inset-y-0 left-0 w-12 sm:w-16 md:w-24 lg:w-32 bg-linear-to-r from-black via-black/80 to-transparent z-20 pointer-events-none" />
-            <div className="absolute inset-y-0 right-0 w-12 sm:w-16 md:w-24 lg:w-32 bg-linear-to-l from-black via-black/80 to-transparent z-20 pointer-events-none" />
+            <div className="absolute inset-y-0 left-0 w-12 sm:w-16 md:w-24 lg:w-32 bg-linear-to-r from-background via-background/80 to-transparent z-20 pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-12 sm:w-16 md:w-24 lg:w-32 bg-linear-to-l from-background via-background/80 to-transparent z-20 pointer-events-none" />
 
             <div className="relative z-10 overflow-hidden space-y-4 sm:space-y-6 md:space-y-8">
                 {/* First row - scrolling left */}

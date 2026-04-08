@@ -20,48 +20,38 @@ export default function ScrollSection({ children }: ScrollSectionProps) {
     useGSAP(() => {
         if (!containerRef.current || !contentRef.current) return;
 
-        // Wait for ScrollTrigger to be ready
-        ScrollTrigger.refresh();
-
-        // 1. ENTRANCE REVEAL (Lenis-style)
+        // Lightweight entrance animation (transform + opacity only).
         gsap.fromTo(contentRef.current, 
             { 
-                clipPath: "inset(15% 5% 15% 5% round 20px)",
                 opacity: 0,
-                scale: 0.9,
-                filter: "blur(20px)",
+                y: 36,
             },
             {
-                clipPath: "inset(0% 0% 0% 0% round 0px)",
                 opacity: 1,
-                scale: 1,
-                filter: "blur(0px)",
-                duration: 1.5,
-                ease: "expo.out",
+                y: 0,
+                duration: 0.9,
+                ease: "power3.out",
                 scrollTrigger: {
                     trigger: containerRef.current,
                     start: "top bottom",
                     end: "top center",
-                    scrub: 1,
+                    scrub: 0.6,
                     invalidateOnRefresh: true,
                 }
             }
         );
 
-        // 2. EXIT STACKING - Disabled pinning to prevent scroll conflicts
-        // Only animate opacity/scale without pinning to allow smooth scrolling
+        // Lightweight exit animation to keep transitions smooth.
         gsap.to(contentRef.current, {
             scrollTrigger: {
                 trigger: containerRef.current,
                 start: "bottom bottom",
                 end: "bottom top",
-                scrub: 1,
-                pin: false,
+                scrub: 0.6,
                 invalidateOnRefresh: true,
             },
-            opacity: 0,
-            scale: 0.95,
-            filter: "blur(10px)",
+            opacity: 0.2,
+            y: -20,
             ease: "none"
         });
     }, []);

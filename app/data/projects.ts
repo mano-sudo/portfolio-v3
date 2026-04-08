@@ -32,7 +32,7 @@ const projectCoreList: readonly ProjectCore[] = [
         live: "https://ams.manosudo.com",
         featured: true,
         year: "2024",
-        image: "/images/projects/atms.png",
+        image: "/file.svg",
     },
     {
         slug: "outfit-haven-ecommerce-platform",
@@ -49,7 +49,7 @@ const projectCoreList: readonly ProjectCore[] = [
         live: "https://outfithat.manosudo.com",
         featured: true,
         year: "2024",
-        image: "/images/projects/outfithaven.png",
+        image: "/file.svg",
     },
     {
         slug: "burger-ka-samen-ordering-system",
@@ -66,7 +66,7 @@ const projectCoreList: readonly ProjectCore[] = [
         live: "https://ordering.manosudo.com",
         featured: false,
         year: "2023",
-        image: "/images/projects/bks.png",
+        image: "/file.svg",
     },
     {
         slug: "omnichannel-ecommerce-analytics-system",
@@ -84,7 +84,7 @@ const projectCoreList: readonly ProjectCore[] = [
         live: "#",
         featured: true,
         year: "2025",
-        image: "/images/projects/melon.png",
+        image: "/file.svg",
     },
     {
         slug: "enterprise-ecommerce-crm-hris-finance-ess",
@@ -102,7 +102,7 @@ const projectCoreList: readonly ProjectCore[] = [
         live: "#",
         featured: true,
         year: "2025",
-        image: "/images/projects/rz.png",
+        image: "/file.svg",
     },
     {
         slug: "electronic-medical-record-system",
@@ -120,7 +120,7 @@ const projectCoreList: readonly ProjectCore[] = [
         live: "#",
         featured: false,
         year: "2024",
-        image: "/images/projects/emr.png",
+        image: "/file.svg",
     },
     {
         slug: "car-dealership-trading-loan-management",
@@ -138,7 +138,7 @@ const projectCoreList: readonly ProjectCore[] = [
         live: "#",
         featured: false,
         year: "2024",
-        image: "/images/projects/dbauto.png",
+        image: "/file.svg",
     },
 ];
 

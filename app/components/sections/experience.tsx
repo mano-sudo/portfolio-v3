@@ -106,23 +106,23 @@ export default function Experience() {
     }, []);
 
     return (
-        <section ref={sectionRef} className="relative bg-black py-16 sm:py-20 lg:py-28 overflow-hidden">
+        <section ref={sectionRef} className="relative bg-background py-16 sm:py-20 lg:py-28 overflow-hidden">
             <div className="w-full px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 2xl:px-44 max-w-[1920px] mx-auto">
                 <div className="flex flex-col lg:flex-row lg:justify-between gap-10 md:gap-14 lg:gap-16 items-start">
                     {/* Left — Title */}
                     <div className="experience-panel-left lg:w-5/12 space-y-6">
                         <div className="flex items-center gap-3">
-                            <span className="experience-anim text-[10px] sm:text-xs uppercase tracking-[0.35em] text-white/35 font-mono">
+                            <span className="experience-anim text-[10px] sm:text-xs uppercase tracking-[0.35em] text-black/45 font-mono">
                                 Experience
                             </span>
-                            <div className="h-px flex-1 bg-white/10" />
+                            <div className="h-px flex-1 bg-black/10" />
                         </div>
 
-                        <h2 className="experience-anim text-[clamp(2rem,5vw,5rem)] font-black uppercase leading-[0.95] text-white tracking-tight">
+                        <h2 className="experience-anim text-[clamp(2rem,5vw,5rem)] font-black uppercase leading-[0.95] text-black tracking-tight">
                             Work History
                         </h2>
 
-                        <p className="experience-anim text-base sm:text-lg text-white/50 leading-relaxed max-w-lg">
+                        <p className="experience-anim text-base sm:text-lg text-black/65 leading-relaxed max-w-lg">
                             Roles and innovation work across enterprise and academic projects.
                         </p>
                     </div>
@@ -131,26 +131,26 @@ export default function Experience() {
                     <div className="experience-panel-right lg:w-7/12 lg:self-center">
                         <div className="grid gap-10 md:gap-12">
                             {experiences.map((exp) => (
-                                <article key={`${exp.company}-${exp.period}-${exp.title}`} className="experience-anim border border-white/10 bg-white/3 p-6 md:p-8 lg:p-10">
-                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-white/50 text-xs md:text-sm font-medium mb-4">
-                                        <span className="flex items-center gap-2 text-white/80">
-                                            <Briefcase className="w-4 h-4 opacity-50 text-white" />
+                                <article key={`${exp.company}-${exp.period}-${exp.title}`} className="experience-anim border border-black/10 bg-black/2 p-6 md:p-8 lg:p-10">
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-black/60 text-xs md:text-sm font-medium mb-4">
+                                        <span className="flex items-center gap-2 text-black/85">
+                                            <Briefcase className="w-4 h-4 opacity-50 text-black" />
                                             {exp.company}
                                         </span>
-                                        <span className="flex items-center gap-2 text-white/45">
+                                        <span className="flex items-center gap-2 text-black/55">
                                             <MapPin className="w-4 h-4 opacity-40" />
                                             {exp.location}
                                         </span>
-                                        <span className="text-white/35 font-mono uppercase tracking-widest text-[10px] md:text-xs">
+                                        <span className="text-black/45 font-mono uppercase tracking-widest text-[10px] md:text-xs">
                                             {exp.period}
                                         </span>
                                     </div>
 
-                                    <h3 className="text-2xl md:text-4xl lg:text-5xl font-black text-white tracking-tight leading-none mb-4">
+                                    <h3 className="text-2xl md:text-4xl lg:text-5xl font-black text-black tracking-tight leading-none mb-4">
                                         {exp.title}
                                     </h3>
 
-                                    <p className="text-white/55 text-sm md:text-base leading-relaxed max-w-3xl mb-6">
+                                    <p className="text-black/65 text-sm md:text-base leading-relaxed max-w-3xl mb-6">
                                         {exp.description}
                                     </p>
 
@@ -158,7 +158,7 @@ export default function Experience() {
                                         {exp.tech.map((tech) => (
                                             <span
                                                 key={tech}
-                                                className="experience-tech-anim text-[10px] md:text-xs px-3 py-1.5 md:px-4 md:py-2 bg-white/4 text-white/60 border border-white/10 font-mono uppercase tracking-widest"
+                                                className="experience-tech-anim text-[10px] md:text-xs px-3 py-1.5 md:px-4 md:py-2 bg-black/3 text-black/60 border border-black/10 font-mono uppercase tracking-widest"
                                             >
                                                 {tech}
                                             </span>

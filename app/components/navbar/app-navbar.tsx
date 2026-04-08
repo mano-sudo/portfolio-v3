@@ -66,9 +66,9 @@ export default function AppNavbar() {
 
     return (
         <>
-            <nav className={`fixed top-0 w-full z-50 flex justify-between items-center p-6 px-8 md:px-12 lg:px-20 transition-transform duration-300 bg-black/80 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none ${navHidden && !menuOpen ? "-translate-y-full" : "translate-y-0"}`}>
+            <nav className={`fixed top-0 w-full z-50 flex justify-between items-center p-6 px-8 md:px-12 lg:px-20 transition-transform duration-300 bg-background/80 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none ${navHidden && !menuOpen ? "-translate-y-full" : "translate-y-0"}`}>
                 {/* Left - Dashboard */}
-                <div className="text-white uppercase tracking-wider text-xs md:text-sm font-medium">
+                <div className="text-black uppercase tracking-wider text-xs md:text-sm font-medium">
                     DASHBOARD
                 </div>
 
@@ -82,13 +82,13 @@ export default function AppNavbar() {
                                 href={item.href}
                                 className={`relative uppercase tracking-wider text-xs md:text-sm font-medium transition-all ${
                                     isActive
-                                        ? "text-white"
-                                        : "text-white/60 hover:text-white"
+                                        ? "text-black"
+                                        : "text-black/60 hover:text-black"
                                 }`}
                             >
                                 {item.name}
                                 {isActive && (
-                                    <span className="absolute -bottom-1 left-0 w-full h-px bg-white" />
+                                    <span className="absolute -bottom-1 left-0 w-full h-px bg-black" />
                                 )}
                             </Link>
                         );
@@ -98,7 +98,7 @@ export default function AppNavbar() {
                     <Link
                         href="#contact"
                         aria-label="Navigate to contact section"
-                        className="text-white uppercase tracking-wider text-xs md:text-sm font-medium hover:text-white/80 transition-colors"
+                        className="text-black uppercase tracking-wider text-xs md:text-sm font-medium hover:text-black/80 transition-colors"
                     >
                         LET&apos;S WORK
                     </Link>
@@ -111,17 +111,17 @@ export default function AppNavbar() {
                     aria-label="Toggle menu"
                 >
                     <span
-                        className={`block w-6 h-[2px] bg-white transition-all duration-300 origin-center ${
+                        className={`block w-6 h-[2px] bg-black transition-all duration-300 origin-center ${
                             menuOpen ? "rotate-45 translate-y-[8px]" : ""
                         }`}
                     />
                     <span
-                        className={`block w-6 h-[2px] bg-white transition-all duration-300 ${
+                        className={`block w-6 h-[2px] bg-black transition-all duration-300 ${
                             menuOpen ? "opacity-0 scale-x-0" : "opacity-100"
                         }`}
                     />
                     <span
-                        className={`block w-6 h-[2px] bg-white transition-all duration-300 origin-center ${
+                        className={`block w-6 h-[2px] bg-black transition-all duration-300 origin-center ${
                             menuOpen ? "-rotate-45 -translate-y-[8px]" : ""
                         }`}
                     />
@@ -137,14 +137,14 @@ export default function AppNavbar() {
                 }`}
             >
                 {/* Backdrop */}
-                <div className="absolute inset-0 bg-black/95 backdrop-blur-md" />
+                <div className="absolute inset-0 bg-background/95 backdrop-blur-md" />
 
                 {/* Menu Content */}
                 <div className="relative h-full flex flex-col justify-center items-center gap-2 px-8">
                     {/* Close Button */}
                     <button
                         onClick={() => setMenuOpen(false)}
-                        className="absolute top-6 right-8 w-10 h-10 flex items-center justify-center text-white/60 hover:text-white transition-colors duration-300"
+                        className="absolute top-6 right-8 w-10 h-10 flex items-center justify-center text-black/60 hover:text-black transition-colors duration-300"
                         aria-label="Close menu"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -173,14 +173,14 @@ export default function AppNavbar() {
                                 <span
                                     className={`text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-wider transition-colors duration-300 ${
                                         isActive
-                                            ? "text-white"
-                                            : "text-white/40 group-hover:text-white"
+                                            ? "text-black"
+                                            : "text-black/40 group-hover:text-black"
                                     }`}
                                 >
                                     {item.name}
                                 </span>
                                 {isActive && (
-                                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-white" />
+                                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-black" />
                                 )}
                             </Link>
                         );
@@ -188,7 +188,7 @@ export default function AppNavbar() {
 
                     {/* Divider */}
                     <div
-                        className={`w-16 h-px bg-white/20 my-4 transition-all duration-500 ${
+                        className={`w-16 h-px bg-black/20 my-4 transition-all duration-500 ${
                             menuOpen
                                 ? "opacity-100 scale-x-100"
                                 : "opacity-0 scale-x-0"
@@ -200,7 +200,7 @@ export default function AppNavbar() {
                     <Link
                         href="#contact"
                         onClick={() => setMenuOpen(false)}
-                        className={`text-lg sm:text-xl font-semibold uppercase tracking-widest text-white/60 hover:text-white transition-all duration-500 ${
+                        className={`text-lg sm:text-xl font-semibold uppercase tracking-widest text-black/60 hover:text-black transition-all duration-500 ${
                             menuOpen
                                 ? "opacity-100 translate-y-0"
                                 : "opacity-0 translate-y-8"
@@ -212,7 +212,7 @@ export default function AppNavbar() {
 
                     {/* Time display at bottom */}
                     <div
-                        className={`absolute bottom-12 left-1/2 -translate-x-1/2 text-white/30 text-xs font-mono tracking-widest transition-all duration-500 ${
+                        className={`absolute bottom-12 left-1/2 -translate-x-1/2 text-black/30 text-xs font-mono tracking-widest transition-all duration-500 ${
                             menuOpen
                                 ? "opacity-100 translate-y-0"
                                 : "opacity-0 translate-y-4"
