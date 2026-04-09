@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Canvas, type ThreeElements, useFrame } from "@react-three/fiber";
-import { Environment, useGLTF } from "@react-three/drei";
+import { Environment, Html, useGLTF } from "@react-three/drei";
 import type { Group } from "three";
 
 type GunModelProps = GroupProps & {
@@ -20,6 +20,14 @@ type GunViewerProps = {
     aimX: number;
     aimY: number;
 };
+
+function ModelLoadingFallback(): React.JSX.Element {
+    return (
+        <Html center>
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+        </Html>
+    );
+}
 
 function GunRig({ aimX, aimY }: GunViewerProps): React.JSX.Element {
     const yawRef = React.useRef<Group | null>(null);
@@ -70,7 +78,7 @@ export default function GunViewer({ aimX, aimY }: GunViewerProps): React.JSX.Ele
                     camera={{ position: [1.75, 0.85, 2.1], fov: 36 }}
                     gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
                 >
-                    <React.Suspense fallback={null}>
+                    <React.Suspense fallback={<ModelLoadingFallback />}>
                         <ambientLight intensity={0.9} />
                         <directionalLight position={[2, 2, 2]} intensity={1.2} />
                         <GunRig aimX={aimX} aimY={aimY} />

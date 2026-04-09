@@ -53,6 +53,7 @@ export default function Hero() {
                                 width={1200}
                                 height={675}
                                 sizes="100vw"
+                                loading="lazy"
                                 className="h-full w-full object-cover"
                             />
                         </div>
@@ -185,6 +186,7 @@ export default function Hero() {
                                             width={1600}
                                             height={600}
                                             sizes="(max-width: 768px) 100vw, 640px"
+                                            loading="lazy"
                                             className="h-full w-full object-cover"
                                         />
                                     </div>

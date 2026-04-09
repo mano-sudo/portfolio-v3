@@ -8,7 +8,20 @@ type ShootToggleState = "on" | "off";
 
 const STORAGE_KEY = "shoot-toggle-state";
 
-const GunViewer = dynamic(() => import("./gun-viewer"), { ssr: false });
+function GunLoadingFallback(): React.JSX.Element {
+    return (
+        <div className="h-64 w-[min(92vw,30rem)] sm:h-80 sm:w-xl md:h-96 md:w-176 overflow-visible flex items-end justify-center">
+            <div className="h-60 w-[min(88vw,24rem)] sm:h-72 sm:w-md md:h-88 md:w-xl flex items-center justify-center">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-black/20 border-t-black/70" />
+            </div>
+        </div>
+    );
+}
+
+const GunViewer = dynamic(() => import("./gun-viewer"), {
+    ssr: false,
+    loading: () => <GunLoadingFallback />,
+});
 
 type PaintSplat = {
     id: number;
@@ -152,6 +165,11 @@ export default function FloatingShootToggle(): React.JSX.Element {
 
     React.useEffect(() => {
         setIsOn(readInitialState());
+    }, []);
+
+    React.useEffect(() => {
+        // Warm up the JS chunk so first render appears faster.
+        void import("./gun-viewer");
     }, []);
 
     React.useEffect(() => {
