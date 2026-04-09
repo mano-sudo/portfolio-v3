@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Github, MessageCircle, Send, Star, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -360,42 +359,37 @@ export default function AppNavbar() {
             >
                 {/* Left - Logo */}
                 <Link href="/" aria-label="Go to home" className="inline-flex items-center">
-                    <Image
-                        src="/images/roman.png"
-                        alt="Roman logo"
-                        width={168}
-                        height={48}
-                        sizes="(max-width: 768px) 130px, 168px"
-                        className="h-8 w-auto md:h-10"
-                        priority
-                    />
+                    <span className="text-black/70 font-black leading-[0.88] tracking-[-0.04em] text-[clamp(0.9rem,1.9vw,1.35rem)]">
+                        DevByRoman
+                    </span>
                 </Link>
 
-                {/* Center - Responsive Navigation */}
-                <div className="hidden sm:flex items-center gap-2 sm:gap-3 md:gap-4">
-                    <div className="flex items-center gap-2 rounded-xl  px-2 py-1.5">
-                        <div className="flex items-center gap-2 px-1.5 text-black/70">
-                            <Users className="h-4 w-4" />
-                            <span className="hidden lg:inline text-xs md:text-sm font-semibold tracking-wide">
-                                {activeUsers} active users
-                            </span>
-                            <span className="inline lg:hidden text-xs font-semibold tracking-wide">{activeUsers}</span>
-                        </div>
+                {/* Right Side - Menu + Status/Chat */}
+                <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+                    <div className="hidden sm:flex items-center gap-2 sm:gap-3 md:gap-4">
+                        <div className="flex items-center gap-2 rounded-xl  px-2 py-1.5">
+                            <div className="flex items-center gap-2 px-1.5 text-black/70">
+                                <Users className="h-4 w-4" />
+                                <span className="hidden lg:inline text-xs md:text-sm font-semibold tracking-wide">
+                                    {activeUsers} active users
+                                </span>
+                                <span className="inline lg:hidden text-xs font-semibold tracking-wide">{activeUsers}</span>
+                            </div>
 
-                        <div className="relative" ref={chatRef}>
-                            <button
-                                type="button"
-                                onClick={() => setChatOpen((prev) => !prev)}
-                                className="inline-flex items-center gap-2 rounded-lg border border-black/20 bg-background px-3 py-1.5 text-black/80 transition-colors hover:border-black/35 hover:bg-black/5"
-                                aria-expanded={chatOpen}
-                                aria-label="Open chat"
-                            >
-                                <MessageCircle className="h-4 w-4" />
-                                <span className="hidden md:inline text-xs font-semibold uppercase tracking-wide">Messages</span>
-                            </button>
+                            <div className="relative" ref={chatRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setChatOpen((prev) => !prev)}
+                                    className="inline-flex items-center gap-2 rounded-lg border border-black/20 bg-background px-3 py-1.5 text-black/80 transition-colors hover:border-black/35 hover:bg-black/5"
+                                    aria-expanded={chatOpen}
+                                    aria-label="Open chat"
+                                >
+                                    <MessageCircle className="h-4 w-4" />
+                                    <span className="hidden md:inline text-xs font-semibold uppercase tracking-wide">Messages</span>
+                                </button>
 
-                        {chatOpen && (
-                            <div className="absolute right-0 mt-2 w-[min(94vw,360px)] rounded-2xl border border-black/15 bg-[#f4f3ee] p-3 text-black shadow-[0_24px_55px_-30px_rgba(0,0,0,0.35)]">
+                            {chatOpen && (
+                                <div className="absolute right-0 mt-2 w-[min(94vw,360px)] rounded-2xl border border-black/15 bg-[#f4f3ee] p-3 text-black shadow-[0_24px_55px_-30px_rgba(0,0,0,0.35)]">
                                 <div className="mb-2 flex items-center justify-between border-b border-black/10 pb-2">
                                     <span className="text-xs font-mono uppercase tracking-[0.2em] text-black/80"># general</span>
                                     <div className="flex items-center gap-3">
@@ -493,81 +487,51 @@ export default function AppNavbar() {
                                     You are chatting as {displayName || userNameRef.current}
                                 </div>
                             </div>
-                        )}
-                        </div>
+                            )}
+                            </div>
 
-                        <Link
-                            href="https://github.com/mano-sudo/portfolio-v3"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-lg border border-black/20 bg-background px-3 py-1.5 text-black/80 transition-colors hover:border-black/35 hover:bg-black/5"
-                            aria-label="Open GitHub repository"
-                        >
-                            <Github className="h-4 w-4" />
-                            <span className="hidden md:inline text-xs font-semibold tracking-wide">{stars?.toLocaleString() ?? "1,017"}</span>
-                            <Star className="h-3.5 w-3.5 fill-black/80 text-black/80" />
-                        </Link>
-                    </div>
-
-                    <div className="hidden xl:flex items-center gap-8 md:gap-12 lg:gap-16">
-                    {navItems.map((item) => {
-                        const isActive = pathname === item.href;
-                        return (
                             <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`relative uppercase tracking-wider text-xs md:text-sm font-medium transition-all ${
-                                    isActive
-                                        ? "text-black"
-                                        : "text-black/60 hover:text-black"
-                                }`}
+                                href="https://github.com/mano-sudo/portfolio-v3"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 rounded-lg border border-black/20 bg-background px-3 py-1.5 text-black/80 transition-colors hover:border-black/35 hover:bg-black/5"
+                                aria-label="Open GitHub repository"
                             >
-                                {item.name}
-                                {isActive && (
-                                    <span className="absolute -bottom-1 left-0 w-full h-px bg-black" />
-                                )}
+                                <Github className="h-4 w-4" />
+                                <span className="hidden md:inline text-xs font-semibold tracking-wide">{stars?.toLocaleString() ?? "1,017"}</span>
+                                <Star className="h-3.5 w-3.5 fill-black/80 text-black/80" />
                             </Link>
-                        );
-                    })}
-
-                    {/* Right side nav */}
-                    <Link
-                        href="#contact"
-                        aria-label="Navigate to contact section"
-                        className="text-black uppercase tracking-wider text-xs md:text-sm font-medium hover:text-black/80 transition-colors"
-                    >
-                        LET&apos;S WORK
-                    </Link>
+                        </div>
                     </div>
-                </div>
 
-                {/* Mobile - Hamburger Button */}
-                <button
-                    onClick={() => setMenuOpen(!menuOpen)}
-                    className="lg:hidden relative z-60 flex flex-col items-center justify-center w-10 h-10 gap-[6px]"
-                    aria-label="Toggle menu"
-                >
-                    <span
-                        className={`block w-6 h-[2px] bg-black transition-all duration-300 origin-center ${
-                            menuOpen ? "rotate-45 translate-y-[8px]" : ""
-                        }`}
-                    />
-                    <span
-                        className={`block w-6 h-[2px] bg-black transition-all duration-300 ${
-                            menuOpen ? "opacity-0 scale-x-0" : "opacity-100"
-                        }`}
-                    />
-                    <span
-                        className={`block w-6 h-[2px] bg-black transition-all duration-300 origin-center ${
-                            menuOpen ? "-rotate-45 -translate-y-[8px]" : ""
-                        }`}
-                    />
-                </button>
+                    {/* Menu Button */}
+                    <button
+                        onClick={() => setMenuOpen(!menuOpen)}
+                        className="relative z-60 flex flex-col items-center justify-center w-10 h-10 gap-[6px]"
+                        aria-label="Toggle menu"
+                    >
+                        <span
+                            className={`block w-6 h-[2px] bg-black transition-all duration-300 origin-center ${
+                                menuOpen ? "rotate-45 translate-y-[8px]" : ""
+                            }`}
+                        />
+                        <span
+                            className={`block w-6 h-[2px] bg-black transition-all duration-300 ${
+                                menuOpen ? "opacity-0 scale-x-0" : "opacity-100"
+                            }`}
+                        />
+                        <span
+                            className={`block w-6 h-[2px] bg-black transition-all duration-300 origin-center ${
+                                menuOpen ? "-rotate-45 -translate-y-[8px]" : ""
+                            }`}
+                        />
+                    </button>
+                </div>
             </nav>
 
-            {/* Mobile Full-Screen Menu Overlay */}
+            {/* Full-Screen Menu Overlay */}
             <div
-                className={`fixed inset-0 z-55 lg:hidden transition-all duration-500 ${
+                className={`fixed inset-0 z-55 transition-all duration-500 ${
                     menuOpen
                         ? "opacity-100 pointer-events-auto"
                         : "opacity-0 pointer-events-none"

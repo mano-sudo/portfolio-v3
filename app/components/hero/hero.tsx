@@ -7,10 +7,9 @@ export default function Hero() {
         <section
             data-shoot-target="1"
             data-shoot-granularity="char"
-            className="relative w-full bg-[#f4f3ee] overflow-hidden"
+            className="relative w-full bg-[#f4f3ee] overflow-hidden min-h-[calc(100svh-var(--app-header-h,88px))] sm:h-auto sm:min-h-[calc(72dvh-var(--app-header-h,88px))] md:h-auto md:min-h-[calc(64dvh-var(--app-header-h,88px))] lg:h-auto lg:min-h-[calc(58dvh-var(--app-header-h,88px))] xl:h-auto xl:min-h-[calc(100svh-var(--app-header-h,88px))]"
             style={{
                 marginTop: "var(--app-header-h, 88px)",
-                minHeight: "calc(100svh - var(--app-header-h, 88px))",
             }}
         >
             <div className="mx-auto h-full w-full max-w-[1920px] px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20">
@@ -49,7 +48,7 @@ export default function Hero() {
                         </div>
                         <div className="relative w-full aspect-video overflow-hidden border border-black/20 bg-black/5">
                             <Image
-                                src="/window.svg"
+                                src="/heropic.svg"
                                 alt="Portrait"
                                 width={1200}
                                 height={675}
@@ -181,7 +180,7 @@ export default function Hero() {
                                     {/* Image frame */}
                                     <div className="relative w-full aspect-16/6 overflow-hidden border border-black/20 bg-black/5">
                                         <Image
-                                            src="/window.svg"
+                                            src="/heropic.svg"
                                             alt="Portrait"
                                             width={1600}
                                             height={600}

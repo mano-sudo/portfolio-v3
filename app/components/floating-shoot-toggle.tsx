@@ -216,6 +216,9 @@ export default function FloatingShootToggle(): React.JSX.Element {
         if (!isOn) return;
         let firingInterval: number | null = null;
         let isHoldingPrimary = false;
+        let touchStart: { x: number; y: number } | null = null;
+        let touchMoved = false;
+        const touchMoveThreshold = 12;
 
         const onSelectStart = (event: Event) => {
             const target = event.target as Element | null;
@@ -322,6 +325,15 @@ export default function FloatingShootToggle(): React.JSX.Element {
             if (!event.isPrimary) return;
             if (event.pointerType === "mouse" && event.button !== 0) return;
             if ((event.target as Element | null)?.closest("[data-shoot-ui]")) return;
+
+            // Keep touchscreen scrolling natural while allowing tap-to-shoot.
+            if (event.pointerType === "touch") {
+                updateAimFromPoint(event.clientX, event.clientY);
+                touchStart = { x: event.clientX, y: event.clientY };
+                touchMoved = false;
+                return;
+            }
+
             event.preventDefault();
             window.getSelection()?.removeAllRanges();
             updateAimFromPoint(event.clientX, event.clientY);
@@ -336,13 +348,33 @@ export default function FloatingShootToggle(): React.JSX.Element {
             }, 90);
         };
 
+        const onPointerMove = (event: PointerEvent) => {
+            if (!event.isPrimary) return;
+            if (event.pointerType !== "touch") return;
+            if (!touchStart) return;
+            const movedDistance = Math.hypot(event.clientX - touchStart.x, event.clientY - touchStart.y);
+            if (movedDistance > touchMoveThreshold) {
+                touchMoved = true;
+            }
+        };
+
         const onPointerUp = (event: PointerEvent) => {
             if (!event.isPrimary) return;
             if (event.pointerType === "mouse" && event.button !== 0) return;
+            if (event.pointerType === "touch") {
+                if (!(event.target as Element | null)?.closest("[data-shoot-ui]") && !touchMoved) {
+                    updateAimFromPoint(event.clientX, event.clientY);
+                    fireShot(event.clientX, event.clientY);
+                }
+                touchStart = null;
+                touchMoved = false;
+            }
             stopHoldFire();
         };
 
         const onPointerCancel = () => {
+            touchStart = null;
+            touchMoved = false;
             stopHoldFire();
         };
 
@@ -353,6 +385,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
         document.addEventListener("selectstart", onSelectStart);
         document.addEventListener("dragstart", onSelectStart);
         window.addEventListener("pointerdown", onPointerDown);
+        window.addEventListener("pointermove", onPointerMove, { passive: true });
         window.addEventListener("pointerup", onPointerUp);
         window.addEventListener("pointercancel", onPointerCancel);
         window.addEventListener("blur", onWindowBlur);
@@ -361,6 +394,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
             document.removeEventListener("selectstart", onSelectStart);
             document.removeEventListener("dragstart", onSelectStart);
             window.removeEventListener("pointerdown", onPointerDown);
+            window.removeEventListener("pointermove", onPointerMove);
             window.removeEventListener("pointerup", onPointerUp);
             window.removeEventListener("pointercancel", onPointerCancel);
             window.removeEventListener("blur", onWindowBlur);

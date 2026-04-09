@@ -26,9 +26,11 @@ export default function Home() {
       <ScrollSection>
         <Hero />
       </ScrollSection>
-      <ScrollSection>
-        <Marquee />
-      </ScrollSection>
+      <div className="-mt-8 sm:-mt-10 md:-mt-14 lg:mt-0">
+        <ScrollSection>
+          <Marquee />
+        </ScrollSection>
+      </div>
       <ScrollSection>
         <Stats />
       </ScrollSection>
