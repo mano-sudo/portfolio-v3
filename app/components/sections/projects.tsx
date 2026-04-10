@@ -446,7 +446,7 @@ export default function Projects() {
             <section
                 ref={sectionRef}
                 id="projects"
-                className="projects-section scroll-mt-24 border-t border-black/10 bg-background text-foreground"
+                className="projects-section scroll-mt-24  bg-background text-foreground"
                 aria-label="Projects"
             >
                 <div className="mx-auto max-w-[1920px] px-5 py-14 sm:px-8 md:px-12 lg:px-16 xl:px-24">

@@ -19,14 +19,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Roman Caseres | Full Stack Developer",
-  description: "Roman Caseres is a full stack developer with a passion for building web applications.",
+  title: "Roman Caseres | Software Developer",
+  description: "Roman Caseres is a software developer with a passion for building web applications.",
   icons: {
     icon: "/favicon.ico",
   },
   openGraph: {
-    title: "Roman Caseres | Full Stack Developer",
-    description: "Roman Caseres is a full stack developer with a passion for building web applications.",
+    title: "Roman Caseres | Software Developer",
+    description: "Roman Caseres is a software developer with a passion for building web applications.",
     images: "/og-image.png",
   },
 };

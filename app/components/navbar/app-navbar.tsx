@@ -9,6 +9,9 @@ import { createClient } from "@supabase/supabase-js";
 /** Messages older than this are dropped in the UI and purged in the database (see supabase/migrations). */
 const CHAT_MESSAGE_TTL_MS = 10 * 60 * 1000;
 
+/** Past this scroll offset the navbar gets a solid surface; at the top it stays transparent. */
+const NAV_SOLID_BG_SCROLL_PX = 24;
+
 type ChatMessage = {
     id: number;
     user: string;
@@ -34,6 +37,7 @@ export default function AppNavbar() {
     const [currentTime, setCurrentTime] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
     const [navHidden, setNavHidden] = useState(false);
+    const [navSolidBg, setNavSolidBg] = useState(false);
     const [chatOpen, setChatOpen] = useState(false);
     const [chatInput, setChatInput] = useState("");
     const [isEditingName, setIsEditingName] = useState(false);
@@ -96,12 +100,14 @@ export default function AppNavbar() {
         return () => { document.body.style.overflow = ""; };
     }, [menuOpen]);
 
-    // Hide navbar on scroll down, show on scroll up
+    // Hide navbar on scroll down, show on scroll up; solid bar only after leaving the top
     useEffect(() => {
         let lastY = window.scrollY;
+        setNavSolidBg(lastY > NAV_SOLID_BG_SCROLL_PX);
 
         const onScroll = () => {
             const currentY = window.scrollY;
+            setNavSolidBg(currentY > NAV_SOLID_BG_SCROLL_PX);
             if (menuOpen) return; // don't hide while overlay is open
 
             if (currentY > lastY && currentY > 80) {
@@ -115,6 +121,10 @@ export default function AppNavbar() {
         window.addEventListener("scroll", onScroll, { passive: true });
         return () => window.removeEventListener("scroll", onScroll);
     }, [menuOpen]);
+
+    useEffect(() => {
+        setNavSolidBg(window.scrollY > NAV_SOLID_BG_SCROLL_PX);
+    }, [pathname]);
 
     useEffect(() => {
         const applyHeaderHeight = () => {
@@ -296,6 +306,12 @@ export default function AppNavbar() {
         : "border-black/20 bg-background text-black/80 hover:border-black/35 hover:bg-black/5";
     const menuBarClass = isProjectDetailPage ? "bg-background" : "bg-black";
 
+    const navSurfaceSolidClass = isProjectDetailPage
+        ? "border-b border-white/10 bg-black/50 backdrop-blur-md"
+        : "border-b border-black/10 bg-background/90 backdrop-blur-md";
+    const navSurfaceTopClass = "border-b border-transparent bg-transparent backdrop-blur-none";
+    const navSurfaceClass = navSolidBg ? navSurfaceSolidClass : navSurfaceTopClass;
+
     const sendMessage = async () => {
         const value = chatInput.trim();
         if (!value) return;
@@ -391,7 +407,7 @@ export default function AppNavbar() {
             <nav
                 ref={navRef}
                 data-shoot-ui="1"
-                className={`fixed top-0 z-50 flex w-full min-w-0 items-center justify-between gap-2 py-4 pl-4 pr-3 transition-transform duration-300 sm:gap-3 sm:p-6 sm:px-8 md:px-12 lg:px-20 bg-background/80 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none ${navHidden && !menuOpen ? "-translate-y-full" : "translate-y-0"}`}
+                className={`fixed top-0 z-50 flex w-full min-w-0 items-center justify-between gap-2 py-4 pl-4 pr-3 will-change-transform transition-[transform,opacity,background-color,border-color] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] sm:gap-3 sm:p-6 sm:px-8 md:px-12 lg:px-20 ${navSurfaceClass} ${navHidden && !menuOpen ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
             >
                 {/* Left - Logo */}
                 <Link href="/" aria-label="Go to home" className="inline-flex min-w-0 shrink items-center">
