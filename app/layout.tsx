@@ -18,7 +18,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://romancaseres.cloud";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Roman Caseres | Software Developer",
   description: "Roman Caseres is a software developer with a passion for building web applications.",
   icons: {

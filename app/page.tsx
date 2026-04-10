@@ -1,18 +1,18 @@
 import Hero from "./components/hero/hero";
-import Stats from "./components/sections/stats";
-import Marquee from "./components/sections/marquee";
-import Footer from "./components/footer";
 import dynamic from "next/dynamic";
 
 import FloatingSocials from "./components/floating-socials";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
 import ScrollSection from "./components/scroll-section";
 
+const Marquee = dynamic(() => import("./components/sections/marquee"));
+const Stats = dynamic(() => import("./components/sections/stats"));
 const Projects = dynamic(() => import("./components/sections/projects"));
 const Skills = dynamic(() => import("./components/sections/skills"));
 const Achievements = dynamic(() => import("./components/sections/achievements"));
 const Testimonials = dynamic(() => import("./components/sections/testimonials"));
 const Contact = dynamic(() => import("./components/sections/contact"));
+const Footer = dynamic(() => import("./components/footer"));
 
 export default function Home() {
   return (

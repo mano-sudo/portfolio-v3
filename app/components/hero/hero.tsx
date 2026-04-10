@@ -19,7 +19,7 @@ export default function Hero() {
         <section
             data-shoot-target="1"
             data-shoot-granularity="char"
-            className="relative isolate w-full overflow-x-hidden bg-background contain-layout pb-8 min-h-[calc(100svh-var(--app-header-h,88px))] sm:min-h-[calc(72dvh-var(--app-header-h,88px))] sm:pb-10 md:min-h-0 md:pb-14 lg:pb-6 xl:flex xl:min-h-[calc(100svh-var(--app-header-h,88px))] xl:flex-col xl:justify-center xl:pb-8"
+            className="relative isolate w-full overflow-hidden bg-background contain-layout pb-8 min-h-[calc(100svh-var(--app-header-h,88px))] sm:min-h-[calc(72dvh-var(--app-header-h,88px))] sm:pb-10 md:min-h-0 md:pb-14 lg:pb-6 xl:flex xl:min-h-[calc(100svh-var(--app-header-h,88px))] xl:flex-col xl:justify-center xl:pb-8"
             style={{
                 marginTop: "var(--app-header-h, 88px)",
             }}
@@ -69,7 +69,8 @@ export default function Hero() {
                                 width={1200}
                                 height={675}
                                 sizes="100vw"
-                                loading="lazy"
+                                priority
+                                fetchPriority="high"
                                 className="h-full w-full object-cover"
                             />
                         </HeroInteractivePortrait>
@@ -215,7 +216,8 @@ export default function Hero() {
                                             width={1600}
                                             height={600}
                                             sizes="(max-width: 768px) 100vw, 640px"
-                                            loading="lazy"
+                                            priority
+                                            fetchPriority="high"
                                             className="h-full w-full object-cover"
                                         />
                                     </HeroInteractivePortrait>

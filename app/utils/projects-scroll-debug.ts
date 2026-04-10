@@ -1,7 +1,7 @@
 /**
  * Set to false to silence [projects-scroll] logs after you finish diagnosing.
  */
-export const PROJECTS_SCROLL_DEBUG = true;
+export const PROJECTS_SCROLL_DEBUG = false;
 
 type ScrollSnapshot = Record<string, unknown>;
 

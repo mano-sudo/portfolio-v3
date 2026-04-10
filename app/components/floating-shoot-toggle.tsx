@@ -71,13 +71,109 @@ function textNodeHasVisibleChar(text: Text): boolean {
     return (text.textContent ?? "").trim().length > 0;
 }
 
+/**
+ * Deepest ancestor with `data-shoot-target` (section + inner headings both tagged -> heading wins).
+ * Avoids matching Framer `div` wrappers before real text nodes via `closest(...,div,...)`.
+ */
+function pickInnerShootTarget(raw: Element | null): HTMLElement | null {
+    let el: Element | null = raw;
+    while (el && el instanceof HTMLElement) {
+        if (el.matches("[data-shoot-ui]")) return null;
+        if (el.hasAttribute("data-shoot-target")) {
+            return el;
+        }
+        el = el.parentElement;
+    }
+    return null;
+}
+
+function pickSemanticTextTarget(raw: Element | null): HTMLElement | null {
+    let el: Element | null = raw;
+    while (el && el instanceof HTMLElement) {
+        if (el.matches("[data-shoot-ui]")) return null;
+        if (el.matches("h1,h2,h3,h4,h5,h6,p,span,a,button,li,br,article,img")) {
+            return el;
+        }
+        el = el.parentElement;
+    }
+    return null;
+}
+
+/** Prefer inner `data-shoot-target` (e.g. h1) over outer section when hit-testing disagrees with caret. */
+function pickInnerShootTargetFromTextNode(text: Text): HTMLElement | null {
+    let el: HTMLElement | null = text.parentElement;
+    while (el) {
+        if (el.matches("[data-shoot-ui]")) return null;
+        if (el.hasAttribute("data-shoot-target")) {
+            return el;
+        }
+        el = el.parentElement;
+    }
+    return null;
+}
+
+/**
+ * For `data-shoot-granularity="char"`, wrap the glyph under (x,y) in its own span so GSAP
+ * only moves that letter (imperative DOM; hero copy is static between navigations).
+ */
+function wrapShootCharAtPoint(x: number, y: number, root: HTMLElement): HTMLElement | null {
+    const doc = document as Document & {
+        caretRangeFromPoint?: (nx: number, ny: number) => Range | null;
+    };
+    if (typeof doc.caretRangeFromPoint !== "function") return null;
+    const range = doc.caretRangeFromPoint(x, y);
+    if (!range || range.startContainer.nodeType !== Node.TEXT_NODE) return null;
+    const textNode = range.startContainer as Text;
+    if (!root.contains(textNode)) return null;
+
+    const parentEl = textNode.parentElement;
+    if (parentEl?.getAttribute("data-shoot-char-wrap") === "1") {
+        return parentEl;
+    }
+
+    const full = textNode.textContent ?? "";
+    if (full.length === 0) return null;
+
+    let offset = range.startOffset;
+    if (offset >= full.length) offset = full.length - 1;
+    if (offset < 0) offset = 0;
+
+    const ch = full[offset];
+    if (ch === undefined) return null;
+
+    const before = full.slice(0, offset);
+    const after = full.slice(offset + 1);
+
+    const span = document.createElement("span");
+    span.setAttribute("data-shoot-char-wrap", "1");
+    span.style.display = "inline-block";
+    span.textContent = ch;
+
+    const fragment = document.createDocumentFragment();
+    if (before.length > 0) {
+        fragment.appendChild(document.createTextNode(before));
+    }
+    fragment.appendChild(span);
+    if (after.length > 0) {
+        fragment.appendChild(document.createTextNode(after));
+    }
+
+    const parent = textNode.parentNode;
+    if (!parent) return null;
+    parent.replaceChild(fragment, textNode);
+    return span;
+}
+
+function resolveShootAnimationTarget(target: HTMLElement, x: number, y: number): HTMLElement {
+    if (target.getAttribute("data-shoot-granularity") !== "char") return target;
+    return wrapShootCharAtPoint(x, y, target) ?? target;
+}
+
 function pickHitWord(x: number, y: number, raw: Element | null): HTMLElement | null {
     if (!raw) return null;
     if (raw.closest("[data-shoot-ui]")) return null;
 
-    const target = raw.closest<HTMLElement>(
-        "[data-shoot-target],h1,h2,h3,h4,h5,h6,p,span,a,button,li,br,img,div,article"
-    );
+    const target = pickInnerShootTarget(raw) ?? pickSemanticTextTarget(raw);
     if (!target || target.closest("[data-shoot-ui]")) return null;
 
     if (target.tagName === "IMG") {
@@ -106,7 +202,7 @@ function pickHitWord(x: number, y: number, raw: Element | null): HTMLElement | n
         return null;
     }
 
-    return target;
+    return pickInnerShootTargetFromTextNode(textAtPoint) ?? target;
 }
 
 function readInitialState(): boolean {
@@ -291,8 +387,10 @@ export default function FloatingShootToggle(): React.JSX.Element {
             const target = pickHitWord(x, y, raw);
             if (!target) return;
 
-            if (target.dataset.shotDown === "1") {
-                gsap.to(target, {
+            const animTarget = resolveShootAnimationTarget(target, x, y);
+
+            if (animTarget.dataset.shotDown === "1") {
+                gsap.to(animTarget, {
                     y: "+=12",
                     rotation: "+=6",
                     duration: 0.16,
@@ -301,12 +399,12 @@ export default function FloatingShootToggle(): React.JSX.Element {
                 return;
             }
 
-            target.dataset.shotDown = "1";
-            target.style.willChange = "transform, opacity";
+            animTarget.dataset.shotDown = "1";
+            animTarget.style.willChange = "transform, opacity";
             const impactTilt = gsap.utils.random(-7, 7, 1);
             const fallTilt = gsap.utils.random(-24, 24, 1);
             const tl = gsap.timeline();
-            tl.to(target, {
+            tl.to(animTarget, {
                 x: gsap.utils.random(-6, 6, 1),
                 y: gsap.utils.random(-10, -4, 1),
                 rotation: impactTilt,
@@ -314,7 +412,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
                 duration: 0.09,
                 ease: "power2.out",
             })
-                .to(target, {
+                .to(animTarget, {
                     x: gsap.utils.random(-2, 2, 1),
                     y: gsap.utils.random(-2, 2, 1),
                     rotation: impactTilt * 0.45,
@@ -322,7 +420,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
                     duration: 0.08,
                     ease: "power1.inOut",
                 })
-                .to(target, {
+                .to(animTarget, {
                     y: window.innerHeight * 0.55,
                     rotation: fallTilt,
                     opacity: 0.15,
