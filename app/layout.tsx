@@ -32,7 +32,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Roman Caseres | Software Developer",
     description: "Roman Caseres is a software developer with a passion for building web applications.",
-    images: "/og-image.png",
+    images: "/DevByRoman.png",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Roman Caseres | Software Developer",
+    description: "Roman Caseres is a software developer with a passion for building web applications.",
+    images: ["/DevByRoman.png"],
   },
 };
 
