@@ -19,6 +19,18 @@ function normalizeCountryCode(value: unknown): string | null {
     return /^[A-Z]{2}$/.test(t) ? t : null;
 }
 
+/** PostgREST / Postgres error when `country_code` is not in the table yet. */
+function isChatCountryColumnError(body: unknown): boolean {
+    if (!body || typeof body !== "object") return false;
+    const o = body as { code?: string; message?: string };
+    const msg = typeof o.message === "string" ? o.message : "";
+    return (
+        o.code === "PGRST204" ||
+        o.code === "42703" ||
+        msg.includes("country_code")
+    );
+}
+
 function detectCountryCodeFromLocale(): string | null {
     if (typeof window === "undefined") return null;
     try {
@@ -29,6 +41,19 @@ function detectCountryCodeFromLocale(): string | null {
     } catch {
         return null;
     }
+}
+
+/** Prefer `navigator.languages` so a region tag is found when `en-US` is listed before bare `en`. */
+function countryCodeFromNavigatorLanguages(): string | null {
+    if (typeof navigator === "undefined") return null;
+    const list = [...(navigator.languages ?? []), navigator.language];
+    for (const lang of list) {
+        const match = lang.match(/-([A-Za-z]{2})\b/);
+        if (!match) continue;
+        const c = normalizeCountryCode(match[1]);
+        if (c) return c;
+    }
+    return null;
 }
 
 /** Uses system IANA zone (e.g. Asia/Manila); usually matches real location better than en-US locale. */
@@ -71,6 +96,7 @@ type DbChatMessageRow = {
     username: string;
     message: string;
     created_at: string;
+    country_code?: string | null;
 };
 
 export default function AppNavbar() {
@@ -95,6 +121,8 @@ export default function AppNavbar() {
     const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
     const userNameRef = useRef<string>(`Guest-${Math.floor(Math.random() * 9999).toString().padStart(4, "0")}`);
     const countryCodeRef = useRef<string | null>(null);
+    /** In-memory only: null = try country_code in REST; false = column missing this session. */
+    const chatCountryColumnOkRef = useRef<boolean | null>(null);
 
     const toTimeText = (isoValue: string) => {
         const date = new Date(isoValue);
@@ -112,7 +140,8 @@ export default function AppNavbar() {
     };
 
     const rowToChatMessage = (row: DbChatMessageRow): ChatMessage => {
-        const selfGuess =
+        const fromDb = normalizeCountryCode(row.country_code);
+        const selfFallback =
             row.username === userNameRef.current ? countryCodeRef.current : null;
         return {
             id: row.id,
@@ -120,7 +149,7 @@ export default function AppNavbar() {
             text: row.message,
             time: toTimeText(row.created_at),
             createdAt: row.created_at,
-            countryCode: selfGuess,
+            countryCode: fromDb ?? selfFallback,
         };
     };
 
@@ -222,8 +251,9 @@ export default function AppNavbar() {
         const fromTz = detectCountryCodeFromTimeZone();
         const savedCc = window.localStorage.getItem("navbar-chat-country-code");
         const fromStorage = normalizeCountryCode(savedCc);
+        const fromLang = countryCodeFromNavigatorLanguages();
         const fromLocale = detectCountryCodeFromLocale();
-        const cc = fromTz ?? fromStorage ?? fromLocale;
+        const cc = fromTz ?? fromStorage ?? fromLang ?? fromLocale;
         if (cc) {
             countryCodeRef.current = cc;
             window.localStorage.setItem("navbar-chat-country-code", cc);
@@ -289,18 +319,42 @@ export default function AppNavbar() {
             const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
             if (!url || !key) return;
 
-            const response = await fetch(
-                `${url}/rest/v1/chat_messages?select=id,username,message,created_at&order=created_at.desc&limit=40`,
-                {
-                    method: "GET",
-                    headers: {
-                        apikey: key,
-                        Authorization: `Bearer ${key}`,
-                    },
-                    cache: "no-store",
+            const selectWithoutCountry = "id,username,message,created_at";
+            const selectWithCountry = `${selectWithoutCountry},country_code`;
+            const tryCountry = chatCountryColumnOkRef.current !== false;
+
+            const fetchList = async (select: string) =>
+                fetch(
+                    `${url}/rest/v1/chat_messages?select=${select}&order=created_at.desc&limit=40`,
+                    {
+                        method: "GET",
+                        headers: {
+                            apikey: key,
+                            Authorization: `Bearer ${key}`,
+                        },
+                        cache: "no-store",
+                    }
+                );
+
+            let usedCountryInSelect = tryCountry;
+            let response = await fetchList(tryCountry ? selectWithCountry : selectWithoutCountry);
+            if (!response.ok && tryCountry) {
+                let errBody: unknown;
+                try {
+                    errBody = await response.json();
+                } catch {
+                    errBody = null;
                 }
-            );
+                if (isChatCountryColumnError(errBody)) {
+                    chatCountryColumnOkRef.current = false;
+                    usedCountryInSelect = false;
+                    response = await fetchList(selectWithoutCountry);
+                }
+            }
             if (!response.ok) return;
+            if (usedCountryInSelect) {
+                chatCountryColumnOkRef.current = true;
+            }
             const payload = (await response.json()) as DbChatMessageRow[];
             if (!Array.isArray(payload)) return;
             const mapped = payload
@@ -384,16 +438,63 @@ export default function AppNavbar() {
         const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
         const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
         if (url && key) {
-            const response = await fetch(`${url}/rest/v1/chat_messages`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    apikey: key,
-                    Authorization: `Bearer ${key}`,
-                    Prefer: "return=representation",
-                },
-                body: JSON.stringify([{ username: userNameRef.current, message: value }]),
-            });
+            const cc =
+                countryCodeRef.current ??
+                detectCountryCodeFromTimeZone() ??
+                countryCodeFromNavigatorLanguages() ??
+                detectCountryCodeFromLocale();
+            if (cc) {
+                countryCodeRef.current = cc;
+                try {
+                    window.localStorage.setItem("navbar-chat-country-code", cc);
+                } catch {
+                    //
+                }
+            }
+
+            const includeCountry =
+                chatCountryColumnOkRef.current !== false && Boolean(cc);
+            const rowPayload: { username: string; message: string; country_code?: string } = {
+                username: userNameRef.current,
+                message: value,
+            };
+            if (includeCountry && cc) {
+                rowPayload.country_code = cc;
+            }
+
+            const postBody = (payload: typeof rowPayload) =>
+                fetch(`${url}/rest/v1/chat_messages`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        apikey: key,
+                        Authorization: `Bearer ${key}`,
+                        Prefer: "return=representation",
+                    },
+                    body: JSON.stringify([payload]),
+                });
+
+            let postedCountryColumn = includeCountry && Boolean(cc);
+            let response = await postBody(rowPayload);
+
+            if (!response.ok && postedCountryColumn) {
+                let errBody: unknown;
+                try {
+                    errBody = await response.json();
+                } catch {
+                    errBody = null;
+                }
+                if (isChatCountryColumnError(errBody)) {
+                    chatCountryColumnOkRef.current = false;
+                    postedCountryColumn = false;
+                    const minimal = { username: userNameRef.current, message: value };
+                    response = await postBody(minimal);
+                }
+            }
+
+            if (response.ok && postedCountryColumn) {
+                chatCountryColumnOkRef.current = true;
+            }
 
             // Apply immediately for sender; realtime keeps other clients in sync.
             if (response.ok) {
