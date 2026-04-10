@@ -7,6 +7,7 @@ import AppNavbar from "./components/navbar/app-navbar";
 import SmoothScroll from "./components/smooth-scroll";
 import PageTransition from "./components/page-transition";
 import FloatingShootToggleHost from "./components/floating-shoot-toggle-host";
+import CollaborativeCursors from "./components/collaborative-cursors";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppNavbar />
+        <CollaborativeCursors />
         <FloatingShootToggleHost />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <SmoothScroll>
