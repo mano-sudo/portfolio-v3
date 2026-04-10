@@ -213,20 +213,15 @@ export default function FloatingShootToggle(): React.JSX.Element {
         setCursorY(window.innerHeight / 2);
 
         const onPointerMove = (event: PointerEvent) => {
+            // Touch drags (e.g. scrolling) must not steer the gun; only mouse/trackpad
+            // tracks aim continuously, matching large-viewport behavior.
+            if (event.pointerType === "touch") return;
             updateAimFromPoint(event.clientX, event.clientY);
         };
 
-        const onTouchMove = (event: TouchEvent) => {
-            const touch = event.touches[0];
-            if (!touch) return;
-            updateAimFromPoint(touch.clientX, touch.clientY);
-        };
-
         window.addEventListener("pointermove", onPointerMove, { passive: true });
-        window.addEventListener("touchmove", onTouchMove, { passive: true });
         return () => {
             window.removeEventListener("pointermove", onPointerMove);
-            window.removeEventListener("touchmove", onTouchMove);
         };
     }, [isOn, updateAimFromPoint]);
 
@@ -345,8 +340,8 @@ export default function FloatingShootToggle(): React.JSX.Element {
             if ((event.target as Element | null)?.closest("[data-shoot-ui]")) return;
 
             // Keep touchscreen scrolling natural while allowing tap-to-shoot.
+            // Do not update aim on touch down (avoids gun jumping when starting a scroll).
             if (event.pointerType === "touch") {
-                updateAimFromPoint(event.clientX, event.clientY);
                 touchStart = { x: event.clientX, y: event.clientY };
                 touchMoved = false;
                 return;
@@ -422,13 +417,22 @@ export default function FloatingShootToggle(): React.JSX.Element {
     React.useEffect(() => {
         const cursorClassName = "shoot-cursor-hidden";
         const shootModeClassName = "shoot-mode-active";
+        const touchUiClassName = "shoot-mode-touch-ui";
 
         if (isOn) {
             document.documentElement.classList.add(shootModeClassName);
             document.body.classList.add(shootModeClassName);
+            const isTouchCapable =
+                typeof navigator !== "undefined" && navigator.maxTouchPoints > 0;
+            if (isTouchCapable) {
+                document.documentElement.classList.add(touchUiClassName);
+                document.body.classList.add(touchUiClassName);
+            }
         } else {
             document.documentElement.classList.remove(shootModeClassName);
             document.body.classList.remove(shootModeClassName);
+            document.documentElement.classList.remove(touchUiClassName);
+            document.body.classList.remove(touchUiClassName);
         }
 
         if (isOn && showGunCursor) {
@@ -444,6 +448,8 @@ export default function FloatingShootToggle(): React.JSX.Element {
             document.body.classList.remove(cursorClassName);
             document.documentElement.classList.remove(shootModeClassName);
             document.body.classList.remove(shootModeClassName);
+            document.documentElement.classList.remove(touchUiClassName);
+            document.body.classList.remove(touchUiClassName);
         };
     }, [isOn, showGunCursor]);
 

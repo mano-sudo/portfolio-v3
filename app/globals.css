@@ -253,7 +253,21 @@ body.shoot-mode-active *::before,
 body.shoot-mode-active *::after {
   user-select: none !important;
   -webkit-user-select: none !important;
-  touch-action: none !important;
+}
+
+/*
+ * Touchscreens: keep pan/pinch in shoot mode (class from JS via maxTouchPoints;
+ * media queries alone miss many tablets that report fine pointer + hover).
+ */
+html.shoot-mode-active.shoot-mode-touch-ui,
+html.shoot-mode-active.shoot-mode-touch-ui *,
+body.shoot-mode-active.shoot-mode-touch-ui,
+body.shoot-mode-active.shoot-mode-touch-ui *,
+html.shoot-mode-active.shoot-mode-touch-ui *::before,
+html.shoot-mode-active.shoot-mode-touch-ui *::after,
+body.shoot-mode-active.shoot-mode-touch-ui *::before,
+body.shoot-mode-active.shoot-mode-touch-ui *::after {
+  touch-action: manipulation !important;
 }
 
 html.shoot-cursor-hidden,
