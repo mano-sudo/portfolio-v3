@@ -5,6 +5,7 @@ import { Github, MessageCircle, Send, Star, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { countryCodeFromIanaTimeZone } from "@/app/utils/timezone-to-country-code";
 
 /** Messages older than this are dropped in the UI and purged in the database (see supabase/migrations). */
 const CHAT_MESSAGE_TTL_MS = 10 * 60 * 1000;
@@ -12,12 +13,57 @@ const CHAT_MESSAGE_TTL_MS = 10 * 60 * 1000;
 /** Past this scroll offset the navbar gets a solid surface; at the top it stays transparent. */
 const NAV_SOLID_BG_SCROLL_PX = 24;
 
+function normalizeCountryCode(value: unknown): string | null {
+    if (typeof value !== "string") return null;
+    const t = value.trim().toUpperCase();
+    return /^[A-Z]{2}$/.test(t) ? t : null;
+}
+
+function detectCountryCodeFromLocale(): string | null {
+    if (typeof window === "undefined") return null;
+    try {
+        const locale = Intl.DateTimeFormat().resolvedOptions().locale || navigator.language;
+        const match = locale.match(/-([A-Za-z]{2})\b/);
+        if (!match) return null;
+        return normalizeCountryCode(match[1]);
+    } catch {
+        return null;
+    }
+}
+
+/** Uses system IANA zone (e.g. Asia/Manila); usually matches real location better than en-US locale. */
+function detectCountryCodeFromTimeZone(): string | null {
+    if (typeof window === "undefined") return null;
+    try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (!tz) return null;
+        return countryCodeFromIanaTimeZone(tz);
+    } catch {
+        return null;
+    }
+}
+
+/** ISO 3166-1 alpha-2 -> regional-indicator flag emoji. */
+function countryCodeToFlagEmoji(code: string): string {
+    const upper = code.toUpperCase();
+    if (!/^[A-Z]{2}$/.test(upper)) return "";
+    const base = 0x1f1e6;
+    let out = "";
+    for (let i = 0; i < upper.length; i += 1) {
+        const cp = upper.codePointAt(i);
+        if (cp === undefined) break;
+        out += String.fromCodePoint(base + (cp - 65));
+    }
+    return out;
+}
+
 type ChatMessage = {
     id: number;
     user: string;
     text: string;
     time: string;
     createdAt: string;
+    countryCode: string | null;
 };
 
 type DbChatMessageRow = {
@@ -48,6 +94,7 @@ export default function AppNavbar() {
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
     const userNameRef = useRef<string>(`Guest-${Math.floor(Math.random() * 9999).toString().padStart(4, "0")}`);
+    const countryCodeRef = useRef<string | null>(null);
 
     const toTimeText = (isoValue: string) => {
         const date = new Date(isoValue);
@@ -64,13 +111,18 @@ export default function AppNavbar() {
         return Date.now() - t < CHAT_MESSAGE_TTL_MS;
     };
 
-    const rowToChatMessage = (row: DbChatMessageRow): ChatMessage => ({
-        id: row.id,
-        user: row.username,
-        text: row.message,
-        time: toTimeText(row.created_at),
-        createdAt: row.created_at,
-    });
+    const rowToChatMessage = (row: DbChatMessageRow): ChatMessage => {
+        const selfGuess =
+            row.username === userNameRef.current ? countryCodeRef.current : null;
+        return {
+            id: row.id,
+            user: row.username,
+            text: row.message,
+            time: toTimeText(row.created_at),
+            createdAt: row.created_at,
+            countryCode: selfGuess,
+        };
+    };
 
     useEffect(() => {
         const updateTime = () => {
@@ -166,6 +218,16 @@ export default function AppNavbar() {
         userNameRef.current = initial;
         setDisplayName(initial);
         setNameDraft(initial);
+
+        const fromTz = detectCountryCodeFromTimeZone();
+        const savedCc = window.localStorage.getItem("navbar-chat-country-code");
+        const fromStorage = normalizeCountryCode(savedCc);
+        const fromLocale = detectCountryCodeFromLocale();
+        const cc = fromTz ?? fromStorage ?? fromLocale;
+        if (cc) {
+            countryCodeRef.current = cc;
+            window.localStorage.setItem("navbar-chat-country-code", cc);
+        }
     }, []);
 
     useEffect(() => {
@@ -353,6 +415,7 @@ export default function AppNavbar() {
                         text: value,
                         time: `${hh}:${mm} ${suffix}`,
                         createdAt,
+                        countryCode: countryCodeRef.current,
                     },
                 ]);
             }
@@ -366,6 +429,7 @@ export default function AppNavbar() {
                     text: value,
                     time: `${hh}:${mm} ${suffix}`,
                     createdAt,
+                    countryCode: countryCodeRef.current,
                 },
             ]);
         }
@@ -515,9 +579,18 @@ export default function AppNavbar() {
                                                 className="h-9 w-9 shrink-0 rounded-full border border-black/20 bg-black/5"
                                             />
                                             <div className="min-w-0">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="truncate text-base font-bold leading-none text-black/85">{message.user}</span>
-                                                    <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-black/45">{message.time}</span>
+                                                <div className="flex min-w-0 items-center gap-2">
+                                                    <span className="min-w-0 truncate text-base font-bold leading-none text-black/85">{message.user}</span>
+                                                    {message.countryCode ? (
+                                                        <span
+                                                            className="shrink-0 text-base leading-none"
+                                                            title={message.countryCode}
+                                                            aria-label={`${message.countryCode} flag`}
+                                                        >
+                                                            {countryCodeToFlagEmoji(message.countryCode)}
+                                                        </span>
+                                                    ) : null}
+                                                    <span className="shrink-0 text-[10px] font-mono uppercase tracking-[0.12em] text-black/45">{message.time}</span>
                                                 </div>
                                                 <p className="mt-1 wrap-break-word text-base leading-tight text-black/80">{message.text}</p>
                                             </div>
