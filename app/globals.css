@@ -353,11 +353,9 @@ body.shoot-mode-active *::selection {
   @keyframes hero-backdrop-reveal {
     from {
       opacity: 0;
-      transform: scale3d(0.92, 0.92, 1);
     }
     to {
       opacity: 1;
-      transform: scale3d(1, 1, 1);
     }
   }
 }
@@ -369,7 +367,7 @@ body.shoot-mode-active *::selection {
 
 @media (prefers-reduced-motion: no-preference) {
   .hero-backdrop-reveal {
-    animation: hero-backdrop-reveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: hero-backdrop-reveal 0.32s ease-out both;
   }
 
   .hero-backdrop-orb-a {

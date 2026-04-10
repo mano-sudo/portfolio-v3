@@ -39,64 +39,6 @@ type PaintSplat = {
     exiting?: boolean;
 };
 
-function prepareShootWords(element: HTMLElement): void {
-    if (element.dataset.shootPrepared === "1") return;
-    if (element.closest("[data-shoot-ui]")) return;
-    if (element.classList.contains("shoot-word")) return;
-
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-    const textNodes: Text[] = [];
-    let node: Node | null = walker.nextNode();
-
-    while (node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            const textNode = node as Text;
-            if (textNode.textContent && textNode.textContent.trim().length > 0) {
-                textNodes.push(textNode);
-            }
-        }
-        node = walker.nextNode();
-    }
-
-    const splitByChar =
-        element.dataset.shootGranularity === "char" ||
-        element.tagName === "H1" ||
-        element.tagName === "H2";
-
-    textNodes.forEach((textNode) => {
-        const text = textNode.textContent ?? "";
-        const parts = text.split(/(\s+)/);
-        const fragment = document.createDocumentFragment();
-
-        parts.forEach((part) => {
-            if (!part) return;
-            if (/^\s+$/.test(part)) {
-                fragment.appendChild(document.createTextNode(part));
-                return;
-            }
-
-            if (splitByChar && part.length > 1) {
-                [...part].forEach((char) => {
-                    const charSpan = document.createElement("span");
-                    charSpan.textContent = char;
-                    charSpan.className = "shoot-word inline-block";
-                    fragment.appendChild(charSpan);
-                });
-                return;
-            }
-
-            const wordSpan = document.createElement("span");
-            wordSpan.textContent = part;
-            wordSpan.className = "shoot-word inline-block";
-            fragment.appendChild(wordSpan);
-        });
-
-        textNode.parentNode?.replaceChild(fragment, textNode);
-    });
-
-    element.dataset.shootPrepared = "1";
-}
-
 /** True only if (x,y) is over a non-empty text character (not padding / empty layout). */
 function getTextNodeAtPoint(x: number, y: number): Text | null {
     if (typeof document === "undefined") return null;
@@ -152,8 +94,6 @@ function pickHitWord(x: number, y: number, raw: Element | null): HTMLElement | n
         return inside ? raw : null;
     }
 
-    prepareShootWords(target);
-
     const textAtPoint = getTextNodeAtPoint(x, y);
     if (!textAtPoint || !textNodeHasVisibleChar(textAtPoint)) {
         const imgs = target.querySelectorAll("img");
@@ -166,16 +106,7 @@ function pickHitWord(x: number, y: number, raw: Element | null): HTMLElement | n
         return null;
     }
 
-    let node: Node | null = textAtPoint.parentElement;
-    while (node) {
-        if (node instanceof HTMLElement && node.classList.contains("shoot-word")) {
-            if (node.closest("[data-shoot-ui]")) return null;
-            return node;
-        }
-        node = node.parentElement;
-    }
-
-    return null;
+    return target;
 }
 
 function readInitialState(): boolean {

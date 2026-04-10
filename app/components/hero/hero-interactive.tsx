@@ -6,12 +6,9 @@ import { m, useReducedMotion, type Variants } from "framer-motion";
 import { ArrowDownRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/**
- * Scale reads as growing from the viewport center while x-translation slides
- * content to its final side (left items from +x, right items from -x).
- */
-export const HERO_VIEWPORT_CENTER_ORIGIN: React.CSSProperties = {
-    transformOrigin: "50vw 50svh",
+/** Local origin keeps compositing cheap; enter uses translate only (no scale). */
+export const HERO_MOTION_ORIGIN: React.CSSProperties = {
+    transformOrigin: "center",
 };
 
 export type HeroEnterDrift = "left" | "right" | "center";
@@ -19,29 +16,27 @@ export type HeroEnterDrift = "left" | "right" | "center";
 function driftItemVariants(reduceMotion: boolean, drift: HeroEnterDrift): Variants {
     if (reduceMotion) {
         return {
-            hidden: { opacity: 1, x: 0, y: 0, scale: 1 },
-            visible: { opacity: 1, x: 0, y: 0, scale: 1 },
+            hidden: { opacity: 1, x: 0, y: 0 },
+            visible: { opacity: 1, x: 0, y: 0 },
         };
     }
 
-    const xHidden = drift === "left" ? "24vw" : drift === "right" ? "-24vw" : 0;
+    const xHidden = drift === "left" ? 28 : drift === "right" ? -28 : 0;
 
     return {
         hidden: {
             opacity: 0,
-            scale: 0.62,
             x: xHidden,
-            y: drift === "center" ? "min(2.5vh, 18px)" : 0,
+            y: drift === "center" ? 10 : 0,
         },
         visible: {
             opacity: 1,
-            scale: 1,
             x: 0,
             y: 0,
             transition: {
                 type: "tween",
-                duration: 0.72,
-                ease: [0.16, 1, 0.3, 1],
+                duration: 0.28,
+                ease: [0.22, 1, 0.36, 1],
             },
         },
     };
@@ -61,8 +56,8 @@ export function HeroMotionRoot({
             hidden: {},
             visible: {
                 transition: {
-                    staggerChildren: reduceMotion ? 0 : 0.07,
-                    delayChildren: reduceMotion ? 0 : 0.03,
+                    staggerChildren: reduceMotion ? 0 : 0.018,
+                    delayChildren: reduceMotion ? 0 : 0,
                 },
             },
         }),
@@ -100,7 +95,7 @@ export function HeroEnterBlock({
         <m.div
             className={cn(className, "transform-gpu")}
             variants={variants}
-            style={HERO_VIEWPORT_CENTER_ORIGIN}
+            style={HERO_MOTION_ORIGIN}
         >
             {children}
         </m.div>
@@ -124,7 +119,7 @@ export function HeroEnterSplitRow({
             hidden: {},
             visible: {
                 transition: {
-                    staggerChildren: reduceMotion ? 0 : 0.07,
+                    staggerChildren: reduceMotion ? 0 : 0.018,
                 },
             },
         }),
@@ -147,14 +142,14 @@ export function HeroEnterSplitRow({
         >
             <m.div
                 variants={leftVariants}
-                style={HERO_VIEWPORT_CENTER_ORIGIN}
+                style={HERO_MOTION_ORIGIN}
                 className="min-w-0 transform-gpu"
             >
                 {left}
             </m.div>
             <m.div
                 variants={rightVariants}
-                style={HERO_VIEWPORT_CENTER_ORIGIN}
+                style={HERO_MOTION_ORIGIN}
                 className="shrink-0 transform-gpu"
             >
                 {right}
@@ -173,7 +168,7 @@ export function HeroBackdrop(): React.JSX.Element {
                 !reduceMotion && "hero-backdrop-reveal"
             )}
             aria-hidden
-            style={HERO_VIEWPORT_CENTER_ORIGIN}
+            style={HERO_MOTION_ORIGIN}
         >
             <div
                 className="absolute inset-0 opacity-[0.04]"
