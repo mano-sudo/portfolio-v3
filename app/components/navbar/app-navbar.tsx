@@ -319,11 +319,9 @@ export default function AppNavbar() {
         const hh = now.getHours() % 12 || 12;
         const mm = now.getMinutes().toString().padStart(2, "0");
         const suffix = now.getHours() >= 12 ? "PM" : "AM";
-        const client = supabaseRef.current;
-        if (client) {
-            const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-            const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-            if (!url || !key) return;
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+        if (url && key) {
             const response = await fetch(`${url}/rest/v1/chat_messages`, {
                 method: "POST",
                 headers: {
@@ -339,12 +337,24 @@ export default function AppNavbar() {
             if (response.ok) {
                 const inserted = (await response.json()) as DbChatMessageRow[];
                 const row = inserted[0];
-                if (row && typeof row.id === "number") {
-                    setChatMessages((prev) => {
-                        if (prev.some((item) => item.id === row.id)) return prev;
-                        return [...prev.slice(-48), rowToChatMessage(row)];
-                    });
-                }
+                if (!row || typeof row.id !== "number") return;
+                setChatMessages((prev) => {
+                    if (prev.some((item) => item.id === row.id)) return prev;
+                    return [...prev.slice(-48), rowToChatMessage(row)];
+                });
+            } else {
+                // Keep chat usable even if backend policy blocks this client.
+                const createdAt = now.toISOString();
+                setChatMessages((prev) => [
+                    ...prev,
+                    {
+                        id: Date.now(),
+                        user: userNameRef.current,
+                        text: value,
+                        time: `${hh}:${mm} ${suffix}`,
+                        createdAt,
+                    },
+                ]);
             }
         } else {
             const createdAt = now.toISOString();
@@ -498,7 +508,7 @@ export default function AppNavbar() {
                                     }}
                                 >
                                     {chatMessages.map((message) => (
-                                        <div key={message.id} className="flex items-start gap-2.5 rounded-xl bg-black/3 px-2.5 py-2">
+                                        <div key={message.id} className="flex items-start gap-2.5 rounded-xl px-2.5 py-2">
                                             <img
                                                 src={getAvatarUrl(message.user)}
                                                 alt={`${message.user} avatar`}
