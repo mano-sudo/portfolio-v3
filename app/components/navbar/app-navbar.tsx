@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Github, MessageCircle, Send, Star, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { countryCodeFromIanaTimeZone } from "@/app/utils/timezone-to-country-code";
 
@@ -577,6 +577,24 @@ export default function AppNavbar() {
         list.scrollTop = list.scrollHeight;
     }, [chatMessages, chatOpen]);
 
+    /** Other guests with at least one message in the thread (not you). Red badge shows this count. */
+    const messengerOtherParticipantCount = useMemo(() => {
+        const selfNorm = new Set<string>();
+        const dn = displayName.trim().toLowerCase();
+        const un = userNameRef.current.trim().toLowerCase();
+        if (dn.length > 0) selfNorm.add(dn);
+        if (un.length > 0) selfNorm.add(un);
+        const others = new Set<string>();
+        for (const m of chatMessages) {
+            const key = m.user.trim().toLowerCase();
+            if (key.length === 0 || selfNorm.has(key)) continue;
+            others.add(key);
+        }
+        return others.size;
+    }, [chatMessages, displayName]);
+
+    const showMessengerParticipantBadge = messengerOtherParticipantCount > 0;
+
     return (
         <>
             <nav
@@ -611,14 +629,28 @@ export default function AppNavbar() {
                                 <button
                                     type="button"
                                     onClick={() => setChatOpen((prev) => !prev)}
-                                    className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-colors sm:gap-2 sm:px-3 ${topButtonClass}`}
+                                    className={`relative inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-colors sm:gap-2 sm:px-3 ${topButtonClass}`}
                                     aria-expanded={chatOpen}
-                                    aria-label="Open chat"
+                                    aria-label={
+                                        showMessengerParticipantBadge
+                                            ? `Open chat, ${messengerOtherParticipantCount} other guest${messengerOtherParticipantCount === 1 ? "" : "s"} in thread`
+                                            : "Open chat"
+                                    }
                                 >
                                     <MessageCircle className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                                     <span className="hidden min-[420px]:inline text-[10px] font-semibold uppercase tracking-wide sm:text-xs">
                                         Messages
                                     </span>
+                                    {showMessengerParticipantBadge ? (
+                                        <span
+                                            className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white shadow-sm ring-2 ring-background sm:h-5 sm:min-w-[20px] sm:text-[11px]"
+                                            aria-hidden
+                                        >
+                                            {messengerOtherParticipantCount > 99
+                                                ? "99+"
+                                                : messengerOtherParticipantCount}
+                                        </span>
+                                    ) : null}
                                 </button>
 
                             {chatOpen && (
