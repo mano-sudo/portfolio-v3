@@ -13,6 +13,39 @@ const CHAT_MESSAGE_TTL_MS = 10 * 60 * 1000;
 /** Past this scroll offset the navbar gets a solid surface; at the top it stays transparent. */
 const NAV_SOLID_BG_SCROLL_PX = 24;
 
+const PRESENCE_SESSION_STORAGE_KEY = "portfolio-navbar-presence-session";
+
+/** Per-tab presence key (sessionStorage). Avoids double-count when dev Strict Mode remounts resets guest refs. */
+function getOrCreatePresenceSessionKey(): string {
+    if (typeof window === "undefined") {
+        return "ssr";
+    }
+    try {
+        const existing = sessionStorage.getItem(PRESENCE_SESSION_STORAGE_KEY);
+        if (existing !== null && existing.length > 0) {
+            return existing;
+        }
+        const id =
+            typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        sessionStorage.setItem(PRESENCE_SESSION_STORAGE_KEY, id);
+        return id;
+    } catch {
+        return `presence-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+}
+
+function countPresenceMetas(state: Record<string, unknown>): number {
+    let n = 0;
+    for (const metas of Object.values(state)) {
+        if (Array.isArray(metas)) {
+            n += metas.length;
+        }
+    }
+    return n;
+}
+
 function normalizeCountryCode(value: unknown): string | null {
     if (typeof value !== "string") return null;
     const t = value.trim().toUpperCase();
@@ -291,20 +324,25 @@ export default function AppNavbar() {
         const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
         if (!url || !key) return;
 
+        const presenceKey = getOrCreatePresenceSessionKey();
         const channel = client.channel("portfolio-navbar-presence", {
             config: {
-                presence: { key: userNameRef.current },
+                presence: { key: presenceKey },
             },
         });
 
         channel
             .on("presence", { event: "sync" }, () => {
-                const state = channel.presenceState();
-                setActiveUsers(Object.keys(state).length || 1);
+                const state = channel.presenceState() as Record<string, unknown>;
+                const n = countPresenceMetas(state);
+                setActiveUsers(Math.max(n, 1));
             })
             .subscribe((status) => {
                 if (status !== "SUBSCRIBED") return;
-                void channel.track({ joinedAt: new Date().toISOString() });
+                void channel.track({
+                    joinedAt: new Date().toISOString(),
+                    displayName: userNameRef.current,
+                });
             });
 
         return () => {

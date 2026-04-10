@@ -9,9 +9,9 @@ import {
     domAnimation,
     m,
     motion,
-    useReducedMotion,
 } from "framer-motion";
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useHydrationSafeReducedMotion } from "@/app/hooks/use-hydration-safe-reduced-motion";
 import { createPortal } from "react-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -46,7 +46,7 @@ function projectTagsLine(project: Project): string {
 }
 
 function useTypewriterTitle(fullText: string, sequenceKey: string): { display: string; complete: boolean } {
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useHydrationSafeReducedMotion();
     const [display, setDisplay] = useState(fullText);
     const [complete, setComplete] = useState(true);
 
@@ -102,7 +102,7 @@ function ProjectsDesktopGallery({
     viewportShell,
     goToProject,
 }: DesktopGalleryProps) {
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useHydrationSafeReducedMotion();
     const project = featured[activeIndex] ?? featured[0];
     const slug = project?.slug ?? "";
     const { display: typedTitle, complete: titleTyped } = useTypewriterTitle(project?.title ?? "", slug);

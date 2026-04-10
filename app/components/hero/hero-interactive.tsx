@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { m, useReducedMotion, type Variants } from "framer-motion";
+import { m, type Variants } from "framer-motion";
 import { ArrowDownRight } from "lucide-react";
+import { useHydrationSafeReducedMotion } from "@/app/hooks/use-hydration-safe-reduced-motion";
 import { cn } from "@/lib/utils";
 
 /** Local origin keeps compositing cheap; enter uses translate only (no scale). */
@@ -49,7 +50,7 @@ export function HeroMotionRoot({
     children: React.ReactNode;
     className?: string;
 }): React.JSX.Element {
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useHydrationSafeReducedMotion();
 
     const containerVariants = React.useMemo<Variants>(
         () => ({
@@ -85,7 +86,7 @@ export function HeroEnterBlock({
     className?: string;
     drift?: HeroEnterDrift;
 }): React.JSX.Element {
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useHydrationSafeReducedMotion();
     const variants = React.useMemo(
         () => driftItemVariants(!!reduceMotion, drift),
         [reduceMotion, drift]
@@ -112,7 +113,7 @@ export function HeroEnterSplitRow({
     left: React.ReactNode;
     right: React.ReactNode;
 }): React.JSX.Element {
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useHydrationSafeReducedMotion();
 
     const rowVariants = React.useMemo<Variants>(
         () => ({
@@ -159,7 +160,7 @@ export function HeroEnterSplitRow({
 }
 
 export function HeroBackdrop(): React.JSX.Element {
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useHydrationSafeReducedMotion();
 
     return (
         <div
@@ -203,7 +204,7 @@ export function HeroInteractivePortrait({
     children,
     frameClassName,
 }: HeroInteractivePortraitProps): React.JSX.Element {
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useHydrationSafeReducedMotion();
 
     return (
         <div className="group relative">
@@ -280,7 +281,7 @@ export function HeroTechChips(): React.JSX.Element {
 }
 
 export function HeroAvailability(): React.JSX.Element {
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useHydrationSafeReducedMotion();
 
     return (
         <div
@@ -301,7 +302,7 @@ export function HeroAvailability(): React.JSX.Element {
 }
 
 export function HeroExploreLink({ className }: { className?: string }): React.JSX.Element {
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useHydrationSafeReducedMotion();
 
     return (
         <div className={className} data-shoot-ui="1">
