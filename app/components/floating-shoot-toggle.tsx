@@ -12,6 +12,9 @@ const SPLAT_FADE_MS = 520;
 const SPLAT_TOTAL_LIFETIME_MS = 3200;
 const SPLAT_VISIBLE_MS = SPLAT_TOTAL_LIFETIME_MS - SPLAT_FADE_MS;
 
+/** Pinned scroll UIs (projects gallery): keep native clicks; shoot handlers must ignore this subtree. */
+const SHOOT_SCROLL_INTERACTIVE_SEL = "[data-shoot-scroll-interactive]";
+
 function GunLoadingFallback(): React.JSX.Element {
     return (
         <div className="h-64 w-[min(92vw,30rem)] sm:h-80 sm:w-xl md:h-96 md:w-176 overflow-visible flex items-end justify-center">
@@ -228,6 +231,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
     const [cursorX, setCursorX] = React.useState<number>(0);
     const [cursorY, setCursorY] = React.useState<number>(0);
     const [splats, setSplats] = React.useState<PaintSplat[]>([]);
+    const [hoverShootControls, setHoverShootControls] = React.useState<boolean>(false);
     const pointerRef = React.useRef<{ x: number; y: number }>({ x: 0, y: 0 });
     const updateAimFromPoint = React.useCallback((x: number, y: number) => {
         setCursorX(x);
@@ -240,6 +244,10 @@ export default function FloatingShootToggle(): React.JSX.Element {
     React.useEffect(() => {
         setIsOn(readInitialState());
     }, []);
+
+    React.useEffect(() => {
+        if (!isOn) setHoverShootControls(false);
+    }, [isOn]);
 
     React.useEffect(() => {
         // Warm up the JS chunk so first render appears faster.
@@ -329,12 +337,16 @@ export default function FloatingShootToggle(): React.JSX.Element {
         const onSelectStart = (event: Event) => {
             const target = event.target as Element | null;
             if (target?.closest("[data-shoot-ui]")) return;
+            if (target?.closest(SHOOT_SCROLL_INTERACTIVE_SEL)) return;
             event.preventDefault();
         };
 
         const fireShot = (x: number, y: number) => {
             const raw = document.elementFromPoint(x, y);
             if (raw?.closest("[data-shoot-ui]")) {
+                return;
+            }
+            if (raw?.closest(SHOOT_SCROLL_INTERACTIVE_SEL)) {
                 return;
             }
 
@@ -442,6 +454,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
             if (!event.isPrimary) return;
             if (event.pointerType === "mouse" && event.button !== 0) return;
             if ((event.target as Element | null)?.closest("[data-shoot-ui]")) return;
+            if ((event.target as Element | null)?.closest(SHOOT_SCROLL_INTERACTIVE_SEL)) return;
 
             // Keep touchscreen scrolling natural while allowing tap-to-shoot.
             // Do not update aim on touch down (avoids gun jumping when starting a scroll).
@@ -479,7 +492,10 @@ export default function FloatingShootToggle(): React.JSX.Element {
             if (!event.isPrimary) return;
             if (event.pointerType === "mouse" && event.button !== 0) return;
             if (event.pointerType === "touch") {
-                if (!(event.target as Element | null)?.closest("[data-shoot-ui]") && !touchMoved) {
+                const upEl = document.elementFromPoint(event.clientX, event.clientY);
+                const inShootUi = upEl?.closest("[data-shoot-ui]");
+                const inScrollInteractive = upEl?.closest(SHOOT_SCROLL_INTERACTIVE_SEL);
+                if (!inShootUi && !inScrollInteractive && !touchMoved) {
                     updateAimFromPoint(event.clientX, event.clientY);
                     fireShot(event.clientX, event.clientY);
                 }
@@ -539,7 +555,8 @@ export default function FloatingShootToggle(): React.JSX.Element {
             document.body.classList.remove(touchUiClassName);
         }
 
-        if (isOn && showGunCursor) {
+        const hideSystemCursor = isOn && showGunCursor && !hoverShootControls;
+        if (hideSystemCursor) {
             document.documentElement.classList.add(cursorClassName);
             document.body.classList.add(cursorClassName);
         } else {
@@ -555,7 +572,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
             document.documentElement.classList.remove(touchUiClassName);
             document.body.classList.remove(touchUiClassName);
         };
-    }, [isOn, showGunCursor]);
+    }, [isOn, showGunCursor, hoverShootControls]);
 
     return (
         <>
@@ -627,8 +644,8 @@ export default function FloatingShootToggle(): React.JSX.Element {
                 </div>
             )}
 
-            {/* Custom gun cursor */}
-            {isOn && showGunCursor && (
+            {/* Custom gun cursor (hidden over the toggle so the system pointer reads clearly). */}
+            {isOn && showGunCursor && !hoverShootControls && (
                 <div
                     className="fixed z-9999 pointer-events-none"
                     style={{ left: cursorX, top: cursorY, transform: "translate(-50%, -50%)" }}
@@ -655,12 +672,17 @@ export default function FloatingShootToggle(): React.JSX.Element {
             <div className="fixed bottom-5 inset-x-0 z-9999 px-6 pointer-events-none" data-shoot-ui="1">
                 <div className="flex items-center justify-between">
                     {/* Left: toggle */}
-                    <div className="pointer-events-auto" data-shoot-controls="1">
+                    <div
+                        className="pointer-events-auto cursor-pointer"
+                        data-shoot-controls="1"
+                        onMouseEnter={() => setHoverShootControls(true)}
+                        onMouseLeave={() => setHoverShootControls(false)}
+                    >
                         <button
                             type="button"
                             onClick={toggle}
                             className={[
-                                "group flex items-center gap-3",
+                                "group flex cursor-pointer items-center gap-3",
                                 "rounded-full  backdrop-blur-md",
                                 "px-4 py-2",
                                 "shadow-[0_18px_50px_-30px_rgba(0,0,0,0.35)]",

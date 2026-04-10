@@ -284,6 +284,20 @@ html.shoot-mode-active [data-shoot-controls] summary {
   pointer-events: auto !important;
 }
 
+/* Pinned / scroll-scrub regions (e.g. projects gallery): real clicks + wheel/touch scroll. */
+html.shoot-mode-active [data-shoot-scroll-interactive] a[href],
+html.shoot-mode-active [data-shoot-scroll-interactive] button:not(:disabled),
+html.shoot-mode-active [data-shoot-scroll-interactive] [role="button"],
+html.shoot-mode-active [data-shoot-scroll-interactive] [role="link"],
+html.shoot-mode-active [data-shoot-scroll-interactive] [role="tab"],
+html.shoot-mode-active [data-shoot-scroll-interactive] [role="menuitem"],
+html.shoot-mode-active [data-shoot-scroll-interactive] input:not([type="hidden"]),
+html.shoot-mode-active [data-shoot-scroll-interactive] textarea,
+html.shoot-mode-active [data-shoot-scroll-interactive] select,
+html.shoot-mode-active [data-shoot-scroll-interactive] summary {
+  pointer-events: auto !important;
+}
+
 /*
  * Touchscreens: keep pan/pinch in shoot mode (class from JS via maxTouchPoints;
  * media queries alone miss many tablets that report fine pointer + hover).
@@ -308,6 +322,18 @@ html.shoot-cursor-hidden *::after,
 body.shoot-cursor-hidden *::before,
 body.shoot-cursor-hidden *::after {
   cursor: none !important;
+}
+
+/* Shoot toggle: show normal pointer so users can see they can turn mode off. */
+html.shoot-cursor-hidden [data-shoot-controls],
+html.shoot-cursor-hidden [data-shoot-controls] *,
+html.shoot-cursor-hidden [data-shoot-controls]::before,
+html.shoot-cursor-hidden [data-shoot-controls]::after,
+body.shoot-cursor-hidden [data-shoot-controls],
+body.shoot-cursor-hidden [data-shoot-controls] *,
+body.shoot-cursor-hidden [data-shoot-controls]::before,
+body.shoot-cursor-hidden [data-shoot-controls]::after {
+  cursor: pointer !important;
 }
 
 html.shoot-mode-active *::selection,

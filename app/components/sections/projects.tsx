@@ -446,6 +446,7 @@ export default function Projects() {
             <section
                 ref={sectionRef}
                 id="projects"
+                data-shoot-scroll-interactive="1"
                 className="projects-section scroll-mt-24  bg-background text-foreground"
                 aria-label="Projects"
             >
