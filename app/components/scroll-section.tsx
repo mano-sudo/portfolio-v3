@@ -58,7 +58,7 @@ export default function ScrollSection({ children }: ScrollSectionProps) {
 
     return (
         <div ref={containerRef} className="relative w-full">
-            <div ref={contentRef} className="w-full h-full overflow-hidden">
+            <div ref={contentRef} className="w-full min-h-0">
                 {children}
             </div>
         </div>

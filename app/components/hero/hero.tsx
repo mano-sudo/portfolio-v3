@@ -19,13 +19,13 @@ export default function Hero() {
         <section
             data-shoot-target="1"
             data-shoot-granularity="char"
-            className="relative isolate w-full bg-background overflow-hidden contain-layout min-h-[calc(100svh-var(--app-header-h,88px))] sm:h-auto sm:min-h-[calc(72dvh-var(--app-header-h,88px))] md:h-auto md:min-h-[calc(64dvh-var(--app-header-h,88px))] lg:h-auto lg:min-h-[calc(58dvh-var(--app-header-h,88px))] xl:h-auto xl:min-h-[calc(100svh-var(--app-header-h,88px))]"
+            className="relative isolate w-full overflow-x-hidden bg-background contain-layout pb-8 min-h-[calc(100svh-var(--app-header-h,88px))] sm:min-h-[calc(72dvh-var(--app-header-h,88px))] sm:pb-10 md:min-h-0 md:pb-14 lg:pb-6 xl:flex xl:min-h-[calc(100svh-var(--app-header-h,88px))] xl:flex-col xl:justify-center xl:pb-8"
             style={{
                 marginTop: "var(--app-header-h, 88px)",
             }}
         >
             <HeroBackdrop />
-            <div className="relative z-10 mx-auto h-full w-full max-w-[1920px] px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20">
+            <div className="relative z-10 mx-auto h-full min-h-0 w-full max-w-[1920px] px-4 sm:px-6 md:h-auto md:px-10 lg:px-14 xl:px-20">
                 {/* Mobile layout */}
                 <HeroMotionRoot className="md:hidden flex h-full flex-col justify-center gap-4 py-4 sm:py-6">
                     <HeroEnterSplitRow
@@ -137,7 +137,7 @@ export default function Hero() {
                 </HeroMotionRoot>
 
                 {/* Desktop/tablet layout */}
-                <HeroMotionRoot className="hidden h-full flex-col justify-center gap-6 py-6 md:flex md:gap-8 md:py-8 lg:gap-10 lg:py-10">
+                <HeroMotionRoot className="hidden flex-col gap-6 py-6 md:flex md:justify-start md:gap-8 md:py-8 lg:gap-10 lg:py-10">
                     {/* Top row */}
                     <div className="grid grid-cols-12 items-start gap-x-6 gap-y-10">
                         <HeroEnterBlock className="col-span-12 md:col-span-5 md:order-2">
@@ -208,8 +208,6 @@ export default function Hero() {
                         <HeroEnterBlock className="col-span-12 md:col-span-7 md:order-1" drift="left">
                             <div className="md:flex md:justify-start">
                                 <div className="w-full max-w-[720px]">
-                                   
-
                                     <HeroInteractivePortrait frameClassName="w-full aspect-16/6">
                                         <Image
                                             src="/heropic.svg"
