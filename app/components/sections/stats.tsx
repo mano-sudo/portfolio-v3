@@ -71,6 +71,7 @@ export default function Stats() {
                 trigger: root,
                 start: "top 78%",
                 end: "bottom 22%",
+                invalidateOnRefresh: true,
                 onEnter: () => {
                     tlPanelsIn.play(0);
                 },
@@ -119,54 +120,60 @@ export default function Stats() {
     }, []);
 
     return (
-        <section ref={sectionRef} className="relative bg-[#f4f3ee] py-16 sm:py-20 lg:py-28 overflow-hidden border-t border-black/10">
-            <div className="w-full px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 2xl:px-44 max-w-[1920px] mx-auto">
-                <div className="flex flex-col lg:flex-row lg:justify-between gap-10 md:gap-14 lg:gap-16 items-start">
+        <section
+            ref={sectionRef}
+            className="relative min-w-0 bg-[#f4f3ee] py-12 sm:py-16 md:py-20 lg:py-24 xl:py-28 overflow-x-clip border-t border-black/10"
+        >
+            <div className="w-full min-w-0 max-w-[min(100%,1920px)] mx-auto px-3 min-[375px]:px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20 2xl:px-28">
+                <div className="flex min-w-0 flex-col lg:flex-row lg:justify-between lg:items-start gap-8 sm:gap-10 md:gap-12 lg:gap-16 xl:gap-20 2xl:gap-24">
                     {/* Left — About */}
-                    <div className="stats-panel-left w-full lg:w-5/12 space-y-6">
-                        <div className="flex items-center gap-3">
-                            <span className="stats-anim text-[10px] sm:text-xs uppercase tracking-[0.35em] text-black/55 font-mono">
+                    <div className="stats-panel-left w-full min-w-0 max-w-full lg:w-[42%] lg:max-w-none xl:w-5/12 space-y-4 sm:space-y-5 md:space-y-6">
+                        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                            <span className="stats-anim shrink-0 text-[9px] min-[375px]:text-[10px] sm:text-xs uppercase tracking-[0.28em] sm:tracking-[0.35em] text-black/55 font-mono">
                                 About
                             </span>
-                            <div className="h-px flex-1 bg-black/10" />
+                            <div className="h-px min-w-0 flex-1 bg-black/10" />
                         </div>
 
-                        <h2 className="stats-anim text-[clamp(2rem,5vw,5rem)] font-black uppercase leading-[0.95] text-black tracking-tight">
+                        <h2 className="stats-anim text-[clamp(1.625rem,calc(0.9rem+4.2vw),5rem)] font-black uppercase leading-[0.95] text-black tracking-tight wrap-anywhere">
                             About
                         </h2>
-                        <p className="stats-anim text-base sm:text-lg text-black/70 leading-relaxed max-w-lg">
+                        <p className="stats-anim text-[0.9375rem] sm:text-base md:text-lg text-black/70 leading-relaxed max-w-full sm:max-w-lg wrap-anywhere">
                             Full-Stack Developer with a BS in Information Technology, experienced in building scalable web
                             applications using React, TypeScript, Next.js, Laravel, and Node.js. Skilled in RESTful APIs,
                             MySQL, and responsive user interfaces.
                         </p>
-                        <p className="stats-anim text-sm sm:text-base text-black/55 leading-relaxed max-w-lg">
+                        <p className="stats-anim text-[0.8125rem] sm:text-sm md:text-base text-black/55 leading-relaxed max-w-full sm:max-w-lg wrap-anywhere">
                             Led mobile development for an award-winning real-time flood monitoring system (Best Research
                             Paper 2025). Experienced in full-stack development for enterprise and healthcare applications,
                             building dashboards, analytics, and role-based systems.
                         </p>
-                        <p className="stats-anim text-sm sm:text-base text-black/55 leading-relaxed max-w-lg">
+                        <p className="stats-anim text-[0.8125rem] sm:text-sm md:text-base text-black/55 leading-relaxed max-w-full sm:max-w-lg wrap-anywhere">
                             Passionate about clean code, problem-solving, and collaboration, with a focus on delivering
                             high-performance, user-centered applications.
                         </p>
                     </div>
 
                     {/* Right — Tech Stacks */}
-                    <div className="stats-panel-right w-full lg:w-7/12 lg:self-center">
-                        <div className="grid gap-8 sm:gap-10 md:gap-12">
+                    <div className="stats-panel-right w-full min-w-0 max-w-full lg:w-[58%] lg:max-w-none xl:w-7/12 lg:self-center">
+                        <div className="grid gap-6 sm:gap-8 md:gap-10 lg:gap-12">
                             {techStacks.map((group) => (
-                                <div key={group.label} className="grid grid-cols-12 items-start sm:items-center gap-5 sm:gap-6 md:gap-8">
-                                    <div className="col-span-12 sm:col-span-4">
-                                        <div className="stats-anim text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-black/45 leading-none">
+                                <div
+                                    key={group.label}
+                                    className="grid min-w-0 grid-cols-1 min-[480px]:grid-cols-12 items-start sm:items-center gap-4 min-[480px]:gap-5 sm:gap-6 md:gap-8"
+                                >
+                                    <div className="min-w-0 min-[480px]:col-span-12 sm:col-span-4">
+                                        <div className="stats-anim text-xl min-[400px]:text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] xl:text-4xl 2xl:text-5xl font-black uppercase tracking-tight text-black/45 leading-[1.05] wrap-anywhere">
                                             {group.label}
                                         </div>
                                     </div>
 
-                                    <div className="col-span-12 sm:col-span-8">
-                                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
+                                    <div className="min-w-0 min-[480px]:col-span-12 sm:col-span-8">
+                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-2 sm:gap-x-3 sm:gap-y-2 md:gap-4">
                                             {group.items.map((item) => (
                                                 <div
                                                     key={item}
-                                                    className="tech-anim flex items-center gap-2 sm:gap-3 pr-2 sm:pr-3 min-w-0"
+                                                    className="tech-anim flex min-w-0 max-w-full flex-wrap items-center gap-x-1.5 gap-y-0.5 sm:gap-x-2 sm:gap-y-0 sm:gap-3 pr-1 sm:pr-2 md:pr-3"
                                                     title={item}
                                                 >
                                                     <Image
@@ -174,10 +181,10 @@ export default function Stats() {
                                                         alt={item}
                                                         width={40}
                                                         height={40}
-                                                        sizes="(max-width: 640px) 28px, (max-width: 1024px) 32px, 40px"
-                                                        className="opacity-100 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 shrink-0"
+                                                        sizes="(max-width: 400px) 24px, (max-width: 640px) 28px, (max-width: 1024px) 32px, 40px"
+                                                        className="opacity-100 size-6 min-[400px]:size-7 sm:size-8 md:size-9 lg:size-10 shrink-0"
                                                     />
-                                                    <span className="text-[11px] sm:text-xs md:text-sm font-mono uppercase tracking-wider text-black/60 whitespace-nowrap">
+                                                    <span className="min-w-0 max-w-full text-[10px] min-[400px]:text-[11px] sm:text-xs md:text-sm font-mono uppercase tracking-wide sm:tracking-wider text-black/60 wrap-break-word sm:whitespace-nowrap sm:break-normal leading-snug">
                                                         {item}
                                                     </span>
                                                 </div>

@@ -8,6 +8,10 @@ type ShootToggleState = "on" | "off";
 
 const STORAGE_KEY = "shoot-toggle-state";
 
+const SPLAT_FADE_MS = 520;
+const SPLAT_TOTAL_LIFETIME_MS = 3200;
+const SPLAT_VISIBLE_MS = SPLAT_TOTAL_LIFETIME_MS - SPLAT_FADE_MS;
+
 function GunLoadingFallback(): React.JSX.Element {
     return (
         <div className="h-64 w-[min(92vw,30rem)] sm:h-80 sm:w-xl md:h-96 md:w-176 overflow-visible flex items-end justify-center">
@@ -32,6 +36,7 @@ type PaintSplat = {
     hue: number;
     saturation: number;
     lightness: number;
+    exiting?: boolean;
 };
 
 function prepareShootWords(element: HTMLElement): void {
@@ -92,43 +97,85 @@ function prepareShootWords(element: HTMLElement): void {
     element.dataset.shootPrepared = "1";
 }
 
+/** True only if (x,y) is over a non-empty text character (not padding / empty layout). */
+function getTextNodeAtPoint(x: number, y: number): Text | null {
+    if (typeof document === "undefined") return null;
+    try {
+        const doc = document as Document & {
+            caretRangeFromPoint?: (nx: number, ny: number) => Range | null;
+            caretPositionFromPoint?: (nx: number, ny: number) => CaretPosition | null;
+        };
+        if (typeof doc.caretRangeFromPoint === "function") {
+            const range = doc.caretRangeFromPoint(x, y);
+            if (range?.startContainer?.nodeType === Node.TEXT_NODE) {
+                return range.startContainer as Text;
+            }
+            return null;
+        }
+        if (typeof doc.caretPositionFromPoint === "function") {
+            const pos = doc.caretPositionFromPoint(x, y);
+            if (pos?.offsetNode?.nodeType === Node.TEXT_NODE) {
+                return pos.offsetNode as Text;
+            }
+            return null;
+        }
+    } catch {
+        return null;
+    }
+    return null;
+}
+
+function textNodeHasVisibleChar(text: Text): boolean {
+    return (text.textContent ?? "").trim().length > 0;
+}
+
 function pickHitWord(x: number, y: number, raw: Element | null): HTMLElement | null {
     if (!raw) return null;
+    if (raw.closest("[data-shoot-ui]")) return null;
 
-    const directWord = raw.closest<HTMLElement>(".shoot-word");
-    if (directWord) return directWord;
-
-    const target = raw.closest<HTMLElement>("[data-shoot-target],h1,h2,h3,h4,h5,h6,p,span,a,button,li,br,img,div,article");
+    const target = raw.closest<HTMLElement>(
+        "[data-shoot-target],h1,h2,h3,h4,h5,h6,p,span,a,button,li,br,img,div,article"
+    );
     if (!target || target.closest("[data-shoot-ui]")) return null;
+
+    if (target.tagName === "IMG") {
+        const rect = target.getBoundingClientRect();
+        const inside =
+            x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+        return inside ? target : null;
+    }
+
+    if (raw instanceof HTMLElement && raw.tagName === "IMG") {
+        const rect = raw.getBoundingClientRect();
+        const inside =
+            x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+        return inside ? raw : null;
+    }
 
     prepareShootWords(target);
 
-    const words = Array.from(target.querySelectorAll<HTMLElement>(".shoot-word"));
-    if (words.length === 0) return target;
-
-    const containingWord = words.find((word) => {
-        const rect = word.getBoundingClientRect();
-        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom; 
-    });
-    if (containingWord) return containingWord;
-
-    let closest: HTMLElement | null = null;
-    let minDistance = Number.POSITIVE_INFINITY;
-
-    words.forEach((word) => {
-        const rect = word.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = cx - x;
-        const dy = cy - y;
-        const distance = Math.hypot(dx, dy);
-        if (distance < minDistance) {
-            minDistance = distance;
-            closest = word;
+    const textAtPoint = getTextNodeAtPoint(x, y);
+    if (!textAtPoint || !textNodeHasVisibleChar(textAtPoint)) {
+        const imgs = target.querySelectorAll("img");
+        for (const im of imgs) {
+            const r = im.getBoundingClientRect();
+            if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+                return im;
+            }
         }
-    });
+        return null;
+    }
 
-    return closest;
+    let node: Node | null = textAtPoint.parentElement;
+    while (node) {
+        if (node instanceof HTMLElement && node.classList.contains("shoot-word")) {
+            if (node.closest("[data-shoot-ui]")) return null;
+            return node;
+        }
+        node = node.parentElement;
+    }
+
+    return null;
 }
 
 function readInitialState(): boolean {
@@ -206,6 +253,25 @@ export default function FloatingShootToggle(): React.JSX.Element {
         });
     }, []);
 
+    // Fade all splats out when leaving shoot mode, then clear.
+    React.useEffect(() => {
+        if (isOn) return;
+        setSplats((prev) => {
+            if (prev.length === 0) return prev;
+            return prev.map((s) => ({ ...s, exiting: true }));
+        });
+        const id = window.setTimeout(() => {
+            setSplats([]);
+        }, SPLAT_FADE_MS);
+        return () => window.clearTimeout(id);
+    }, [isOn]);
+
+    // Drop half-faded splats if shoot mode is turned back on mid-fade.
+    React.useEffect(() => {
+        if (!isOn) return;
+        setSplats((prev) => prev.filter((s) => !s.exiting));
+    }, [isOn]);
+
     React.useEffect(() => {
         if (!isOn) return;
 
@@ -240,6 +306,11 @@ export default function FloatingShootToggle(): React.JSX.Element {
         };
 
         const fireShot = (x: number, y: number) => {
+            const raw = document.elementFromPoint(x, y);
+            if (raw?.closest("[data-shoot-ui]")) {
+                return;
+            }
+
             const id = Date.now() + Math.floor(Math.random() * 1000);
             const size = 26 + Math.random() * 20;
             const rotation = (Math.random() * 80) - 40;
@@ -260,8 +331,13 @@ export default function FloatingShootToggle(): React.JSX.Element {
                 { id, x, y, size, rotation, hue, saturation, lightness },
             ]);
             window.setTimeout(() => {
-                setSplats((prev) => prev.filter((splat) => splat.id !== id));
-            }, 3200);
+                setSplats((prev) =>
+                    prev.map((splat) => (splat.id === id ? { ...splat, exiting: true } : splat))
+                );
+                window.setTimeout(() => {
+                    setSplats((prev) => prev.filter((splat) => splat.id !== id));
+                }, SPLAT_FADE_MS);
+            }, SPLAT_VISIBLE_MS);
 
             const pageContent = document.querySelector("main") as HTMLElement | null;
             if (pageContent) {
@@ -281,7 +357,6 @@ export default function FloatingShootToggle(): React.JSX.Element {
                 );
             }
 
-            const raw = document.elementFromPoint(x, y);
             const target = pickHitWord(x, y, raw);
             if (!target) return;
 
@@ -455,19 +530,21 @@ export default function FloatingShootToggle(): React.JSX.Element {
 
     return (
         <>
-            {/* Paint splats */}
-            {isOn && (
+            {/* Paint splats: keep mounted while fading after shoot mode ends */}
+            {(isOn || splats.length > 0) && (
                 <div className="fixed inset-0 z-9998 pointer-events-none" aria-hidden="true">
                     {splats.map((splat) => (
                         <div
                             key={splat.id}
-                            className="absolute"
+                            className="absolute transition-opacity ease-out"
                             style={{
                                 left: splat.x,
                                 top: splat.y,
                                 width: splat.size,
                                 height: splat.size,
                                 transform: `translate(-50%, -50%) rotate(${splat.rotation}deg)`,
+                                opacity: splat.exiting ? 0 : 1,
+                                transitionDuration: `${SPLAT_FADE_MS}ms`,
                             }}
                         >
                             <span
@@ -549,7 +626,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
             <div className="fixed bottom-5 inset-x-0 z-9999 px-6 pointer-events-none" data-shoot-ui="1">
                 <div className="flex items-center justify-between">
                     {/* Left: toggle */}
-                    <div className="pointer-events-auto">
+                    <div className="pointer-events-auto" data-shoot-controls="1">
                         <button
                             type="button"
                             onClick={toggle}

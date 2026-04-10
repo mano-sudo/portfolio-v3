@@ -158,6 +158,8 @@
 
   html {
     scroll-behavior: auto;
+    /* Avoid reserving a permanent inline-end gutter (reads as empty space on the right in LTR). */
+    scrollbar-gutter: auto;
     overflow-x: hidden;
     overflow-y: auto;
     height: auto;
@@ -255,6 +257,33 @@ body.shoot-mode-active *::after {
   -webkit-user-select: none !important;
 }
 
+/* Disable real clicks on links/controls while shoot mode is on (shoot uses window listeners). */
+html.shoot-mode-active a[href],
+html.shoot-mode-active button:not(:disabled),
+html.shoot-mode-active [role="button"],
+html.shoot-mode-active [role="link"],
+html.shoot-mode-active [role="tab"],
+html.shoot-mode-active [role="menuitem"],
+html.shoot-mode-active input:not([type="hidden"]),
+html.shoot-mode-active textarea,
+html.shoot-mode-active select,
+html.shoot-mode-active summary {
+  pointer-events: none !important;
+}
+
+html.shoot-mode-active [data-shoot-controls] a[href],
+html.shoot-mode-active [data-shoot-controls] button:not(:disabled),
+html.shoot-mode-active [data-shoot-controls] [role="button"],
+html.shoot-mode-active [data-shoot-controls] [role="link"],
+html.shoot-mode-active [data-shoot-controls] [role="tab"],
+html.shoot-mode-active [data-shoot-controls] [role="menuitem"],
+html.shoot-mode-active [data-shoot-controls] input:not([type="hidden"]),
+html.shoot-mode-active [data-shoot-controls] textarea,
+html.shoot-mode-active [data-shoot-controls] select,
+html.shoot-mode-active [data-shoot-controls] summary {
+  pointer-events: auto !important;
+}
+
 /*
  * Touchscreens: keep pan/pinch in shoot mode (class from JS via maxTouchPoints;
  * media queries alone miss many tablets that report fine pointer + hover).
@@ -285,6 +314,77 @@ html.shoot-mode-active *::selection,
 body.shoot-mode-active *::selection {
   background: transparent !important;
   color: inherit !important;
+}
+
+/*
+ * Hero backdrop: compositor-only motion for orbs (large blur + Framer every frame was heavy).
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes hero-orb-a {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(14px, -10px, 0);
+    }
+  }
+
+  @keyframes hero-orb-b {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(-12px, 12px, 0);
+    }
+  }
+
+  @keyframes hero-explore-arrow {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(0, 3px, 0);
+    }
+  }
+
+  @keyframes hero-backdrop-reveal {
+    from {
+      opacity: 0;
+      transform: scale3d(0.92, 0.92, 1);
+    }
+    to {
+      opacity: 1;
+      transform: scale3d(1, 1, 1);
+    }
+  }
+}
+
+.hero-backdrop-root {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-backdrop-reveal {
+    animation: hero-backdrop-reveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-backdrop-orb-a {
+    animation: hero-orb-a 15s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .hero-backdrop-orb-b {
+    animation: hero-orb-b 12s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .hero-explore-arrow-nudge {
+    animation: hero-explore-arrow 1.5s ease-in-out infinite;
+  }
 }
 
 .scrollbar-hidden {

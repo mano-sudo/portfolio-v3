@@ -1,0 +1,334 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { m, useReducedMotion, type Variants } from "framer-motion";
+import { ArrowDownRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+/**
+ * Scale reads as growing from the viewport center while x-translation slides
+ * content to its final side (left items from +x, right items from -x).
+ */
+export const HERO_VIEWPORT_CENTER_ORIGIN: React.CSSProperties = {
+    transformOrigin: "50vw 50svh",
+};
+
+export type HeroEnterDrift = "left" | "right" | "center";
+
+function driftItemVariants(reduceMotion: boolean, drift: HeroEnterDrift): Variants {
+    if (reduceMotion) {
+        return {
+            hidden: { opacity: 1, x: 0, y: 0, scale: 1 },
+            visible: { opacity: 1, x: 0, y: 0, scale: 1 },
+        };
+    }
+
+    const xHidden = drift === "left" ? "24vw" : drift === "right" ? "-24vw" : 0;
+
+    return {
+        hidden: {
+            opacity: 0,
+            scale: 0.62,
+            x: xHidden,
+            y: drift === "center" ? "min(2.5vh, 18px)" : 0,
+        },
+        visible: {
+            opacity: 1,
+            scale: 1,
+            x: 0,
+            y: 0,
+            transition: {
+                type: "tween",
+                duration: 0.72,
+                ease: [0.16, 1, 0.3, 1],
+            },
+        },
+    };
+}
+
+export function HeroMotionRoot({
+    children,
+    className,
+}: {
+    children: React.ReactNode;
+    className?: string;
+}): React.JSX.Element {
+    const reduceMotion = useReducedMotion();
+
+    const containerVariants = React.useMemo<Variants>(
+        () => ({
+            hidden: {},
+            visible: {
+                transition: {
+                    staggerChildren: reduceMotion ? 0 : 0.07,
+                    delayChildren: reduceMotion ? 0 : 0.03,
+                },
+            },
+        }),
+        [reduceMotion]
+    );
+
+    return (
+        <m.div
+            className={cn(className, "transform-gpu")}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            {children}
+        </m.div>
+    );
+}
+
+export function HeroEnterBlock({
+    children,
+    className,
+    drift = "center",
+}: {
+    children: React.ReactNode;
+    className?: string;
+    drift?: HeroEnterDrift;
+}): React.JSX.Element {
+    const reduceMotion = useReducedMotion();
+    const variants = React.useMemo(
+        () => driftItemVariants(!!reduceMotion, drift),
+        [reduceMotion, drift]
+    );
+
+    return (
+        <m.div
+            className={cn(className, "transform-gpu")}
+            variants={variants}
+            style={HERO_VIEWPORT_CENTER_ORIGIN}
+        >
+            {children}
+        </m.div>
+    );
+}
+
+/** One stagger step: left column drifts from center toward the left, right toward the right. */
+export function HeroEnterSplitRow({
+    className,
+    left,
+    right,
+}: {
+    className?: string;
+    left: React.ReactNode;
+    right: React.ReactNode;
+}): React.JSX.Element {
+    const reduceMotion = useReducedMotion();
+
+    const rowVariants = React.useMemo<Variants>(
+        () => ({
+            hidden: {},
+            visible: {
+                transition: {
+                    staggerChildren: reduceMotion ? 0 : 0.07,
+                },
+            },
+        }),
+        [reduceMotion]
+    );
+
+    const leftVariants = React.useMemo(
+        () => driftItemVariants(!!reduceMotion, "left"),
+        [reduceMotion]
+    );
+    const rightVariants = React.useMemo(
+        () => driftItemVariants(!!reduceMotion, "right"),
+        [reduceMotion]
+    );
+
+    return (
+        <m.div
+            className={cn("grid transform-gpu grid-cols-[1fr_auto] items-start gap-4", className)}
+            variants={rowVariants}
+        >
+            <m.div
+                variants={leftVariants}
+                style={HERO_VIEWPORT_CENTER_ORIGIN}
+                className="min-w-0 transform-gpu"
+            >
+                {left}
+            </m.div>
+            <m.div
+                variants={rightVariants}
+                style={HERO_VIEWPORT_CENTER_ORIGIN}
+                className="shrink-0 transform-gpu"
+            >
+                {right}
+            </m.div>
+        </m.div>
+    );
+}
+
+export function HeroBackdrop(): React.JSX.Element {
+    const reduceMotion = useReducedMotion();
+
+    return (
+        <div
+            className={cn(
+                "hero-backdrop-root pointer-events-none absolute inset-0 z-0 overflow-hidden",
+                !reduceMotion && "hero-backdrop-reveal"
+            )}
+            aria-hidden
+            style={HERO_VIEWPORT_CENTER_ORIGIN}
+        >
+            <div
+                className="absolute inset-0 opacity-[0.04]"
+                style={{
+                    backgroundImage:
+                        "linear-gradient(to right, rgb(0 0 0 / 0.5) 1px, transparent 1px), linear-gradient(to bottom, rgb(0 0 0 / 0.5) 1px, transparent 1px)",
+                    backgroundSize: "44px 44px",
+                }}
+            />
+            {!reduceMotion ? (
+                <>
+                    <div
+                        className="hero-backdrop-orb-a absolute -left-[18%] top-[12%] h-[min(42vw,420px)] w-[min(42vw,420px)] rounded-full bg-black/4.5 blur-2xl"
+                        aria-hidden
+                    />
+                    <div
+                        className="hero-backdrop-orb-b absolute -right-[12%] bottom-[18%] h-[min(36vw,360px)] w-[min(36vw,360px)] rounded-full bg-black/5.5 blur-2xl"
+                        aria-hidden
+                    />
+                </>
+            ) : null}
+        </div>
+    );
+}
+
+type HeroInteractivePortraitProps = {
+    children: React.ReactNode;
+    frameClassName?: string;
+};
+
+export function HeroInteractivePortrait({
+    children,
+    frameClassName,
+}: HeroInteractivePortraitProps): React.JSX.Element {
+    const reduceMotion = useReducedMotion();
+
+    return (
+        <div className="group relative">
+            <div
+                className={cn(
+                    "relative overflow-hidden border border-black/20 bg-black/5",
+                    "shadow-none transition-shadow duration-300 ease-out",
+                    !reduceMotion &&
+                        "hover:shadow-[0_22px_55px_-28px_rgb(0_0_0/.22)]",
+                    frameClassName
+                )}
+            >
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 z-1 bg-linear-to-t from-black/18 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                />
+                <div className="relative z-0 h-full w-full">
+                    <div
+                        className={cn(
+                            "h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                            !reduceMotion && "group-hover:scale-[1.02]"
+                        )}
+                    >
+                        {children}
+                    </div>
+                </div>
+                <span
+                    className="pointer-events-none absolute left-2 top-2 z-2 h-3 w-3 border-l border-t border-black/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
+                    aria-hidden
+                />
+                <span
+                    className="pointer-events-none absolute right-2 top-2 z-2 h-3 w-3 border-r border-t border-black/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
+                    aria-hidden
+                />
+                <span
+                    className="pointer-events-none absolute bottom-2 left-2 z-2 h-3 w-3 border-l border-b border-black/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
+                    aria-hidden
+                />
+                <span
+                    className="pointer-events-none absolute bottom-2 right-2 z-2 h-3 w-3 border-r border-b border-black/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
+                    aria-hidden
+                />
+            </div>
+        </div>
+    );
+}
+
+const STACK_LINKS = [
+    { label: "Next.js", href: "/projects" },
+    { label: "TypeScript", href: "/projects" },
+    { label: "UI systems", href: "/#contact" },
+] as const;
+
+export function HeroTechChips(): React.JSX.Element {
+    return (
+        <div className="flex flex-wrap gap-2" data-shoot-ui="1">
+            {STACK_LINKS.map((item) => (
+                <Link
+                    key={item.label}
+                    href={item.href}
+                    className={cn(
+                        "inline-flex items-center rounded-full border border-black/18 bg-black/2",
+                        "px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.22em] text-black/65",
+                        "transition-[border-color,background-color,transform,box-shadow] duration-200",
+                        "hover:border-black/35 hover:bg-black/5 hover:text-black/85",
+                        "active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/30"
+                    )}
+                >
+                    {item.label}
+                </Link>
+            ))}
+        </div>
+    );
+}
+
+export function HeroAvailability(): React.JSX.Element {
+    const reduceMotion = useReducedMotion();
+
+    return (
+        <div
+            data-shoot-ui="1"
+            className="inline-flex max-w-44 items-center gap-2 rounded-full border border-black/15 bg-black/3 px-2.5 py-1 sm:max-w-none"
+        >
+            <span className="relative flex h-2 w-2 shrink-0">
+                {!reduceMotion ? (
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500/35" />
+                ) : null}
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600/90" />
+            </span>
+            <span className="text-[9px] font-mono uppercase leading-tight tracking-[0.18em] text-black/58">
+                Open for work
+            </span>
+        </div>
+    );
+}
+
+export function HeroExploreLink({ className }: { className?: string }): React.JSX.Element {
+    const reduceMotion = useReducedMotion();
+
+    return (
+        <div className={className} data-shoot-ui="1">
+            <Link
+                href="#projects"
+                className={cn(
+                    "group inline-flex items-center gap-2 rounded-full border border-black/20 bg-transparent",
+                    "px-3 py-2 text-[10px] font-mono uppercase tracking-[0.24em] text-black/70",
+                    "transition-[border-color,background-color,color,transform] duration-200",
+                    "hover:border-black/40 hover:bg-black/4 hover:text-black",
+                    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/30"
+                )}
+            >
+                <span>Selected work</span>
+                {!reduceMotion ? (
+                    <span className="hero-explore-arrow-nudge inline-flex" aria-hidden>
+                        <ArrowDownRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:translate-y-0.5" />
+                    </span>
+                ) : (
+                    <ArrowDownRight className="h-3.5 w-3.5" aria-hidden />
+                )}
+            </Link>
+        </div>
+    );
+}

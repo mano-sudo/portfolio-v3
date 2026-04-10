@@ -1,138 +1,339 @@
- "use client";
+"use client";
 
-import { ExternalLink, Github } from "lucide-react";
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+    AnimatePresence,
+    LazyMotion,
+    domAnimation,
+    m,
+    motion,
+    useReducedMotion,
+} from "framer-motion";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { projects, type Project } from "@/app/data/projects";
 import { releaseDocumentScroll } from "@/app/utils/release-document-scroll";
 import {
     prefersHardNavigationToProjectDetail,
     projectDetailPath,
 } from "@/app/utils/project-detail-navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { logPrefersHardNavContext, logProjectsScroll } from "@/app/utils/projects-scroll-debug";
 
-export default function Projects() {
-    const router = useRouter();
-    const [isDesktop, setIsDesktop] = useState<boolean>(false);
-    const [hoveredDesktopSlug, setHoveredDesktopSlug] = useState<string | null>(null);
-    const [previewAnchorY, setPreviewAnchorY] = useState<number>(180);
-    const [isPreviewImageLoaded, setIsPreviewImageLoaded] = useState<boolean>(false);
-    const [mobileVisible, setMobileVisible] = useState<number>(3);
-    const [desktopVisible, setDesktopVisible] = useState<number>(6);
-    const [isNavigatingToProject, setIsNavigatingToProject] = useState(false);
-    const [transitionKey, setTransitionKey] = useState(0);
+if (typeof window !== "undefined") {
+    gsap.registerPlugin(ScrollTrigger);
+}
 
-    const navTimeoutRef = useRef<number | null>(null);
-    const hoverResumeTimeoutRef = useRef<number | null>(null);
-    const isScrollHoverLockedRef = useRef<boolean>(false);
-    const prefetchedProjectSlugsRef = useRef<Set<string>>(new Set());
+const FEATURED_COUNT = 4;
+const DESKTOP_MQ = "(min-width: 1024px)";
 
-    const prefetchProject = useCallback((slug: string) => {
-        if (prefetchedProjectSlugsRef.current.has(slug)) return;
-        prefetchedProjectSlugsRef.current.add(slug);
-        router.prefetch(projectDetailPath(slug));
-    }, [router]);
+function categoryLabel(project: Project): string {
+    const primary = project.tech[0] ?? "Build";
+    const secondary = project.tech[1] ?? project.year;
+    return `[${primary.toUpperCase()}] — [${secondary.toUpperCase()}]`;
+}
 
-    const updatePreviewAnchorFromElement = useCallback((element: HTMLElement) => {
-        const rect = element.getBoundingClientRect();
-        const centerY = rect.top + (rect.height / 2);
-        const estimatedHalfCard = 210;
-        const minY = 120 + estimatedHalfCard;
-        const maxY = window.innerHeight - 24 - estimatedHalfCard;
-        const clampedY = Math.min(Math.max(centerY, minY), maxY);
-        setPreviewAnchorY(clampedY);
-    }, []);
+/** Stacked layout tag line (reference-style multiple brackets). */
+function projectTagsLine(project: Project): string {
+    const tags = project.tech.slice(0, 3).map((t) => `[${t.toUpperCase()}]`);
+    if (tags.length === 0) {
+        return `[${project.year}]`;
+    }
+    return tags.join(" — ");
+}
 
-    const mobileProjects = useMemo<readonly Project[]>(() => {
-        return projects.slice(0, mobileVisible);
-    }, [mobileVisible]);
+function useTypewriterTitle(fullText: string, sequenceKey: string): { display: string; complete: boolean } {
+    const reduceMotion = useReducedMotion();
+    const [display, setDisplay] = useState(fullText);
+    const [complete, setComplete] = useState(true);
 
-    const desktopProjects = useMemo<readonly Project[]>(() => {
-        return projects.slice(0, desktopVisible);
-    }, [desktopVisible]);
-
-    const hoveredDesktopProject = useMemo<Project | null>(() => {
-        if (!hoveredDesktopSlug) return null;
-        return desktopProjects.find((project) => project.slug === hoveredDesktopSlug) ?? null;
-    }, [desktopProjects, hoveredDesktopSlug]);
-
-    React.useEffect(() => {
-        setIsPreviewImageLoaded(false);
-    }, [hoveredDesktopProject?.image]);
-
-    const navigateToProject = useCallback((slug: string) => {
-        if (isNavigatingToProject) return;
-        prefetchProject(slug);
-
-        if (prefersHardNavigationToProjectDetail()) {
-            window.location.assign(projectDetailPath(slug));
+    useEffect(() => {
+        if (reduceMotion) {
+            setDisplay(fullText);
+            setComplete(true);
             return;
         }
 
-        setIsNavigatingToProject(true);
-        setTransitionKey((value) => value + 1);
-        navTimeoutRef.current = window.setTimeout(() => {
-            window.sessionStorage.setItem("route-transition-lock", "1");
-            window.sessionStorage.setItem("project-transition-reveal", "1");
-            router.push(projectDetailPath(slug));
-        }, 620);
-    }, [isNavigatingToProject, prefetchProject, router]);
+        setDisplay("");
+        setComplete(false);
+        let cancelled = false;
+        let timeoutId: number = 0;
+        let i = 0;
+        const msPerChar = Math.min(30, Math.max(11, Math.round(2200 / Math.max(fullText.length, 1))));
 
-    React.useEffect(() => {
-        const mediaQuery = window.matchMedia("(min-width: 1024px)");
-        const handleViewportChange = (event: MediaQueryListEvent) => {
-            setIsDesktop(event.matches);
+        const step = (): void => {
+            if (cancelled) return;
+            i += 1;
+            setDisplay(fullText.slice(0, i));
+            if (i >= fullText.length) {
+                setComplete(true);
+                return;
+            }
+            timeoutId = window.setTimeout(step, msPerChar);
         };
 
-        setIsDesktop(mediaQuery.matches);
-        mediaQuery.addEventListener("change", handleViewportChange);
-
+        timeoutId = window.setTimeout(step, 45);
         return () => {
-            mediaQuery.removeEventListener("change", handleViewportChange);
+            cancelled = true;
+            window.clearTimeout(timeoutId);
         };
+    }, [fullText, sequenceKey, reduceMotion]);
+
+    return { display, complete };
+}
+
+type DesktopGalleryProps = {
+    viewportRef: RefObject<HTMLDivElement | null>;
+    trackRef: RefObject<HTMLDivElement | null>;
+    featured: readonly Project[];
+    activeIndex: number;
+    viewportShell: string;
+    goToProject: (slug: string) => void;
+};
+
+function ProjectsDesktopGallery({
+    viewportRef,
+    trackRef,
+    featured,
+    activeIndex,
+    viewportShell,
+    goToProject,
+}: DesktopGalleryProps) {
+    const reduceMotion = useReducedMotion();
+    const project = featured[activeIndex] ?? featured[0];
+    const slug = project?.slug ?? "";
+    const { display: typedTitle, complete: titleTyped } = useTypewriterTitle(project?.title ?? "", slug);
+
+    return (
+        <div
+            className={`group/shell relative flex w-full flex-col overflow-hidden p-3 sm:p-4 ${viewportShell}`}
+        >
+            <span
+                className="pointer-events-none absolute left-4 top-4 z-30 h-3 w-3 border-l border-t border-black/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:left-5 sm:top-5"
+                aria-hidden
+            />
+            <span
+                className="pointer-events-none absolute right-4 top-4 z-30 h-3 w-3 border-r border-t border-black/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:right-5 sm:top-5"
+                aria-hidden
+            />
+            <span
+                className="pointer-events-none absolute bottom-4 left-4 z-30 h-3 w-3 border-l border-b border-black/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:bottom-5 sm:left-5"
+                aria-hidden
+            />
+            <span
+                className="pointer-events-none absolute bottom-4 right-4 z-30 h-3 w-3 border-r border-b border-black/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:bottom-5 sm:right-5"
+                aria-hidden
+            />
+
+            <div ref={viewportRef} className="relative min-h-0 w-full flex-1 overflow-hidden">
+                <div
+                    ref={trackRef}
+                    className="absolute inset-0 flex flex-col gap-5 will-change-transform sm:gap-6 lg:gap-8"
+                >
+                    {featured.map((p, index) => (
+                        <div
+                            key={p.slug}
+                            className="group/card h-full min-h-0 shrink-0 overflow-hidden rounded-sm border border-black/10 bg-background shadow-sm transition-shadow duration-300 group-hover/shell:shadow-[0_28px_60px_-34px_rgb(0_0_0/.2)]"
+                        >
+                            <button
+                                type="button"
+                                onClick={() => goToProject(p.slug)}
+                                className="flex h-full min-h-0 w-full cursor-pointer flex-col text-left outline-none ring-black/40 focus-visible:ring-2 focus-visible:ring-inset"
+                            >
+                                <div className="relative min-h-0 h-full flex-1 overflow-hidden bg-black/5">
+                                    <m.div
+                                        className="relative h-full w-full"
+                                        initial={false}
+                                        whileHover={
+                                            reduceMotion
+                                                ? undefined
+                                                : { scale: 1.03 }
+                                        }
+                                        transition={{ type: "tween", duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                                    >
+                                        <Image
+                                            src={p.image}
+                                            alt={p.title}
+                                            fill
+                                            sizes="(max-width: 1024px) 100vw, 65vw"
+                                            className="object-cover object-center"
+                                            priority={index === 0}
+                                        />
+                                    </m.div>
+                                    <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-black/5" />
+                                </div>
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-between">
+                    <div className="bg-linear-to-b from-black/75 via-black/35 to-transparent px-4 pb-16 pt-4 sm:px-5 sm:pb-20 sm:pt-5">
+                        <p className="font-mono text-[9px] uppercase tracking-[0.35em] text-white/55 sm:text-[10px]">
+                            {String(activeIndex + 1).padStart(2, "0")} / {String(featured.length).padStart(2, "0")}
+                        </p>
+                        <h3
+                            className="mt-3 min-h-[2.6em] max-w-[95%] font-black uppercase leading-[0.95] tracking-tight text-white text-[clamp(1.15rem,2.1vw,1.85rem)] wrap-break-word sm:min-h-[2.4em] lg:max-w-[90%]"
+                            aria-live="polite"
+                        >
+                            {typedTitle}
+                            {!titleTyped ? (
+                                <span className="ml-0.5 inline-block h-[0.85em] w-px translate-y-px animate-pulse bg-white align-[-0.15em] sm:h-[0.9em]" />
+                            ) : null}
+                        </h3>
+                        <div className="mt-2 min-h-5 max-w-full">
+                            <AnimatePresence mode="wait">
+                                <m.p
+                                    key={slug}
+                                    initial={
+                                        reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }
+                                    }
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -4 }}
+                                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                                    className="font-mono text-[9px] uppercase leading-relaxed tracking-[0.18em] text-white/65 sm:text-[10px] sm:tracking-[0.2em] wrap-break-word"
+                                >
+                                    {categoryLabel(project)}
+                                </m.p>
+                            </AnimatePresence>
+                        </div>
+                        <AnimatePresence mode="wait">
+                            <m.div
+                                key={slug}
+                                className="mt-4 flex flex-wrap gap-1.5 sm:gap-2"
+                                initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -3 }}
+                                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                            >
+                                {project.tech.slice(0, 4).map((tech) => (
+                                    <span
+                                        key={tech}
+                                        className="rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-[8px] font-mono uppercase tracking-wider text-white/85 sm:text-[9px]"
+                                    >
+                                        {tech}
+                                    </span>
+                                ))}
+                            </m.div>
+                        </AnimatePresence>
+                    </div>
+
+                    <div className="px-4 pb-3 sm:px-5 sm:pb-4">
+                        <div className="flex gap-1.5 sm:gap-2">
+                            {featured.map((p, i) => (
+                                <div
+                                    key={p.slug}
+                                    className="h-0.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/20"
+                                    title={p.title}
+                                >
+                                    <m.div
+                                        className="h-full rounded-full bg-white"
+                                        initial={false}
+                                        animate={{
+                                            scaleX: i === activeIndex ? 1 : i < activeIndex ? 1 : 0.2,
+                                            opacity: i === activeIndex ? 1 : i < activeIndex ? 0.55 : 0.35,
+                                        }}
+                                        transition={{ type: "tween", duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                                        style={{ originX: 0 }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        <p className="sr-only">
+                            Project {activeIndex + 1} of {featured.length}. {project.title}.
+                        </p>
+                        <p className="mt-2 text-center font-mono text-[8px] uppercase tracking-[0.28em] text-white/50 sm:text-[9px]">
+                            Scroll to scrub · Click a project to open
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function Projects() {
+    const router = useRouter();
+    const featured = projects.slice(0, FEATURED_COUNT);
+    const sectionRef = useRef<HTMLElement>(null);
+    const viewportRef = useRef<HTMLDivElement>(null);
+    const trackRef = useRef<HTMLDivElement>(null);
+    const pinnedScrollTriggerRef = useRef<ScrollTrigger | null>(null);
+    const navTimeoutRef = useRef<number | null>(null);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [isNavigating, setIsNavigating] = useState(false);
+    const [transitionKey, setTransitionKey] = useState(0);
+    const [portalReady, setPortalReady] = useState(false);
+
+    useEffect(() => {
+        setPortalReady(true);
     }, []);
 
-    React.useEffect(() => {
+    const scrollToProject = useCallback((index: number) => {
+        if (typeof window === "undefined") return;
+        if (!window.matchMedia(DESKTOP_MQ).matches) return;
+
+        const st = pinnedScrollTriggerRef.current;
+        if (st) {
+            const denom = Math.max(FEATURED_COUNT - 1, 1);
+            const progress = index / denom;
+            const targetScroll = st.start + (st.end - st.start) * progress;
+            window.scrollTo({ top: targetScroll, behavior: "smooth" });
+        }
+        setActiveIndex(index);
+    }, []);
+
+    const goToProject = useCallback(
+        (slug: string) => {
+            if (isNavigating) return;
+
+            const hard = prefersHardNavigationToProjectDetail();
+            logProjectsScroll("home #projects goToProject click", {
+                slug,
+                hardNavigation: hard,
+                targetPath: projectDetailPath(slug),
+                ...logPrefersHardNavContext(),
+            });
+
+            if (hard) {
+                logProjectsScroll("home #projects -> location.assign (hard nav)", {
+                    slug,
+                    path: projectDetailPath(slug),
+                });
+                window.location.assign(projectDetailPath(slug));
+                return;
+            }
+
+            setIsNavigating(true);
+            setTransitionKey((v) => v + 1);
+            logProjectsScroll("home #projects scroll lock ON (isNavigating)", {});
+
+            navTimeoutRef.current = window.setTimeout(() => {
+                logProjectsScroll("home #projects -> router.push (soft nav)", {
+                    slug,
+                    path: projectDetailPath(slug),
+                });
+                window.sessionStorage.setItem("route-transition-lock", "1");
+                window.sessionStorage.setItem("project-transition-reveal", "1");
+                router.push(projectDetailPath(slug));
+            }, 620);
+        },
+        [isNavigating, router],
+    );
+
+    useEffect(() => {
         return () => {
             if (navTimeoutRef.current !== null) {
                 window.clearTimeout(navTimeoutRef.current);
             }
-            if (hoverResumeTimeoutRef.current !== null) {
-                window.clearTimeout(hoverResumeTimeoutRef.current);
-            }
         };
     }, []);
 
-    React.useEffect(() => {
-        if (!isDesktop) return;
-
-        const lockHoverDuringScroll = () => {
-            // Prevent row-hover churn while scrolling passes items under a fixed cursor.
-            if (!isScrollHoverLockedRef.current) {
-                isScrollHoverLockedRef.current = true;
-                setHoveredDesktopSlug(null);
-            }
-            if (hoverResumeTimeoutRef.current !== null) {
-                window.clearTimeout(hoverResumeTimeoutRef.current);
-            }
-            hoverResumeTimeoutRef.current = window.setTimeout(() => {
-                isScrollHoverLockedRef.current = false;
-                hoverResumeTimeoutRef.current = null;
-            }, 140);
-        };
-
-        window.addEventListener("scroll", lockHoverDuringScroll, { passive: true });
-        window.addEventListener("wheel", lockHoverDuringScroll, { passive: true });
-
-        return () => {
-            window.removeEventListener("scroll", lockHoverDuringScroll);
-            window.removeEventListener("wheel", lockHoverDuringScroll);
-        };
-    }, [isDesktop]);
-
-    React.useEffect(() => {
-        if (!isNavigatingToProject) return;
+    useEffect(() => {
+        if (!isNavigating) return;
 
         document.documentElement.classList.add("route-transition-lock");
         document.body.classList.add("route-transition-lock");
@@ -140,334 +341,250 @@ export default function Projects() {
         document.body.style.overflow = "hidden";
 
         return () => {
+            logProjectsScroll("home #projects scroll lock cleanup (releaseDocumentScroll)", {
+                wasNavigating: true,
+            });
             releaseDocumentScroll();
         };
-    }, [isNavigatingToProject]);
+    }, [isNavigating]);
+
+    useEffect(() => {
+        const section = sectionRef.current;
+        if (!section) return;
+
+        const ctx = gsap.context(() => {
+            const mm = gsap.matchMedia();
+
+            mm.add(DESKTOP_MQ, () => {
+                const viewport = viewportRef.current;
+                const track = trackRef.current;
+                if (!viewport || !track) return () => {};
+
+                const pinScrollPx = () =>
+                    Math.round(window.innerHeight * (1.85 + FEATURED_COUNT * 0.42));
+
+                const tl = gsap.fromTo(
+                    track,
+                    { y: 0 },
+                    {
+                        y: () =>
+                            -Math.max(0, track.scrollHeight - viewport.clientHeight),
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: section,
+                            start: "center center",
+                            end: () => `+=${pinScrollPx()}`,
+                            pin: true,
+                            pinSpacing: true,
+                            scrub: 0.18,
+                            anticipatePin: 1,
+                            invalidateOnRefresh: true,
+                            onUpdate: (self) => {
+                                const p = self.progress;
+                                const idx =
+                                    FEATURED_COUNT <= 1
+                                        ? 0
+                                        : Math.min(
+                                              Math.round(p * (FEATURED_COUNT - 1)),
+                                              FEATURED_COUNT - 1,
+                                          );
+                                setActiveIndex(idx);
+                            },
+                        },
+                    },
+                );
+
+                const st = tl.scrollTrigger ?? null;
+                pinnedScrollTriggerRef.current = st;
+
+                return () => {
+                    pinnedScrollTriggerRef.current = null;
+                    tl.scrollTrigger?.kill();
+                };
+            });
+        }, sectionRef);
+
+        return () => {
+            pinnedScrollTriggerRef.current = null;
+            ctx.revert();
+        };
+    }, []);
+
+    /** Outer shell height (desktop preview column). Inner clip is shorter due to padding so gaps show between slides. */
+    const viewportShell =
+        "h-[72dvh] min-h-[300px] lg:h-[min(88vh,860px)] lg:min-h-[360px]";
+
+    const transitionOverlay =
+        portalReady && isNavigating
+            ? createPortal(
+                  <div
+                      className="pointer-events-none fixed inset-0 z-9999 overflow-hidden"
+                      data-project-transition-overlay
+                      aria-hidden
+                  >
+                      <motion.div
+                          key={transitionKey}
+                          className="absolute inset-0 bg-[#0a0a0a]"
+                          initial={{ y: "100%" }}
+                          animate={{
+                              y: ["100%", "0%", "0%"],
+                          }}
+                          transition={{
+                              duration: 1.25,
+                              times: [0, 0.24, 1],
+                              ease: "easeInOut",
+                          }}
+                      />
+                  </div>,
+                  document.body,
+              )
+            : null;
 
     return (
-        <section id="projects" className="projects-section relative bg-background overflow-hidden scroll-mt-24">
-            {isNavigatingToProject && (
-                <div className="pointer-events-none fixed inset-0 z-9999 overflow-hidden">
-                    <motion.div
-                        key={transitionKey}
-                        className="absolute inset-0"
-                        initial={{ y: "100%" }}
-                        animate={{
-                            y: ["100%", "0%", "0%"],
-                            backgroundColor: ["#f4f3ee", "#f4f3ee", "#f4f3ee"],
-                        }}
-                        transition={{
-                            duration: 1.25,
-                            times: [0, 0.24, 1],
-                            ease: "easeInOut",
-                        }}
-                    />
-                </div>
-            )}
-            <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 xl:px-32">
-                <div className="projects-header pt-12 lg:pt-20 pb-8 lg:pb-12">
-                    <span className="text-[10px] uppercase tracking-[0.3em] font-mono text-black/45 mb-2 lg:mb-4 block">Selected Projects</span>
-                    <h2 className="text-2xl md:text-5xl lg:text-7xl font-black text-black uppercase leading-[0.9] tracking-tighter italic mb-4">
-                        Featured<br className="lg:hidden" /> <span className="lg:block">Work</span>
+        <>
+            {transitionOverlay}
+            <section
+                ref={sectionRef}
+                id="projects"
+                className="projects-section scroll-mt-24 border-t border-black/10 bg-background text-foreground"
+                aria-label="Projects"
+            >
+                <div className="mx-auto max-w-[1920px] px-5 py-14 sm:px-8 md:px-12 lg:px-16 xl:px-24">
+                {/* ——— Below lg: single column, stacked projects (theme) ——— */}
+                <div className="lg:hidden">
+                    <h2 className="text-3xl font-black uppercase leading-[0.95] tracking-tighter text-black sm:text-4xl md:text-5xl">
+                        Featured Work
                     </h2>
-                    <p className="text-black/55 text-sm md:text-lg italic leading-relaxed max-w-2xl lg:max-w-xl">
-                        A collection of projects showcasing full-stack development and modern design.
+                    <p className="mt-5 max-w-2xl text-sm leading-relaxed text-black/55 sm:text-base md:text-lg">
+                        We build websites where every scroll, every transition, and every interaction feels intentional.
+                        The details most teams skip are the details we care about most.
                     </p>
-                </div>
 
-                <div className="projects-content-wrapper relative z-10 pb-10 md:pb-14 lg:pb-20">
-                    {/* Mobile & Tablet: stacked cards (touch-friendly) */}
-                    {!isDesktop && (
-                        <>
-                        <div className="grid grid-cols-1 gap-8 md:gap-10">
-                            {mobileProjects.map((project) => (
-                                <article
-                                    key={project.slug}
-                                    className="rounded-sm border border-black/10 bg-black/2 overflow-hidden cursor-pointer"
-                                    style={{ contentVisibility: "auto", containIntrinsicSize: "640px" }}
-                                    onClick={() => navigateToProject(project.slug)}
-                                    onKeyDown={(event) => {
-                                        if (event.key === "Enter" || event.key === " ") {
-                                            event.preventDefault();
-                                            navigateToProject(project.slug);
-                                        }
-                                    }}
-                                    role="button"
-                                    tabIndex={0}
+                    <div className="mt-12 flex flex-col gap-14 sm:mt-14 sm:gap-16 md:gap-20">
+                        {featured.map((project, index) => (
+                            <article key={project.slug} className="w-full">
+                                <button
+                                    type="button"
+                                    onClick={() => goToProject(project.slug)}
+                                    className="group w-full text-left outline-none ring-black/30 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                                 >
-                                    <div className="relative w-full aspect-16/10 bg-black/5">
+                                    <div className="relative aspect-16/10 w-full overflow-hidden rounded-sm border border-black/10 bg-black/5">
                                         <Image
                                             src={project.image}
                                             alt={project.title}
                                             fill
-                                            sizes="(max-width: 768px) 100vw, 50vw"
-                                            loading="lazy"
-                                            quality={65}
-                                            className="absolute inset-0 h-full w-full object-cover opacity-95"
+                                            sizes="100vw"
+                                            className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
+                                            priority={index === 0}
                                         />
-                                        <div className="absolute inset-0 bg-linear-to-t from-black/45 via-black/10 to-transparent" />
+                                        <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/15 via-transparent to-transparent" />
                                     </div>
-
-                                    <div className="p-5">
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="min-w-0">
-                                                <div className="flex items-center gap-3 text-black/50 font-mono text-[10px] uppercase tracking-widest mb-2">
-                                                    <span>{project.year}</span>
-                                                    {project.featured && (
-                                                        <span className="text-black/55">Featured</span>
-                                                    )}
-                                                </div>
-                                                <h3 className="text-black font-black uppercase tracking-tight text-xl leading-tight">
-                                                    {project.title}
-                                                </h3>
-                                            </div>
-
-                                            <div className="flex items-center gap-3 shrink-0">
-                                                <a
-                                                    href={project.github}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    aria-label={`View ${project.title} source code on GitHub`}
-                                                    onClick={(event) => event.stopPropagation()}
-                                                    className="w-10 h-10 rounded-full border border-black/15 flex items-center justify-center text-black/70 active:text-black active:border-black/35 transition-colors"
-                                                >
-                                                    <Github className="w-5 h-5" />
-                                                </a>
-                                                <a
-                                                    href={project.live}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    aria-label={`View ${project.title} live demo`}
-                                                    onClick={(event) => event.stopPropagation()}
-                                                    className="w-10 h-10 rounded-full border border-black/15 flex items-center justify-center text-black/70 active:text-black active:border-black/35 transition-colors"
-                                                >
-                                                    <ExternalLink className="w-5 h-5" />
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <p className="mt-4 text-black/65 text-sm italic leading-relaxed line-clamp-2">
-                                            {project.description}
-                                        </p>
-
-                                        <div className="mt-5 flex flex-wrap gap-2">
-                                            {project.tech.map((tech) => (
-                                                <span
-                                                    key={tech}
-                                                    className="text-[10px] px-2.5 py-1 bg-black/3 text-black/60 rounded-full border border-black/10 font-mono uppercase tracking-widest"
-                                                >
-                                                    {tech}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </article>
-                            ))}
-                        </div>
-
-                        {projects.length > 3 && mobileVisible < projects.length && (
-                            <div className="pt-10 flex justify-center">
-                                <button
-                                    type="button"
-                                    onClick={() => setMobileVisible((v) => Math.min(projects.length, v + 3))}
-                                    className="px-5 py-3 text-[11px] font-mono uppercase tracking-[0.35em] text-black/70 hover:text-black border border-black/15 hover:border-black/35 transition-colors bg-black/2"
-                                >
-                                    Show more projects
+                                    <h3 className="mt-4 font-black uppercase leading-tight tracking-tight text-black sm:mt-5 sm:text-xl md:text-2xl">
+                                        {project.title}
+                                    </h3>
+                                    <p className="mt-2 font-mono text-[10px] uppercase leading-relaxed tracking-[0.2em] text-black/45 sm:text-[11px]">
+                                        {projectTagsLine(project)}
+                                    </p>
                                 </button>
-                            </div>
-                        )}
-                        </>
-                    )}
+                            </article>
+                        ))}
+                    </div>
 
-                    {/* Desktop: title list + lightweight preview */}
-                    {isDesktop && (
-                        <div
-                            className="relative grid grid-cols-12 items-start gap-12"
-                            onMouseLeave={() => setHoveredDesktopSlug(null)}
+                    <div className="mt-12 border-t border-black/10 pt-10 sm:mt-14">
+                        <Link
+                            href="/projects"
+                            className="inline-flex items-center gap-3 bg-black px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-black/85"
                         >
-                        {/* Left: list */}
-                        <div className="col-span-12 xl:col-span-7">
-                            <div className="border-t border-black/10">
-                                {desktopProjects.map((project, index) => {
-                                    const isHovered = hoveredDesktopSlug === project.slug;
-                                    return (
-                                        <button
-                                            key={project.slug}
-                                            type="button"
-                                            onMouseEnter={() => {
-                                                if (isScrollHoverLockedRef.current) return;
-                                                setHoveredDesktopSlug(project.slug);
-                                                prefetchProject(project.slug);
-                                            }}
-                                            onMouseMove={(event) => {
-                                                if (isScrollHoverLockedRef.current) return;
-                                                updatePreviewAnchorFromElement(event.currentTarget);
-                                            }}
-                                            onFocus={(event) => {
-                                                if (isScrollHoverLockedRef.current) return;
-                                                setHoveredDesktopSlug(project.slug);
-                                                prefetchProject(project.slug);
-                                                updatePreviewAnchorFromElement(event.currentTarget);
-                                            }}
-                                            onClick={() => navigateToProject(project.slug)}
-                                            className="group w-full text-left border-b border-black/10 py-4 md:py-5 lg:py-6"
-                                            style={{ contentVisibility: "auto", containIntrinsicSize: "120px" }}
-                                        >
-                                            <div className="flex items-start gap-5 md:gap-7">
-                                                <div className="pt-1 w-10 shrink-0">
-                                                    <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-black/45">
-                                                        {String(index + 1).padStart(2, "0")}
-                                                    </span>
-                                                </div>
+                            View all
+                        </Link>
+                    </div>
+                </div>
 
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-4">
-                                                        <h3
-                                                            className={[
-                                                                "text-xl md:text-2xl lg:text-3xl font-black uppercase leading-tight tracking-tight italic transition-colors",
-                                                                isHovered ? "text-black" : "text-black/45 group-hover:text-black/80",
-                                                            ].join(" ")}
-                                                        >
-                                                            {project.title}
-                                                        </h3>
-                                                        <span
-                                                            className={[
-                                                                "transition-opacity text-black/45",
-                                                                isHovered ? "opacity-100" : "opacity-0 group-hover:opacity-100",
-                                                            ].join(" ")}
-                                                            aria-hidden="true"
-                                                        >
-                                                            <ExternalLink className="w-4 h-4" />
-                                                        </span>
-                                                    </div>
+                {/* ——— lg+ : split column + pinned scrub gallery ——— */}
+                <div className="hidden gap-10 lg:flex lg:flex-row lg:items-start lg:gap-14 xl:gap-20">
+                    <div className="flex w-full shrink-0 flex-col lg:w-[min(100%,380px)] xl:w-[420px]">
+                        <span className="mb-3 block font-mono text-[10px] uppercase tracking-[0.35em] text-black/45">
+                            Selected Projects
+                        </span>
+                        <h2 className="text-3xl font-black uppercase leading-[0.95] tracking-tighter text-black sm:text-4xl lg:text-5xl">
+                            Featured
+                            <br />
+                            Work
+                        </h2>
+                        <p className="mt-5 max-w-sm text-sm leading-relaxed text-black/55 sm:text-base">
+                            Websites where scroll, motion, and interaction feel intentional. The details most teams skip
+                            are the details we care about most.
+                        </p>
 
-                                                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-black/50 font-mono text-[10px] uppercase tracking-widest">
-                                                        <span>{project.year}</span>
-                                                        <span className="text-black/20">/</span>
-                                                        <span className="truncate">{project.tech.join(" · ")}</span>
-                                                        {project.featured && (
-                                                            <>
-                                                                <span className="text-black/20">/</span>
-                                                                <span className="text-black/55">Featured</span>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            {projects.length > 6 && desktopVisible < projects.length && (
-                                <div className="pt-10 flex justify-center">
+                        <div className="mt-8 flex flex-col gap-3 sm:mt-10">
+                            {featured.map((project, index) => {
+                                const isActive = activeIndex === index;
+                                return (
                                     <button
+                                        key={project.slug}
                                         type="button"
-                                        onClick={() => setDesktopVisible((v) => Math.min(projects.length, v + 6))}
-                                    className="px-6 py-3 text-[11px] font-mono uppercase tracking-[0.35em] text-black/70 hover:text-black border border-black/15 hover:border-black/35 transition-colors bg-black/2"
+                                        onClick={() => scrollToProject(index)}
+                                        className="group flex items-center gap-3 rounded-sm text-left outline-none ring-black/30 focus-visible:ring-2"
                                     >
-                                        Show more projects
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Right: floating viewport preview */}
-                        <div className="hidden xl:block xl:col-span-5">
-                            <motion.div
-                                className="fixed xl:left-[56%] 2xl:left-[58%] z-40 w-[340px] 2xl:w-[380px] -translate-y-1/2"
-                                initial={false}
-                                animate={{ top: previewAnchorY }}
-                                transition={{ type: "spring", stiffness: 260, damping: 28, mass: 0.65 }}
-                            >
-                                <AnimatePresence mode="wait" initial={false}>
-                                    {hoveredDesktopProject ? (
-                                        <motion.article
-                                            key={hoveredDesktopProject.slug}
-                                            initial={{ opacity: 0, y: 10, scale: 0.985 }}
-                                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            exit={{ opacity: 0, y: -8, scale: 0.99 }}
-                                            transition={{ duration: 0.22, ease: "easeOut" }}
-                                            className="rounded-sm border border-black/10 bg-background overflow-hidden shadow-2xl shadow-black/10 will-change-transform"
-                                            style={{ contentVisibility: "auto", containIntrinsicSize: "560px" }}
+                                        <div
+                                            className="relative h-14 w-24 shrink-0 overflow-hidden rounded-sm border border-black/10 bg-black/5 sm:h-16 sm:w-28"
+                                            aria-hidden
                                         >
-                                            <div className="relative w-full aspect-16/10 bg-black/5">
-                                                {!isPreviewImageLoaded && (
-                                                    <div className="absolute inset-0 z-10 animate-pulse bg-black/5" />
-                                                )}
-                                                <Image
-                                                    src={hoveredDesktopProject.image}
-                                                    alt={hoveredDesktopProject.title}
-                                                    fill
-                                                    sizes="(max-width: 1536px) 40vw, 560px"
-                                                    loading="lazy"
-                                                    quality={62}
-                                                    className="absolute inset-0 h-full w-full object-cover opacity-95"
-                                                    onLoadingComplete={() => setIsPreviewImageLoaded(true)}
-                                                />
-                                                <div className="absolute inset-0 bg-linear-to-t from-black/35 via-black/10 to-transparent" />
-                                            </div>
-
-                                            <div className="p-5">
-                                                <div className="flex items-start justify-between gap-4">
-                                                    <div className="min-w-0">
-                                                        <div className="flex items-center gap-3 text-black/50 font-mono text-[10px] uppercase tracking-widest mb-2">
-                                                            <span>{hoveredDesktopProject.year}</span>
-                                                            {hoveredDesktopProject.featured && (
-                                                                <span className="text-black/55">Featured</span>
-                                                            )}
-                                                        </div>
-                                                        <h4 className="text-black font-black uppercase tracking-tight text-lg leading-tight truncate">
-                                                            {hoveredDesktopProject.title}
-                                                        </h4>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-3 shrink-0">
-                                                        <a
-                                                            href={hoveredDesktopProject.github}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            aria-label={`View ${hoveredDesktopProject.title} source code on GitHub`}
-                                                            className="w-9 h-9 rounded-full border border-black/15 flex items-center justify-center text-black/70 hover:text-black hover:border-black/35 transition-colors"
-                                                        >
-                                                            <Github className="w-4 h-4" />
-                                                        </a>
-                                                        <a
-                                                            href={hoveredDesktopProject.live}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            aria-label={`View ${hoveredDesktopProject.title} live demo`}
-                                                            className="w-9 h-9 rounded-full border border-black/15 flex items-center justify-center text-black/70 hover:text-black hover:border-black/35 transition-colors"
-                                                        >
-                                                            <ExternalLink className="w-4 h-4" />
-                                                        </a>
-                                                    </div>
-                                                </div>
-
-                                                <p className="mt-3 text-black/65 text-sm italic leading-relaxed line-clamp-3">
-                                                    {hoveredDesktopProject.description}
-                                                </p>
-
-                                                <div className="mt-4 flex flex-wrap gap-2">
-                                                    {hoveredDesktopProject.tech.map((tech) => (
-                                                        <span
-                                                            key={tech}
-                                                            className="text-[10px] px-2.5 py-1 bg-black/3 text-black/60 rounded-full border border-black/10 font-mono uppercase tracking-widest"
-                                                        >
-                                                            {tech}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </motion.article>
-                                    ) : null}
-                                </AnimatePresence>
-                            </motion.div>
+                                            <Image
+                                                src={project.image}
+                                                alt=""
+                                                fill
+                                                sizes="112px"
+                                                className="object-cover opacity-95 transition-opacity group-hover:opacity-100"
+                                            />
+                                        </div>
+                                        <span
+                                            className={`h-2 w-2 shrink-0 rounded-[1px] transition-colors ${
+                                                isActive
+                                                    ? "bg-black"
+                                                    : "bg-black/20 group-hover:bg-black/40"
+                                            }`}
+                                            aria-hidden
+                                        />
+                                        <span
+                                            className={`min-w-0 truncate font-mono text-[10px] uppercase tracking-widest transition-colors ${
+                                                isActive
+                                                    ? "text-black"
+                                                    : "text-black/40 group-hover:text-black/70"
+                                            }`}
+                                        >
+                                            {project.title}
+                                        </span>
+                                    </button>
+                                );
+                            })}
                         </div>
+
+                        <div className="mt-10 sm:mt-12">
+                            <Link
+                                href="/projects"
+                                className="inline-flex items-center gap-3 bg-black px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-black/85"
+                            >
+                                View all
+                            </Link>
                         </div>
-                    )}
+                    </div>
+
+                    <LazyMotion features={domAnimation} strict>
+                        <div className="min-h-0 flex-1 lg:pl-2">
+                            <ProjectsDesktopGallery
+                                viewportRef={viewportRef}
+                                trackRef={trackRef}
+                                featured={featured}
+                                activeIndex={activeIndex}
+                                viewportShell={viewportShell}
+                                goToProject={goToProject}
+                            />
+                        </div>
+                    </LazyMotion>
                 </div>
             </div>
         </section>
+        </>
     );
 }

@@ -6,11 +6,15 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
+/** Messages older than this are dropped in the UI and purged in the database (see supabase/migrations). */
+const CHAT_MESSAGE_TTL_MS = 10 * 60 * 1000;
+
 type ChatMessage = {
     id: number;
     user: string;
     text: string;
     time: string;
+    createdAt: string;
 };
 
 type DbChatMessageRow = {
@@ -22,6 +26,7 @@ type DbChatMessageRow = {
 
 export default function AppNavbar() {
     const pathname = usePathname();
+    const isProjectDetailPage = pathname.startsWith("/projects/") && pathname !== "/projects";
     const navRef = useRef<HTMLElement | null>(null);
     const chatRef = useRef<HTMLDivElement | null>(null);
     const messageListRef = useRef<HTMLDivElement | null>(null);
@@ -48,6 +53,20 @@ export default function AppNavbar() {
         const suffix = date.getHours() >= 12 ? "PM" : "AM";
         return `${hh}:${mm} ${suffix}`;
     };
+
+    const isChatMessageFresh = (createdAtIso: string) => {
+        const t = new Date(createdAtIso).getTime();
+        if (Number.isNaN(t)) return false;
+        return Date.now() - t < CHAT_MESSAGE_TTL_MS;
+    };
+
+    const rowToChatMessage = (row: DbChatMessageRow): ChatMessage => ({
+        id: row.id,
+        user: row.username,
+        text: row.message,
+        time: toTimeText(row.created_at),
+        createdAt: row.created_at,
+    });
 
     useEffect(() => {
         const updateTime = () => {
@@ -199,7 +218,7 @@ export default function AppNavbar() {
             if (!url || !key) return;
 
             const response = await fetch(
-                `${url}/rest/v1/chat_messages?select=id,username,message,created_at&order=created_at.asc&limit=40`,
+                `${url}/rest/v1/chat_messages?select=id,username,message,created_at&order=created_at.desc&limit=40`,
                 {
                     method: "GET",
                     headers: {
@@ -212,12 +231,13 @@ export default function AppNavbar() {
             if (!response.ok) return;
             const payload = (await response.json()) as DbChatMessageRow[];
             if (!Array.isArray(payload)) return;
-            const mapped = payload.map((row) => ({
-                id: row.id,
-                user: row.username,
-                text: row.message,
-                time: toTimeText(row.created_at),
-            }));
+            const mapped = payload
+                .map(rowToChatMessage)
+                .filter((m) => isChatMessageFresh(m.createdAt))
+                .sort(
+                    (a, b) =>
+                        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                );
             setChatMessages(mapped);
         };
 
@@ -233,18 +253,20 @@ export default function AppNavbar() {
                 (payload) => {
                     const row = payload.new as DbChatMessageRow;
                     if (!row || typeof row.id !== "number") return;
+                    if (!isChatMessageFresh(row.created_at)) return;
                     setChatMessages((prev) => {
                         if (prev.some((item) => item.id === row.id)) return prev;
-                        return [
-                            ...prev.slice(-48),
-                            {
-                                id: row.id,
-                                user: row.username,
-                                text: row.message,
-                                time: toTimeText(row.created_at),
-                            },
-                        ];
+                        return [...prev.slice(-48), rowToChatMessage(row)];
                     });
+                }
+            )
+            .on(
+                "postgres_changes",
+                { event: "DELETE", schema: "public", table: "chat_messages" },
+                (payload) => {
+                    const oldRow = payload.old as { id?: number };
+                    if (typeof oldRow?.id !== "number") return;
+                    setChatMessages((prev) => prev.filter((m) => m.id !== oldRow.id));
                 }
             )
             .subscribe();
@@ -254,11 +276,25 @@ export default function AppNavbar() {
         };
     }, []);
 
+    // Drop expired messages locally on a timer (covers quiet periods before DB cron runs).
+    useEffect(() => {
+        const id = window.setInterval(() => {
+            setChatMessages((prev) => prev.filter((m) => isChatMessageFresh(m.createdAt)));
+        }, 30_000);
+        return () => window.clearInterval(id);
+    }, []);
+
     const navItems = [
         { name: "ABOUT", href: "/" },
         { name: "PROJECTS", href: "/projects" },
         { name: "CONTACTS", href: "/#contact" },
     ];
+
+    const topTextClass = isProjectDetailPage ? "text-background/85" : "text-black/70";
+    const topButtonClass = isProjectDetailPage
+        ? "border-background/30 bg-black/25 text-background/90 hover:border-background/50 hover:bg-black/35"
+        : "border-black/20 bg-background text-black/80 hover:border-black/35 hover:bg-black/5";
+    const menuBarClass = isProjectDetailPage ? "bg-background" : "bg-black";
 
     const sendMessage = async () => {
         const value = chatInput.trim();
@@ -290,22 +326,21 @@ export default function AppNavbar() {
                 if (row && typeof row.id === "number") {
                     setChatMessages((prev) => {
                         if (prev.some((item) => item.id === row.id)) return prev;
-                        return [
-                            ...prev.slice(-48),
-                            {
-                                id: row.id,
-                                user: row.username,
-                                text: row.message,
-                                time: toTimeText(row.created_at),
-                            },
-                        ];
+                        return [...prev.slice(-48), rowToChatMessage(row)];
                     });
                 }
             }
         } else {
+            const createdAt = now.toISOString();
             setChatMessages((prev) => [
                 ...prev,
-                { id: Date.now(), user: userNameRef.current, text: value, time: `${hh}:${mm} ${suffix}` },
+                {
+                    id: Date.now(),
+                    user: userNameRef.current,
+                    text: value,
+                    time: `${hh}:${mm} ${suffix}`,
+                    createdAt,
+                },
             ]);
         }
         setChatInput("");
@@ -355,41 +390,48 @@ export default function AppNavbar() {
         <>
             <nav
                 ref={navRef}
-                className={`fixed top-0 w-full z-50 flex justify-between items-center p-6 px-8 md:px-12 lg:px-20 transition-transform duration-300 bg-background/80 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none ${navHidden && !menuOpen ? "-translate-y-full" : "translate-y-0"}`}
+                data-shoot-ui="1"
+                className={`fixed top-0 z-50 flex w-full min-w-0 items-center justify-between gap-2 py-4 pl-4 pr-3 transition-transform duration-300 sm:gap-3 sm:p-6 sm:px-8 md:px-12 lg:px-20 bg-background/80 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none ${navHidden && !menuOpen ? "-translate-y-full" : "translate-y-0"}`}
             >
                 {/* Left - Logo */}
-                <Link href="/" aria-label="Go to home" className="inline-flex items-center">
-                    <span className="text-black/70 font-black leading-[0.88] tracking-[-0.04em] text-[clamp(0.9rem,1.9vw,1.35rem)]">
+                <Link href="/" aria-label="Go to home" className="inline-flex min-w-0 shrink items-center">
+                    <span className={`${topTextClass} truncate font-semibold leading-[0.88] tracking-[-0.03em] text-[clamp(0.65rem,3.2vw,0.95rem)] sm:text-[clamp(0.72rem,1.35vw,0.95rem)]`}>
                         DevByRoman
                     </span>
                 </Link>
 
-                {/* Right Side - Menu + Status/Chat */}
-                <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-                    <div className="hidden sm:flex items-center gap-2 sm:gap-3 md:gap-4">
-                        <div className="flex items-center gap-2 rounded-xl  px-2 py-1.5">
-                            <div className="flex items-center gap-2 px-1.5 text-black/70">
-                                <Users className="h-4 w-4" />
-                                <span className="hidden lg:inline text-xs md:text-sm font-semibold tracking-wide">
-                                    {activeUsers} active users
-                                </span>
-                                <span className="inline lg:hidden text-xs font-semibold tracking-wide">{activeUsers}</span>
-                            </div>
+                {/* Right Side - Menu + Status/Chat (visible on all breakpoints; compact on xs) */}
+                <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2 md:gap-4">
+                    <div className="flex min-w-0 items-center gap-1 rounded-xl px-0 py-0 sm:gap-2 sm:px-2 sm:py-1.5 md:gap-3">
+                        <div className={`flex items-center gap-1 px-0 sm:gap-2 sm:px-1.5 ${topTextClass}`}>
+                            <Users className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" aria-hidden />
+                            <span className="hidden lg:inline text-xs md:text-sm font-semibold tracking-wide">
+                                {activeUsers} active users
+                            </span>
+                            <span
+                                className="inline text-[11px] font-semibold tabular-nums sm:text-xs lg:hidden"
+                                aria-label={`${activeUsers} active users`}
+                            >
+                                {activeUsers}
+                            </span>
+                        </div>
 
-                            <div className="relative" ref={chatRef}>
+                        <div className="relative" ref={chatRef}>
                                 <button
                                     type="button"
                                     onClick={() => setChatOpen((prev) => !prev)}
-                                    className="inline-flex items-center gap-2 rounded-lg border border-black/20 bg-background px-3 py-1.5 text-black/80 transition-colors hover:border-black/35 hover:bg-black/5"
+                                    className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-colors sm:gap-2 sm:px-3 ${topButtonClass}`}
                                     aria-expanded={chatOpen}
                                     aria-label="Open chat"
                                 >
-                                    <MessageCircle className="h-4 w-4" />
-                                    <span className="hidden md:inline text-xs font-semibold uppercase tracking-wide">Messages</span>
+                                    <MessageCircle className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                                    <span className="hidden min-[420px]:inline text-[10px] font-semibold uppercase tracking-wide sm:text-xs">
+                                        Messages
+                                    </span>
                                 </button>
 
                             {chatOpen && (
-                                <div className="absolute right-0 mt-2 w-[min(94vw,360px)] rounded-2xl border border-black/15 bg-[#f4f3ee] p-3 text-black shadow-[0_24px_55px_-30px_rgba(0,0,0,0.35)]">
+                                <div className="z-61 w-[min(calc(100vw-1.25rem),360px)] rounded-2xl border border-black/15 bg-[#f4f3ee] p-3 text-black shadow-[0_24px_55px_-30px_rgba(0,0,0,0.35)] max-sm:fixed max-sm:left-1/2 max-sm:right-auto max-sm:top-[calc(var(--app-header-h,80px)+0.5rem)] max-sm:mt-0 max-sm:-translate-x-1/2 sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:translate-x-0">
                                 <div className="mb-2 flex items-center justify-between border-b border-black/10 pb-2">
                                     <span className="text-xs font-mono uppercase tracking-[0.2em] text-black/80"># general</span>
                                     <div className="flex items-center gap-3">
@@ -488,20 +530,21 @@ export default function AppNavbar() {
                                 </div>
                             </div>
                             )}
-                            </div>
-
-                            <Link
-                                href="https://github.com/mano-sudo/portfolio-v3"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 rounded-lg border border-black/20 bg-background px-3 py-1.5 text-black/80 transition-colors hover:border-black/35 hover:bg-black/5"
-                                aria-label="Open GitHub repository"
-                            >
-                                <Github className="h-4 w-4" />
-                                <span className="hidden md:inline text-xs font-semibold tracking-wide">{stars?.toLocaleString() ?? "1,017"}</span>
-                                <Star className="h-3.5 w-3.5 fill-black/80 text-black/80" />
-                            </Link>
                         </div>
+
+                        <Link
+                            href="https://github.com/mano-sudo/portfolio-v3"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1.5 transition-colors sm:gap-2 sm:px-3 ${topButtonClass}`}
+                            aria-label="Open GitHub repository"
+                        >
+                            <Github className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                            <span className="text-[10px] font-semibold tabular-nums tracking-wide sm:text-xs">
+                                {stars?.toLocaleString() ?? "1,017"}
+                            </span>
+                            <Star className={`h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5 ${isProjectDetailPage ? "fill-background/90 text-background/90" : "fill-black/80 text-black/80"}`} />
+                        </Link>
                     </div>
 
                     {/* Menu Button */}
@@ -511,17 +554,17 @@ export default function AppNavbar() {
                         aria-label="Toggle menu"
                     >
                         <span
-                            className={`block w-6 h-[2px] bg-black transition-all duration-300 origin-center ${
+                            className={`block w-6 h-[2px] ${menuBarClass} transition-all duration-300 origin-center ${
                                 menuOpen ? "rotate-45 translate-y-[8px]" : ""
                             }`}
                         />
                         <span
-                            className={`block w-6 h-[2px] bg-black transition-all duration-300 ${
+                            className={`block w-6 h-[2px] ${menuBarClass} transition-all duration-300 ${
                                 menuOpen ? "opacity-0 scale-x-0" : "opacity-100"
                             }`}
                         />
                         <span
-                            className={`block w-6 h-[2px] bg-black transition-all duration-300 origin-center ${
+                            className={`block w-6 h-[2px] ${menuBarClass} transition-all duration-300 origin-center ${
                                 menuOpen ? "-rotate-45 -translate-y-[8px]" : ""
                             }`}
                         />
@@ -531,6 +574,7 @@ export default function AppNavbar() {
 
             {/* Full-Screen Menu Overlay */}
             <div
+                data-shoot-ui="1"
                 className={`fixed inset-0 z-55 transition-all duration-500 ${
                     menuOpen
                         ? "opacity-100 pointer-events-auto"
