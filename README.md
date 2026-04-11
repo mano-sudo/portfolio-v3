@@ -43,9 +43,5 @@ npm run dev
 - GitHub: [https://github.com/mano-sudo](https://github.com/mano-sudo)
 - Portfolio: [https://romancaseres.cloud](https://romancaseres.cloud)
 
-## Screenshot Setup
-Save your long preview image as:
 
-```text
-public/portfolio-preview.png
-```
+
