@@ -152,7 +152,8 @@ export default function AppNavbar() {
     const [activeUsers, setActiveUsers] = useState<number>(1);
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
-    const userNameRef = useRef<string>(`Guest-${Math.floor(Math.random() * 9999).toString().padStart(4, "0")}`);
+    /** Set in init effect from localStorage (stable guest or saved name). */
+    const userNameRef = useRef<string>("");
     const countryCodeRef = useRef<string | null>(null);
     /** In-memory only: null = try country_code in REST; false = column missing this session. */
     const chatCountryColumnOkRef = useRef<boolean | null>(null);
@@ -275,8 +276,15 @@ export default function AppNavbar() {
     }, [chatOpen]);
 
     useEffect(() => {
-        const saved = window.localStorage.getItem("navbar-chat-display-name");
-        const initial = (saved && saved.trim().length > 0) ? saved.trim() : userNameRef.current;
+        const STORAGE_KEY = "navbar-chat-display-name";
+        const stored = window.localStorage.getItem(STORAGE_KEY)?.trim() ?? "";
+        let initial: string;
+        if (stored.length > 0) {
+            initial = stored;
+        } else {
+            initial = `Guest-${Math.floor(Math.random() * 9999).toString().padStart(4, "0")}`;
+            window.localStorage.setItem(STORAGE_KEY, initial);
+        }
         userNameRef.current = initial;
         setDisplayName(initial);
         setNameDraft(initial);
