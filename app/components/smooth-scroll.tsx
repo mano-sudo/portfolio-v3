@@ -52,7 +52,9 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
     document.body.style.setProperty("scrollbar-width", "none");
     document.body.style.setProperty("-ms-overflow-style", "none");
 
-    if (!shouldUseLenis()) {
+    const useLenis = shouldUseLenis() && pathname !== "/projects";
+
+    if (!useLenis) {
       return () => {
         document.documentElement.style.overflowY = "";
         document.body.style.overflowY = "";
@@ -103,7 +105,7 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
       document.body.style.overflowY = "";
       ScrollTrigger.refresh();
     };
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     const win = getWindowWithLenis();
@@ -112,6 +114,7 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
       pathname,
       lenisInstance: Boolean(lenis),
       shouldUseLenis: shouldUseLenis(),
+      nativeScrollOnProjectsList: pathname === "/projects",
     });
     if (!lenis) return;
 

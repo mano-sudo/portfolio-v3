@@ -3,15 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-    AnimatePresence,
-    LazyMotion,
-    domAnimation,
-    m,
-    motion,
-} from "framer-motion";
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
-import { useHydrationSafeReducedMotion } from "@/app/hooks/use-hydration-safe-reduced-motion";
+import { motion } from "framer-motion";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -45,46 +38,6 @@ function projectTagsLine(project: Project): string {
     return tags.join(" — ");
 }
 
-function useTypewriterTitle(fullText: string, sequenceKey: string): { display: string; complete: boolean } {
-    const reduceMotion = useHydrationSafeReducedMotion();
-    const [display, setDisplay] = useState(fullText);
-    const [complete, setComplete] = useState(true);
-
-    useEffect(() => {
-        if (reduceMotion) {
-            setDisplay(fullText);
-            setComplete(true);
-            return;
-        }
-
-        setDisplay("");
-        setComplete(false);
-        let cancelled = false;
-        let timeoutId: number = 0;
-        let i = 0;
-        const msPerChar = Math.min(30, Math.max(11, Math.round(2200 / Math.max(fullText.length, 1))));
-
-        const step = (): void => {
-            if (cancelled) return;
-            i += 1;
-            setDisplay(fullText.slice(0, i));
-            if (i >= fullText.length) {
-                setComplete(true);
-                return;
-            }
-            timeoutId = window.setTimeout(step, msPerChar);
-        };
-
-        timeoutId = window.setTimeout(step, 45);
-        return () => {
-            cancelled = true;
-            window.clearTimeout(timeoutId);
-        };
-    }, [fullText, sequenceKey, reduceMotion]);
-
-    return { display, complete };
-}
-
 type DesktopGalleryProps = {
     viewportRef: RefObject<HTMLDivElement | null>;
     trackRef: RefObject<HTMLDivElement | null>;
@@ -94,7 +47,7 @@ type DesktopGalleryProps = {
     goToProject: (slug: string) => void;
 };
 
-function ProjectsDesktopGallery({
+const ProjectsDesktopGallery = memo(function ProjectsDesktopGallery({
     viewportRef,
     trackRef,
     featured,
@@ -102,10 +55,8 @@ function ProjectsDesktopGallery({
     viewportShell,
     goToProject,
 }: DesktopGalleryProps) {
-    const reduceMotion = useHydrationSafeReducedMotion();
     const project = featured[activeIndex] ?? featured[0];
     const slug = project?.slug ?? "";
-    const { display: typedTitle, complete: titleTyped } = useTypewriterTitle(project?.title ?? "", slug);
 
     return (
         <div
@@ -144,16 +95,7 @@ function ProjectsDesktopGallery({
                                 className="flex h-full min-h-0 w-full cursor-pointer flex-col text-left outline-none ring-black/40 focus-visible:ring-2 focus-visible:ring-inset"
                             >
                                 <div className="relative min-h-0 h-full flex-1 overflow-hidden bg-black/5">
-                                    <m.div
-                                        className="relative h-full w-full"
-                                        initial={false}
-                                        whileHover={
-                                            reduceMotion
-                                                ? undefined
-                                                : { scale: 1.03 }
-                                        }
-                                        transition={{ type: "tween", duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                                    >
+                                    <div className="relative h-full w-full origin-center transition-transform duration-550 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none group-hover/card:scale-[1.03] motion-reduce:group-hover/card:scale-100">
                                         <Image
                                             src={p.image}
                                             alt={p.title}
@@ -162,7 +104,7 @@ function ProjectsDesktopGallery({
                                             className="object-cover object-center"
                                             priority={index === 0}
                                         />
-                                    </m.div>
+                                    </div>
                                     <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-black/5" />
                                 </div>
                             </button>
@@ -176,49 +118,30 @@ function ProjectsDesktopGallery({
                             {String(activeIndex + 1).padStart(2, "0")} / {String(featured.length).padStart(2, "0")}
                         </p>
                         <h3
+                            key={slug}
                             className="mt-3 min-h-[2.6em] max-w-[95%] font-black uppercase leading-[0.95] tracking-tight text-white text-[clamp(1.15rem,2.1vw,1.85rem)] wrap-break-word sm:min-h-[2.4em] lg:max-w-[90%]"
                             aria-live="polite"
                         >
-                            {typedTitle}
-                            {!titleTyped ? (
-                                <span className="ml-0.5 inline-block h-[0.85em] w-px translate-y-px animate-pulse bg-white align-[-0.15em] sm:h-[0.9em]" />
-                            ) : null}
+                            {project?.title ?? ""}
                         </h3>
                         <div className="mt-2 min-h-5 max-w-full">
-                            <AnimatePresence mode="wait">
-                                <m.p
-                                    key={slug}
-                                    initial={
-                                        reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }
-                                    }
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -4 }}
-                                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                                    className="font-mono text-[9px] uppercase leading-relaxed tracking-[0.18em] text-white/65 sm:text-[10px] sm:tracking-[0.2em] wrap-break-word"
-                                >
-                                    {categoryLabel(project)}
-                                </m.p>
-                            </AnimatePresence>
-                        </div>
-                        <AnimatePresence mode="wait">
-                            <m.div
-                                key={slug}
-                                className="mt-4 flex flex-wrap gap-1.5 sm:gap-2"
-                                initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -3 }}
-                                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                            <p
+                                key={`${slug}-cat`}
+                                className="font-mono text-[9px] uppercase leading-relaxed tracking-[0.18em] text-white/65 sm:text-[10px] sm:tracking-[0.2em] wrap-break-word"
                             >
-                                {project.tech.slice(0, 4).map((tech) => (
-                                    <span
-                                        key={tech}
-                                        className="rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-[8px] font-mono uppercase tracking-wider text-white/85 sm:text-[9px]"
-                                    >
-                                        {tech}
-                                    </span>
-                                ))}
-                            </m.div>
-                        </AnimatePresence>
+                                {categoryLabel(project)}
+                            </p>
+                        </div>
+                        <div key={`${slug}-tech`} className="mt-4 flex flex-wrap gap-1.5 sm:gap-2">
+                            {project.tech.slice(0, 4).map((tech) => (
+                                <span
+                                    key={tech}
+                                    className="rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-[8px] font-mono uppercase tracking-wider text-white/85 sm:text-[9px]"
+                                >
+                                    {tech}
+                                </span>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="px-4 pb-3 sm:px-5 sm:pb-4">
@@ -229,15 +152,15 @@ function ProjectsDesktopGallery({
                                     className="h-0.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/20"
                                     title={p.title}
                                 >
-                                    <m.div
-                                        className="h-full rounded-full bg-white"
-                                        initial={false}
-                                        animate={{
-                                            scaleX: i === activeIndex ? 1 : i < activeIndex ? 1 : 0.2,
-                                            opacity: i === activeIndex ? 1 : i < activeIndex ? 0.55 : 0.35,
+                                    <div
+                                        className="h-full origin-left rounded-full bg-white transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+                                        style={{
+                                            transform: `scaleX(${
+                                                i === activeIndex ? 1 : i < activeIndex ? 1 : 0.2
+                                            })`,
+                                            opacity:
+                                                i === activeIndex ? 1 : i < activeIndex ? 0.55 : 0.35,
                                         }}
-                                        transition={{ type: "tween", duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                                        style={{ originX: 0 }}
                                     />
                                 </div>
                             ))}
@@ -253,16 +176,19 @@ function ProjectsDesktopGallery({
             </div>
         </div>
     );
-}
+});
 
 export default function Projects() {
     const router = useRouter();
-    const featured = projects.slice(0, FEATURED_COUNT);
+    const featured = useMemo(() => projects.slice(0, FEATURED_COUNT), []);
     const sectionRef = useRef<HTMLElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<HTMLDivElement>(null);
     const pinnedScrollTriggerRef = useRef<ScrollTrigger | null>(null);
     const navTimeoutRef = useRef<number | null>(null);
+    const lastScrubIndexRef = useRef(0);
+    const scrubRafRef = useRef(0);
+    const scrubQueuedIdxRef = useRef(0);
     const [activeIndex, setActiveIndex] = useState(0);
     const [isNavigating, setIsNavigating] = useState(false);
     const [transitionKey, setTransitionKey] = useState(0);
@@ -283,6 +209,7 @@ export default function Projects() {
             const targetScroll = st.start + (st.end - st.start) * progress;
             window.scrollTo({ top: targetScroll, behavior: "smooth" });
         }
+        lastScrubIndexRef.current = index;
         setActiveIndex(index);
     }, []);
 
@@ -376,9 +303,10 @@ export default function Projects() {
                             end: () => `+=${pinScrollPx()}`,
                             pin: true,
                             pinSpacing: true,
-                            scrub: 0.18,
+                            scrub: 0.38,
                             anticipatePin: 1,
                             invalidateOnRefresh: true,
+                            fastScrollEnd: true,
                             onUpdate: (self) => {
                                 const p = self.progress;
                                 const idx =
@@ -388,7 +316,16 @@ export default function Projects() {
                                               Math.round(p * (FEATURED_COUNT - 1)),
                                               FEATURED_COUNT - 1,
                                           );
-                                setActiveIndex(idx);
+                                scrubQueuedIdxRef.current = idx;
+                                if (scrubRafRef.current !== 0) return;
+                                scrubRafRef.current = window.requestAnimationFrame(() => {
+                                    scrubRafRef.current = 0;
+                                    const i = scrubQueuedIdxRef.current;
+                                    if (i !== lastScrubIndexRef.current) {
+                                        lastScrubIndexRef.current = i;
+                                        setActiveIndex(i);
+                                    }
+                                });
                             },
                         },
                     },
@@ -405,6 +342,10 @@ export default function Projects() {
         }, sectionRef);
 
         return () => {
+            if (scrubRafRef.current !== 0) {
+                window.cancelAnimationFrame(scrubRafRef.current);
+                scrubRafRef.current = 0;
+            }
             pinnedScrollTriggerRef.current = null;
             ctx.revert();
         };
@@ -571,18 +512,16 @@ export default function Projects() {
                         </div>
                     </div>
 
-                    <LazyMotion features={domAnimation} strict>
-                        <div className="min-h-0 flex-1 lg:pl-2">
-                            <ProjectsDesktopGallery
-                                viewportRef={viewportRef}
-                                trackRef={trackRef}
-                                featured={featured}
-                                activeIndex={activeIndex}
-                                viewportShell={viewportShell}
-                                goToProject={goToProject}
-                            />
-                        </div>
-                    </LazyMotion>
+                    <div className="min-h-0 flex-1 lg:pl-2">
+                        <ProjectsDesktopGallery
+                            viewportRef={viewportRef}
+                            trackRef={trackRef}
+                            featured={featured}
+                            activeIndex={activeIndex}
+                            viewportShell={viewportShell}
+                            goToProject={goToProject}
+                        />
+                    </div>
                 </div>
             </div>
         </section>

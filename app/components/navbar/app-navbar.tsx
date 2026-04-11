@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Github, MessageCircle, Send, Star, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser-client";
 import { countryCodeFromIanaTimeZone } from "@/app/utils/timezone-to-country-code";
 
 /** Messages older than this are dropped in the UI and purged in the database (see supabase/migrations). */
@@ -151,7 +151,7 @@ export default function AppNavbar() {
     const [stars, setStars] = useState<number | null>(null);
     const [activeUsers, setActiveUsers] = useState<number>(1);
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-    const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+    const supabaseRef = useRef<ReturnType<typeof getSupabaseBrowserClient>>(null);
     /** Set in init effect from localStorage (stable guest or saved name). */
     const userNameRef = useRef<string>("");
     const countryCodeRef = useRef<string | null>(null);
@@ -318,10 +318,7 @@ export default function AppNavbar() {
     }, []);
 
     useEffect(() => {
-        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-        if (!url || !key) return;
-        supabaseRef.current = createClient(url, key);
+        supabaseRef.current = getSupabaseBrowserClient();
     }, []);
 
     useEffect(() => {

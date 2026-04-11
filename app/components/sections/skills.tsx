@@ -16,20 +16,38 @@ function useElementWidth<T extends HTMLElement>(ref: React.RefObject<T | null>):
   const [width, setWidth] = useState(0);
 
   useLayoutEffect(() => {
-    function updateWidth() {
-      if (ref.current) {
-        setWidth(ref.current.offsetWidth);
-      }
+    const el = ref.current;
+    if (!el) return;
+
+    const apply = (): void => {
+      setWidth(el.offsetWidth);
+    };
+    apply();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(() => apply());
+      ro.observe(el);
+      return () => ro.disconnect();
     }
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
+
+    window.addEventListener("resize", apply, { passive: true });
+    return () => window.removeEventListener("resize", apply);
   }, [ref]);
 
   return width;
 }
 
-function VelocityText({ children, baseVelocity = 50, isMobile = false }: { children: React.ReactNode; baseVelocity?: number; isMobile?: boolean }) {
+function VelocityText({
+  children,
+  baseVelocity = 50,
+  isMobile = false,
+  paused = false,
+}: {
+  children: React.ReactNode;
+  baseVelocity?: number;
+  isMobile?: boolean;
+  paused?: boolean;
+}) {
   const baseX = useMotionValue(0);
   const copyRef = useRef<HTMLSpanElement>(null);
   const copyWidth = useElementWidth(copyRef);
@@ -47,7 +65,7 @@ function VelocityText({ children, baseVelocity = 50, isMobile = false }: { child
   });
 
   useAnimationFrame((t, delta) => {
-    if (copyWidth === 0) return;
+    if (paused || copyWidth === 0) return;
     const moveBy = baseVelocity * (delta / 1000);
     baseX.set(baseX.get() + moveBy);
   });
@@ -86,14 +104,30 @@ function VelocityText({ children, baseVelocity = 50, isMobile = false }: { child
 export default function Skills() {
     const sectionRef = useRef<HTMLElement>(null);
     const [isMobile, setIsMobile] = React.useState(false);
+    const [marqueeActive, setMarqueeActive] = React.useState(true);
 
     React.useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        const mq = window.matchMedia("(max-width: 767px)");
+        const sync = (): void => setIsMobile(mq.matches);
+        sync();
+        mq.addEventListener("change", sync);
+        return () => mq.removeEventListener("change", sync);
+    }, []);
+
+    React.useEffect(() => {
+        const el = sectionRef.current;
+        if (!el || typeof IntersectionObserver === "undefined") {
+            setMarqueeActive(true);
+            return;
+        }
+        const io = new IntersectionObserver(
+            ([entry]) => {
+                setMarqueeActive(entry.isIntersecting);
+            },
+            { root: null, rootMargin: "100px 0px", threshold: 0 },
+        );
+        io.observe(el);
+        return () => io.disconnect();
     }, []);
 
     return (
@@ -104,12 +138,20 @@ export default function Skills() {
 
             <div className="relative z-10 overflow-hidden space-y-4 sm:space-y-6 md:space-y-8">
                 {/* First row - scrolling left */}
-                <VelocityText baseVelocity={isMobile ? 60 : 80} isMobile={isMobile}>
+                <VelocityText
+                    baseVelocity={isMobile ? 60 : 80}
+                    isMobile={isMobile}
+                    paused={!marqueeActive}
+                >
                     {techStackString}
                 </VelocityText>
 
                 {/* Second row - scrolling right (opposite direction) */}
-                <VelocityText baseVelocity={isMobile ? -60 : -80} isMobile={isMobile}>
+                <VelocityText
+                    baseVelocity={isMobile ? -60 : -80}
+                    isMobile={isMobile}
+                    paused={!marqueeActive}
+                >
                     {techStackString}
                 </VelocityText>
             </div>

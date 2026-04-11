@@ -6,10 +6,29 @@ export default function FloatingSocials() {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        const onScroll = () => setVisible(window.scrollY > 300);
+        let raf = 0;
+        let lastShown: boolean | null = null;
+
+        const apply = (): void => {
+            raf = 0;
+            const next = window.scrollY > 300;
+            if (next !== lastShown) {
+                lastShown = next;
+                setVisible(next);
+            }
+        };
+
+        const onScroll = (): void => {
+            if (raf !== 0) return;
+            raf = window.requestAnimationFrame(apply);
+        };
+
         window.addEventListener("scroll", onScroll, { passive: true });
-        onScroll();
-        return () => window.removeEventListener("scroll", onScroll);
+        apply();
+        return () => {
+            window.removeEventListener("scroll", onScroll);
+            if (raf !== 0) window.cancelAnimationFrame(raf);
+        };
     }, []);
 
     const socials = [

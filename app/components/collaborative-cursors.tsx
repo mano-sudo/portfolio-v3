@@ -1,6 +1,7 @@
 "use client";
 
-import { createClient, type RealtimeChannel } from "@supabase/supabase-js";
+import type { RealtimeChannel } from "@supabase/supabase-js";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser-client";
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -254,11 +255,8 @@ export default function CollaborativeCursors() {
     }, [peers.length]);
 
     useEffect(() => {
-        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-        if (!url || !key) return;
-
-        const client = createClient(url, key);
+        const client = getSupabaseBrowserClient();
+        if (!client) return;
         const channel = client.channel(REALTIME_CHANNEL, {
             config: { broadcast: { self: false } },
         });

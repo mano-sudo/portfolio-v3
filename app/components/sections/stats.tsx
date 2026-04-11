@@ -38,8 +38,6 @@ export default function Stats() {
     useEffect(() => {
         if (!sectionRef.current) return;
 
-        gsap.registerPlugin(ScrollTrigger);
-
         const ctx = gsap.context(() => {
             const root = sectionRef.current;
             if (!root) return;
@@ -51,69 +49,69 @@ export default function Stats() {
             const techItems = gsap.utils.toArray<HTMLElement>(".tech-anim", root);
 
             const panels: HTMLElement[] = [leftPanel, rightPanel].filter((el): el is HTMLElement => !!el);
-            const allItems: HTMLElement[] = [...statsItems, ...techItems];
 
-            // Initial state: hidden + shifted down (prevents "static hidden" caused by competing triggers).
-            gsap.set(panels, { autoAlpha: 0, y: 40, willChange: "transform,opacity" });
-            gsap.set(allItems, { autoAlpha: 0, y: 26, willChange: "transform,opacity" });
+            gsap.set(panels, { autoAlpha: 0, y: 40 });
+            gsap.set(statsItems, { autoAlpha: 0, y: 22 });
+            gsap.set(techItems, { autoAlpha: 0, y: 26 });
 
-            // Panels reveal once; the content inside reveals one-by-one as you scroll.
-            const tlPanelsIn = gsap.timeline({ paused: true });
-            tlPanelsIn.to(panels, {
-                autoAlpha: 1,
-                y: 0,
-                duration: 0.55,
-                ease: "power2.out",
-                stagger: 0.1,
-            });
+            // One timeline + one ScrollTrigger (no scrub). Previously each .stats-anim / .tech-anim had its
+            // own scrubbed trigger (~24 listeners updating every scroll frame -> heavy jank from Marquee/Projects).
+            const master = gsap.timeline({ paused: true });
+
+            if (panels.length > 0) {
+                master.to(panels, {
+                    autoAlpha: 1,
+                    y: 0,
+                    duration: 0.5,
+                    stagger: 0.08,
+                    ease: "power2.out",
+                });
+            }
+
+            if (statsItems.length > 0) {
+                master.to(
+                    statsItems,
+                    {
+                        autoAlpha: 1,
+                        y: 0,
+                        duration: 0.36,
+                        stagger: 0.03,
+                        ease: "power2.out",
+                    },
+                    panels.length > 0 ? "-=0.18" : 0,
+                );
+            }
+
+            if (techItems.length > 0) {
+                master.to(
+                    techItems,
+                    {
+                        autoAlpha: 1,
+                        y: 0,
+                        duration: 0.32,
+                        stagger: 0.018,
+                        ease: "power2.out",
+                    },
+                    statsItems.length > 0 ? "-=0.22" : panels.length > 0 ? "-=0.12" : 0,
+                );
+            }
 
             ScrollTrigger.create({
                 trigger: root,
                 start: "top 78%",
-                end: "bottom 22%",
+                once: true,
                 invalidateOnRefresh: true,
                 onEnter: () => {
-                    tlPanelsIn.play(0);
-                },
-                onEnterBack: () => {
-                    tlPanelsIn.play(0);
+                    master.play(0);
                 },
                 onRefresh: (self) => {
-                    // If the page loads while already inside/past the section,
-                    // ensure content isn't stuck in the initial hidden state.
                     if (self.progress > 0) {
-                        tlPanelsIn.progress(1);
+                        master.progress(1);
                     } else {
-                        tlPanelsIn.pause(0).progress(0);
+                        master.pause(0).progress(0);
                     }
                 },
             });
-
-            const revealOneByOne = (el: HTMLElement, yFrom: number) => {
-                // Scrubbed animation = smooth show/hide while scrolling (no "static jump").
-                gsap.fromTo(
-                    el,
-                    { autoAlpha: 0, y: yFrom },
-                    {
-                        autoAlpha: 1,
-                        y: 0,
-                        ease: "none",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 88%",
-                            end: "top 70%",
-                            scrub: 0.8,
-                            invalidateOnRefresh: true,
-                        },
-                    },
-                );
-            };
-
-            // About-side copy reveals line-by-line.
-            statsItems.forEach((el) => revealOneByOne(el, 22));
-
-            // Tech icons reveal one-by-one; fall out when scrolling up past them.
-            techItems.forEach((el) => revealOneByOne(el, 26));
         }, sectionRef);
 
         return () => ctx.revert();

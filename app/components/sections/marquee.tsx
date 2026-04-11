@@ -22,33 +22,22 @@ export default function Marquee() {
             const mm = gsap.matchMedia();
 
             mm.add("(max-width: 767px)", () => {
-                // MOBILE: two rows, opposite directions, light scroll parallax
-                if (mobileRow1Ref.current) {
-                    gsap.to(mobileRow1Ref.current, {
-                        x: -120,
-                        ease: "none",
+                const row1 = mobileRow1Ref.current;
+                const row2 = mobileRow2Ref.current;
+                const trigger = sectionRef.current;
+                if (row1 || row2) {
+                    const tl = gsap.timeline({
                         scrollTrigger: {
-                            trigger: sectionRef.current,
+                            trigger,
                             start: "top bottom",
                             end: "bottom top",
                             scrub: true,
+                            fastScrollEnd: true,
                             invalidateOnRefresh: true,
                         },
                     });
-                }
-
-                if (mobileRow2Ref.current) {
-                    gsap.to(mobileRow2Ref.current, {
-                        x: 120,
-                        ease: "none",
-                        scrollTrigger: {
-                            trigger: sectionRef.current,
-                            start: "top bottom",
-                            end: "bottom top",
-                            scrub: true,
-                            invalidateOnRefresh: true,
-                        },
-                    });
+                    if (row1) tl.to(row1, { x: -120, ease: "none" }, 0);
+                    if (row2) tl.to(row2, { x: 120, ease: "none" }, 0);
                 }
 
                 gsap.from(".mobile-service-item", {
@@ -88,43 +77,32 @@ export default function Marquee() {
                     return { offscreenRight, offscreenLeft, endLeft, endRight };
                 };
 
-                const topTl = gsap.timeline({
+                const tl = gsap.timeline({
                     scrollTrigger: {
                         trigger: sectionRef.current,
                         start: "top bottom",
                         end: "bottom top",
-                        scrub: 0.15,
+                        scrub: 0.16,
+                        fastScrollEnd: true,
                         invalidateOnRefresh: true,
                     },
                 });
 
-                // Top row: right -> left
-                topTl.fromTo(
+                tl.fromTo(
                     trackTop,
                     { x: () => calculateValues(trackTop).offscreenRight },
-                    { x: () => calculateValues(trackTop).endLeft, ease: "none" }
+                    { x: () => calculateValues(trackTop).endLeft, ease: "none" },
+                    0,
                 );
-
-                const bottomTl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top bottom",
-                        end: "bottom top",
-                        scrub: 0.18,
-                        invalidateOnRefresh: true,
-                    },
-                });
-
-                // Bottom row: left -> right
-                bottomTl.fromTo(
+                tl.fromTo(
                     trackBottom,
                     { x: () => calculateValues(trackBottom).offscreenLeft },
-                    { x: () => calculateValues(trackBottom).endRight, ease: "none" }
+                    { x: () => calculateValues(trackBottom).endRight, ease: "none" },
+                    0,
                 );
 
                 return () => {
-                    topTl.scrollTrigger?.kill();
-                    bottomTl.scrollTrigger?.kill();
+                    tl.scrollTrigger?.kill();
                 };
             });
         }, sectionRef);

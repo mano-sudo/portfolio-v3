@@ -20,40 +20,25 @@ export default function ScrollSection({ children }: ScrollSectionProps) {
     useGSAP(() => {
         if (!containerRef.current || !contentRef.current) return;
 
-        // Lightweight entrance animation (transform + opacity only).
-        gsap.fromTo(contentRef.current, 
-            { 
-                opacity: 0,
-                y: 36,
-            },
+        // One-shot reveal (no scrub): two fewer ScrollTriggers per section vs enter+exit scrub.
+        gsap.fromTo(
+            contentRef.current,
+            { opacity: 0, y: 28 },
             {
                 opacity: 1,
                 y: 0,
-                duration: 0.9,
-                ease: "power3.out",
+                duration: 0.75,
+                ease: "power2.out",
                 scrollTrigger: {
                     trigger: containerRef.current,
-                    start: "top bottom",
-                    end: "top center",
-                    scrub: 0.6,
+                    start: "top 86%",
+                    toggleActions: "play none none none",
+                    once: true,
+                    fastScrollEnd: true,
                     invalidateOnRefresh: true,
-                }
-            }
-        );
-
-        // Lightweight exit animation to keep transitions smooth.
-        gsap.to(contentRef.current, {
-            scrollTrigger: {
-                trigger: containerRef.current,
-                start: "bottom bottom",
-                end: "bottom top",
-                scrub: 0.6,
-                invalidateOnRefresh: true,
+                },
             },
-            opacity: 0.2,
-            y: -20,
-            ease: "none"
-        });
+        );
     }, []);
 
     return (
