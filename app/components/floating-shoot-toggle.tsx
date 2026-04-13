@@ -125,20 +125,7 @@ function pickInnerShootTargetFromTextNode(text: Text): HTMLElement | null {
     return null;
 }
 
-/**
- * For `data-shoot-granularity="char"`, wrap the glyph under (x,y) in its own span so GSAP
- * only moves that letter (imperative DOM; hero copy is static between navigations).
- */
-function wrapShootCharAtPoint(x: number, y: number, root: HTMLElement): HTMLElement | null {
-    const doc = document as Document & {
-        caretRangeFromPoint?: (nx: number, ny: number) => Range | null;
-    };
-    if (typeof doc.caretRangeFromPoint !== "function") return null;
-    const range = doc.caretRangeFromPoint(x, y);
-    if (!range || range.startContainer.nodeType !== Node.TEXT_NODE) return null;
-    const textNode = range.startContainer as Text;
-    if (!root.contains(textNode)) return null;
-
+function wrapCharInTextNode(textNode: Text, offset: number): HTMLElement | null {
     const parentEl = textNode.parentElement;
     if (parentEl?.getAttribute("data-shoot-char-wrap") === "1") {
         return parentEl;
@@ -147,15 +134,15 @@ function wrapShootCharAtPoint(x: number, y: number, root: HTMLElement): HTMLElem
     const full = textNode.textContent ?? "";
     if (full.length === 0) return null;
 
-    let offset = range.startOffset;
-    if (offset >= full.length) offset = full.length - 1;
-    if (offset < 0) offset = 0;
+    let o = offset;
+    if (o >= full.length) o = full.length - 1;
+    if (o < 0) o = 0;
 
-    const ch = full[offset];
+    const ch = full[o];
     if (ch === undefined) return null;
 
-    const before = full.slice(0, offset);
-    const after = full.slice(offset + 1);
+    const before = full.slice(0, o);
+    const after = full.slice(o + 1);
 
     const span = document.createElement("span");
     span.setAttribute("data-shoot-char-wrap", "1");
@@ -175,6 +162,75 @@ function wrapShootCharAtPoint(x: number, y: number, root: HTMLElement): HTMLElem
     if (!parent) return null;
     parent.replaceChild(fragment, textNode);
     return span;
+}
+
+/**
+ * iOS WebKit: caret APIs often fail under shoot-mode `user-select: none`.
+ * Per-glyph rects from Range still resolve reliably.
+ */
+function findTextOffsetAtPointWithRanges(root: HTMLElement, x: number, y: number): { node: Text; offset: number } | null {
+    const range = document.createRange();
+    let best: { node: Text; offset: number; area: number } | null = null;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+
+    let n: Node | null = walker.nextNode();
+    while (n !== null) {
+        const textNode = n as Text;
+        const text = textNode.textContent ?? "";
+        for (let i = 0; i < text.length; i += 1) {
+            try {
+                range.setStart(textNode, i);
+                range.setEnd(textNode, i + 1);
+                const r = range.getBoundingClientRect();
+                if (r.width <= 0 || r.height <= 0) continue;
+                const inside = x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+                if (inside) {
+                    const area = r.width * r.height;
+                    if (best === null || area < best.area) {
+                        best = { node: textNode, offset: i, area };
+                    }
+                }
+            } catch {
+                //
+            }
+        }
+        n = walker.nextNode();
+    }
+
+    return best !== null ? { node: best.node, offset: best.offset } : null;
+}
+
+/**
+ * For `data-shoot-granularity="char"`, wrap the glyph under (x,y) in its own span so GSAP
+ * only moves that letter (imperative DOM; hero copy is static between navigations).
+ */
+function wrapShootCharAtPoint(x: number, y: number, root: HTMLElement): HTMLElement | null {
+    const doc = document as Document & {
+        caretRangeFromPoint?: (nx: number, ny: number) => Range | null;
+    };
+
+    let textNode: Text | null = null;
+    let offset = 0;
+
+    if (typeof doc.caretRangeFromPoint === "function") {
+        const caretRange = doc.caretRangeFromPoint(x, y);
+        if (caretRange?.startContainer.nodeType === Node.TEXT_NODE) {
+            const tn = caretRange.startContainer as Text;
+            if (root.contains(tn)) {
+                textNode = tn;
+                offset = caretRange.startOffset;
+            }
+        }
+    }
+
+    if (textNode === null) {
+        const found = findTextOffsetAtPointWithRanges(root, x, y);
+        if (found === null) return null;
+        textNode = found.node;
+        offset = found.offset;
+    }
+
+    return wrapCharInTextNode(textNode, offset);
 }
 
 function resolveShootAnimationTarget(target: HTMLElement, x: number, y: number): HTMLElement {
@@ -212,7 +268,9 @@ function pickHitWord(x: number, y: number, raw: Element | null): HTMLElement | n
                 return im;
             }
         }
-        return null;
+        // WebKit + shoot-mode `user-select: none` often makes caret APIs return no text node
+        // (iOS). Desktop paths still resolve a text node here, so this branch stays unused there.
+        return target;
     }
 
     return pickInnerShootTargetFromTextNode(textAtPoint) ?? target;
