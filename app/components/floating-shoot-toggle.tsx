@@ -7,10 +7,10 @@ import {
     ensurePaintballAudioRunning,
     playPaintballShotSound,
 } from "@/app/utils/play-paintball-shot-sound";
-
-type ShootToggleState = "on" | "off";
-
-const STORAGE_KEY = "shoot-toggle-state";
+import {
+    notifyShootModeSubscribers,
+    SHOOT_MODE_STORAGE_KEY,
+} from "@/app/utils/shoot-mode-store";
 
 const SPLAT_FADE_MS = 520;
 const SPLAT_TOTAL_LIFETIME_MS = 3200;
@@ -33,6 +33,12 @@ const GunViewer = dynamic(() => import("./gun-viewer"), {
     ssr: false,
     loading: () => <GunLoadingFallback />,
 });
+
+let paintSplatIdSeq = 0;
+function nextPaintSplatId(): number {
+    paintSplatIdSeq += 1;
+    return paintSplatIdSeq;
+}
 
 type PaintSplat = {
     id: number;
@@ -214,13 +220,14 @@ function pickHitWord(x: number, y: number, raw: Element | null): HTMLElement | n
 
 function readInitialState(): boolean {
     if (typeof window === "undefined") return false;
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(SHOOT_MODE_STORAGE_KEY);
     return raw === "on";
 }
 
 function writeStateToStorage(isOn: boolean): void {
     try {
-        window.localStorage.setItem(STORAGE_KEY, isOn ? "on" : "off");
+        window.localStorage.setItem(SHOOT_MODE_STORAGE_KEY, isOn ? "on" : "off");
+        notifyShootModeSubscribers();
     } catch {
         // ignore storage errors (private mode, etc.)
     }
@@ -359,7 +366,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
 
             playPaintballShotSound();
 
-            const id = Date.now() + Math.floor(Math.random() * 1000);
+            const id = nextPaintSplatId();
             const size = 26 + Math.random() * 20;
             const rotation = (Math.random() * 80) - 40;
             const palettes = [

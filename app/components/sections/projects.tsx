@@ -15,6 +15,7 @@ import {
     projectDetailPath,
 } from "@/app/utils/project-detail-navigation";
 import { logPrefersHardNavContext, logProjectsScroll } from "@/app/utils/projects-scroll-debug";
+import { useShootModeOn } from "@/app/utils/shoot-mode-store";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -45,6 +46,7 @@ type DesktopGalleryProps = {
     activeIndex: number;
     viewportShell: string;
     goToProject: (slug: string) => void;
+    interactionsDisabled: boolean;
 };
 
 const ProjectsDesktopGallery = memo(function ProjectsDesktopGallery({
@@ -54,6 +56,7 @@ const ProjectsDesktopGallery = memo(function ProjectsDesktopGallery({
     activeIndex,
     viewportShell,
     goToProject,
+    interactionsDisabled,
 }: DesktopGalleryProps) {
     const project = featured[activeIndex] ?? featured[0];
     const slug = project?.slug ?? "";
@@ -122,8 +125,9 @@ const ProjectsDesktopGallery = memo(function ProjectsDesktopGallery({
                         >
                             <button
                                 type="button"
+                                disabled={interactionsDisabled}
                                 onClick={() => goToProject(p.slug)}
-                                className="flex h-full min-h-0 w-full cursor-pointer flex-col text-left outline-none ring-foreground/40 focus-visible:ring-2 focus-visible:ring-inset"
+                                className="flex h-full min-h-0 w-full cursor-pointer flex-col text-left outline-none ring-foreground/40 focus-visible:ring-2 focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 <div className="relative min-h-0 h-full flex-1 overflow-hidden bg-muted">
                                     <div className="relative h-full w-full origin-center transition-transform duration-550 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none group-hover/card:scale-[1.03] motion-reduce:group-hover/card:scale-100">
@@ -209,6 +213,7 @@ const ProjectsDesktopGallery = memo(function ProjectsDesktopGallery({
 });
 
 export default function Projects() {
+    const shootModeOn = useShootModeOn();
     const router = useRouter();
     const featured = useMemo(() => projects.slice(0, FEATURED_COUNT), []);
     const sectionRef = useRef<HTMLElement>(null);
@@ -228,23 +233,28 @@ export default function Projects() {
         setPortalReady(true);
     }, []);
 
-    const scrollToProject = useCallback((index: number) => {
-        if (typeof window === "undefined") return;
-        if (!window.matchMedia(DESKTOP_MQ).matches) return;
+    const scrollToProject = useCallback(
+        (index: number) => {
+            if (shootModeOn) return;
+            if (typeof window === "undefined") return;
+            if (!window.matchMedia(DESKTOP_MQ).matches) return;
 
-        const st = pinnedScrollTriggerRef.current;
-        if (st) {
-            const denom = Math.max(FEATURED_COUNT - 1, 1);
-            const progress = index / denom;
-            const targetScroll = st.start + (st.end - st.start) * progress;
-            window.scrollTo({ top: targetScroll, behavior: "smooth" });
-        }
-        lastScrubIndexRef.current = index;
-        setActiveIndex(index);
-    }, []);
+            const st = pinnedScrollTriggerRef.current;
+            if (st) {
+                const denom = Math.max(FEATURED_COUNT - 1, 1);
+                const progress = index / denom;
+                const targetScroll = st.start + (st.end - st.start) * progress;
+                window.scrollTo({ top: targetScroll, behavior: "smooth" });
+            }
+            lastScrubIndexRef.current = index;
+            setActiveIndex(index);
+        },
+        [shootModeOn],
+    );
 
     const goToProject = useCallback(
         (slug: string) => {
+            if (shootModeOn) return;
             if (isNavigating) return;
 
             const hard = prefersHardNavigationToProjectDetail();
@@ -278,7 +288,7 @@ export default function Projects() {
                 router.push(projectDetailPath(slug));
             }, 620);
         },
-        [isNavigating, router],
+        [isNavigating, router, shootModeOn],
     );
 
     useEffect(() => {
@@ -465,7 +475,12 @@ export default function Projects() {
                     <div className="mt-12 border-t border-border pt-10 sm:mt-14">
                         <Link
                             href="/projects"
-                            className="inline-flex items-center gap-3 bg-foreground px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85"
+                            onClick={(e) => {
+                                if (shootModeOn) e.preventDefault();
+                            }}
+                            aria-disabled={shootModeOn}
+                            tabIndex={shootModeOn ? -1 : undefined}
+                            className={`inline-flex items-center gap-3 bg-foreground px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85${shootModeOn ? " pointer-events-none opacity-50" : ""}`}
                         >
                             View all
                         </Link>
@@ -495,8 +510,9 @@ export default function Projects() {
                                     <button
                                         key={project.slug}
                                         type="button"
+                                        disabled={shootModeOn}
                                         onClick={() => scrollToProject(index)}
-                                        className="group flex items-center gap-3 rounded-sm text-left outline-none ring-foreground/30 focus-visible:ring-2"
+                                        className="group flex items-center gap-3 rounded-sm text-left outline-none ring-foreground/30 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
                                         <motion.div
                                             animate={{ scale: isActive ? 1 : 0.78 }}
@@ -568,7 +584,12 @@ export default function Projects() {
                         <div className="mt-10 sm:mt-12">
                             <Link
                                 href="/projects"
-                                className="inline-flex items-center gap-3 bg-foreground px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85"
+                                onClick={(e) => {
+                                    if (shootModeOn) e.preventDefault();
+                                }}
+                                aria-disabled={shootModeOn}
+                                tabIndex={shootModeOn ? -1 : undefined}
+                                className={`inline-flex items-center gap-3 bg-foreground px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85${shootModeOn ? " pointer-events-none opacity-50" : ""}`}
                             >
                                 View all
                             </Link>
@@ -583,6 +604,7 @@ export default function Projects() {
                             activeIndex={activeIndex}
                             viewportShell={viewportShell}
                             goToProject={goToProject}
+                            interactionsDisabled={shootModeOn}
                         />
                     </div>
                 </div>

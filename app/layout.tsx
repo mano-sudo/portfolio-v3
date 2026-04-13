@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   title: "Roman Caseres | Software Developer",
   description: "Roman Caseres is a software developer with a passion for building web applications.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/DevByRoman.png",
   },
   openGraph: {
     title: "Roman Caseres | Software Developer",
