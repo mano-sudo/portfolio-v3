@@ -94,19 +94,19 @@ const ProjectsDesktopGallery = memo(function ProjectsDesktopGallery({
             className={`group/shell relative flex w-full flex-col overflow-hidden p-3 sm:p-4 ${viewportShell}`}
         >
             <span
-                className="pointer-events-none absolute left-4 top-4 z-30 h-3 w-3 border-l border-t border-black/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:left-5 sm:top-5"
+                className="pointer-events-none absolute left-4 top-4 z-30 h-3 w-3 border-l border-t border-foreground/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:left-5 sm:top-5"
                 aria-hidden
             />
             <span
-                className="pointer-events-none absolute right-4 top-4 z-30 h-3 w-3 border-r border-t border-black/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:right-5 sm:top-5"
+                className="pointer-events-none absolute right-4 top-4 z-30 h-3 w-3 border-r border-t border-foreground/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:right-5 sm:top-5"
                 aria-hidden
             />
             <span
-                className="pointer-events-none absolute bottom-4 left-4 z-30 h-3 w-3 border-l border-b border-black/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:bottom-5 sm:left-5"
+                className="pointer-events-none absolute bottom-4 left-4 z-30 h-3 w-3 border-l border-b border-foreground/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:bottom-5 sm:left-5"
                 aria-hidden
             />
             <span
-                className="pointer-events-none absolute bottom-4 right-4 z-30 h-3 w-3 border-r border-b border-black/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:bottom-5 sm:right-5"
+                className="pointer-events-none absolute bottom-4 right-4 z-30 h-3 w-3 border-r border-b border-foreground/25 opacity-60 transition-opacity duration-300 group-hover/shell:opacity-100 sm:bottom-5 sm:right-5"
                 aria-hidden
             />
 
@@ -118,14 +118,14 @@ const ProjectsDesktopGallery = memo(function ProjectsDesktopGallery({
                     {featured.map((p, index) => (
                         <div
                             key={p.slug}
-                            className="group/card h-full min-h-0 shrink-0 overflow-hidden rounded-sm border border-black/10 bg-background shadow-sm transition-shadow duration-300 group-hover/shell:shadow-[0_28px_60px_-34px_rgb(0_0_0/.2)]"
+                            className="group/card h-full min-h-0 shrink-0 overflow-hidden rounded-sm border border-border bg-background shadow-sm transition-shadow duration-300 group-hover/shell:shadow-[0_28px_60px_-34px_rgb(0_0_0/.2)]"
                         >
                             <button
                                 type="button"
                                 onClick={() => goToProject(p.slug)}
-                                className="flex h-full min-h-0 w-full cursor-pointer flex-col text-left outline-none ring-black/40 focus-visible:ring-2 focus-visible:ring-inset"
+                                className="flex h-full min-h-0 w-full cursor-pointer flex-col text-left outline-none ring-foreground/40 focus-visible:ring-2 focus-visible:ring-inset"
                             >
-                                <div className="relative min-h-0 h-full flex-1 overflow-hidden bg-black/5">
+                                <div className="relative min-h-0 h-full flex-1 overflow-hidden bg-muted">
                                     <div className="relative h-full w-full origin-center transition-transform duration-550 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none group-hover/card:scale-[1.03] motion-reduce:group-hover/card:scale-100">
                                         <Image
                                             src={p.image}
@@ -424,10 +424,10 @@ export default function Projects() {
                 <div className="mx-auto w-full max-w-[1920px] px-5 py-14 sm:px-8 md:px-12 lg:px-14 xl:px-18 2xl:max-w-none 2xl:pl-24 2xl:pr-0">
                 {/* ——— Below lg: single column, stacked projects (theme) ——— */}
                 <div className="lg:hidden">
-                    <h2 className="text-3xl font-black uppercase leading-[0.95] tracking-tighter text-black sm:text-4xl md:text-5xl">
+                    <h2 className="text-3xl font-black uppercase leading-[0.95] tracking-tighter text-foreground sm:text-4xl md:text-5xl">
                         Featured Work
                     </h2>
-                    <p className="mt-5 max-w-2xl text-sm leading-relaxed text-black/55 sm:text-base md:text-lg">
+                    <p className="mt-5 max-w-2xl text-sm leading-relaxed text-foreground/55 sm:text-base md:text-lg">
                         We build websites where every scroll, every transition, and every interaction feels intentional.
                         The details most teams skip are the details we care about most.
                     </p>
@@ -438,9 +438,9 @@ export default function Projects() {
                                 <button
                                     type="button"
                                     onClick={() => goToProject(project.slug)}
-                                    className="group w-full text-left outline-none ring-black/30 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                    className="group w-full text-left outline-none ring-foreground/30 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                                 >
-                                    <div className="relative aspect-16/10 w-full overflow-hidden rounded-sm border border-black/10 bg-black/5">
+                                    <div className="relative aspect-16/10 w-full overflow-hidden rounded-sm border border-border bg-muted">
                                         <Image
                                             src={project.image}
                                             alt={project.title}
@@ -451,10 +451,10 @@ export default function Projects() {
                                         />
                                         <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/15 via-transparent to-transparent" />
                                     </div>
-                                    <h3 className="mt-4 font-black uppercase leading-tight tracking-tight text-black sm:mt-5 sm:text-xl md:text-2xl">
+                                    <h3 className="mt-4 font-black uppercase leading-tight tracking-tight text-foreground sm:mt-5 sm:text-xl md:text-2xl">
                                         {project.title}
                                     </h3>
-                                    <p className="mt-2 font-mono text-[10px] uppercase leading-relaxed tracking-[0.2em] text-black/45 sm:text-[11px]">
+                                    <p className="mt-2 font-mono text-[10px] uppercase leading-relaxed tracking-[0.2em] text-foreground/45 sm:text-[11px]">
                                         {projectTagsLine(project)}
                                     </p>
                                 </button>
@@ -462,10 +462,10 @@ export default function Projects() {
                         ))}
                     </div>
 
-                    <div className="mt-12 border-t border-black/10 pt-10 sm:mt-14">
+                    <div className="mt-12 border-t border-border pt-10 sm:mt-14">
                         <Link
                             href="/projects"
-                            className="inline-flex items-center gap-3 bg-black px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-black/85"
+                            className="inline-flex items-center gap-3 bg-foreground px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85"
                         >
                             View all
                         </Link>
@@ -475,15 +475,15 @@ export default function Projects() {
                 {/* ——— lg+ : split column + pinned scrub gallery ——— */}
                 <div className="hidden gap-8 lg:flex lg:flex-row lg:items-start lg:gap-10 xl:gap-14">
                     <div className="flex w-full shrink-0 flex-col lg:w-[min(100%,320px)] xl:w-[360px]">
-                        <span className="mb-3 block font-mono text-[10px] uppercase tracking-[0.35em] text-black/45">
+                        <span className="mb-3 block font-mono text-[10px] uppercase tracking-[0.35em] text-foreground/45">
                             Selected Projects
                         </span>
-                        <h2 className="text-3xl font-black uppercase leading-[0.95] tracking-tighter text-black sm:text-4xl lg:text-5xl">
+                        <h2 className="text-3xl font-black uppercase leading-[0.95] tracking-tighter text-foreground sm:text-4xl lg:text-5xl">
                             Featured
                             <br />
                             Work
                         </h2>
-                        <p className="mt-5 max-w-sm text-sm leading-relaxed text-black/55 sm:text-base">
+                        <p className="mt-5 max-w-sm text-sm leading-relaxed text-foreground/55 sm:text-base">
                             Websites where scroll, motion, and interaction feel intentional. The details most teams skip
                             are the details we care about most.
                         </p>
@@ -496,7 +496,7 @@ export default function Projects() {
                                         key={project.slug}
                                         type="button"
                                         onClick={() => scrollToProject(index)}
-                                        className="group flex items-center gap-3 rounded-sm text-left outline-none ring-black/30 focus-visible:ring-2"
+                                        className="group flex items-center gap-3 rounded-sm text-left outline-none ring-foreground/30 focus-visible:ring-2"
                                     >
                                         <motion.div
                                             animate={{ scale: isActive ? 1 : 0.78 }}
@@ -534,7 +534,7 @@ export default function Projects() {
                                             ) : null}
                                             {!isActive ? (
                                                 <span
-                                                    className="pointer-events-none absolute inset-0 z-20 bg-black/55"
+                                                    className="pointer-events-none absolute inset-0 z-20 bg-muted5"
                                                     aria-hidden
                                                 />
                                             ) : null}
@@ -568,7 +568,7 @@ export default function Projects() {
                         <div className="mt-10 sm:mt-12">
                             <Link
                                 href="/projects"
-                                className="inline-flex items-center gap-3 bg-black px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-black/85"
+                                className="inline-flex items-center gap-3 bg-foreground px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85"
                             >
                                 View all
                             </Link>

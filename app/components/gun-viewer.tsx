@@ -24,7 +24,7 @@ type GunViewerProps = {
 function ModelLoadingFallback(): React.JSX.Element {
     return (
         <Html center>
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/25 border-t-black/70" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-foreground/70" />
         </Html>
     );
 }

@@ -23,11 +23,11 @@ function splitDescription(description: string): { lead: string; rest: string } {
 
 function MetaRow({ label, value }: { label: string; value: string }): ReactElement {
     return (
-        <div className="border-b border-black/10 py-4 first:pt-0 sm:py-5">
-            <dt className="font-mono text-[9px] uppercase tracking-[0.28em] text-black/40 sm:text-[10px]">
+        <div className="border-b border-border py-4 first:pt-0 sm:py-5">
+            <dt className="font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[10px]">
                 {label}
             </dt>
-            <dd className="mt-2 text-sm font-medium leading-snug text-black sm:text-base wrap-break-word">
+            <dd className="mt-2 text-sm font-medium leading-snug text-foreground sm:text-base wrap-break-word">
                 {value}
             </dd>
         </div>
@@ -116,21 +116,21 @@ export default function ProjectDescriptionPage({
 
                 {/* —— Case study body (reference: two columns, theme-aligned) —— */}
                 <section
-                    className="border-t border-black/10 bg-background"
+                    className="border-t border-border bg-background"
                     aria-label="Project details"
                 >
                     <div className="mx-auto max-w-[1920px] px-5 py-14 sm:px-8 sm:py-16 md:px-12 md:py-20 lg:px-16 lg:py-24 xl:px-24">
                         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16 xl:gap-20">
                             {/* Left column */}
                             <div className="lg:col-span-5 xl:col-span-4">
-                                <p className="text-2xl font-black uppercase leading-[0.95] tracking-tight text-black sm:text-3xl md:text-4xl wrap-break-word">
+                                <p className="text-2xl font-black uppercase leading-[0.95] tracking-tight text-foreground sm:text-3xl md:text-4xl wrap-break-word">
                                     {project.title}
                                 </p>
                                 <a
                                     href={project.live}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="mt-5 inline-block border-b border-black/25 pb-0.5 font-mono text-[11px] uppercase tracking-[0.2em] text-black/70 transition-colors hover:border-black/50 hover:text-black sm:text-xs"
+                                    className="mt-5 inline-block border-b border-foreground/25 pb-0.5 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-foreground/50 hover:text-foreground sm:text-xs"
                                 >
                                     View live site
                                 </a>
@@ -150,7 +150,7 @@ export default function ProjectDescriptionPage({
                                         href={project.github}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex w-full items-center justify-center border border-black/20 px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-black/80 transition-colors hover:border-black/35 hover:bg-black/5 hover:text-black sm:w-auto"
+                                        className="inline-flex w-full items-center justify-center border border-border px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground/80 transition-colors hover:border-foreground/35 hover:bg-muted hover:text-foreground sm:w-auto"
                                     >
                                         View source
                                     </a>
@@ -158,7 +158,7 @@ export default function ProjectDescriptionPage({
                                         href={project.live}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex w-full items-center justify-center rounded-full bg-black px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-black/85 sm:w-auto"
+                                        className="inline-flex w-full items-center justify-center rounded-full bg-foreground px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85 sm:w-auto"
                                     >
                                         Live demo
                                     </a>
@@ -167,31 +167,31 @@ export default function ProjectDescriptionPage({
 
                             {/* Right column */}
                             <div className="min-w-0 lg:col-span-7 xl:col-span-8">
-                                <h2 className="text-[clamp(1.5rem,3.2vw,2.75rem)] font-black uppercase leading-[1.05] tracking-tight text-black text-balance">
+                                <h2 className="text-[clamp(1.5rem,3.2vw,2.75rem)] font-black uppercase leading-[1.05] tracking-tight text-foreground text-balance">
                                     {lead}
                                 </h2>
-                                <div className="mt-6 h-px w-full bg-black/10 sm:mt-8" aria-hidden />
-                                <div className="mt-6 space-y-5 text-base leading-relaxed text-black/65 sm:mt-8 sm:text-lg sm:leading-relaxed">
+                                <div className="mt-6 h-px w-full bg-border sm:mt-8" aria-hidden />
+                                <div className="mt-6 space-y-5 text-base leading-relaxed text-muted-foreground sm:mt-8 sm:text-lg sm:leading-relaxed">
                                     {rest ? <p className="wrap-break-word">{rest}</p> : null}
                                 </div>
                             </div>
                         </div>
 
                         {/* Highlights — two-column block (reference layout) */}
-                        <div className="mt-16 grid grid-cols-1 gap-6 border-t border-black/10 pt-14 sm:mt-20 sm:gap-8 sm:pt-16 md:mt-24 md:pt-20 lg:grid-cols-12 lg:gap-12">
+                        <div className="mt-16 grid grid-cols-1 gap-6 border-t border-border pt-14 sm:mt-20 sm:gap-8 sm:pt-16 md:mt-24 md:pt-20 lg:grid-cols-12 lg:gap-12">
                             <div className="lg:col-span-5 xl:col-span-4">
-                                <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-black/45 sm:text-[11px]">
+                                <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px]">
                                     Highlights
                                 </h2>
-                                <p className="mt-4 text-xl font-black uppercase leading-tight tracking-tight text-black sm:text-2xl md:text-3xl wrap-break-word">
+                                <p className="mt-4 text-xl font-black uppercase leading-tight tracking-tight text-foreground sm:text-2xl md:text-3xl wrap-break-word">
                                     Scope &amp; impact
                                 </p>
                             </div>
                             <div className="min-w-0 lg:col-span-7 xl:col-span-8">
-                                <ul className="space-y-4 text-sm leading-relaxed text-black/70 sm:text-base md:space-y-5">
+                                <ul className="space-y-4 text-sm leading-relaxed text-foreground/80 sm:text-base md:space-y-5">
                                     {project.highlights.map((item) => (
                                         <li key={item} className="flex gap-3">
-                                            <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-black/30" aria-hidden />
+                                            <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-foreground/30" aria-hidden />
                                             <span className="wrap-break-word">{item}</span>
                                         </li>
                                     ))}

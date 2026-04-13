@@ -191,18 +191,18 @@ function PeerCursorMarker({
                 />
             </div>
 
-            <div className="flex max-w-40 items-center gap-2 rounded-2xl border border-white/20 bg-zinc-950/50 py-1.5 pl-2 pr-3 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.45)] backdrop-blur-md">
+            <div className="flex max-w-40 items-center gap-2 rounded-2xl border border-border bg-card/90 py-1.5 pl-2 pr-3 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.45)] backdrop-blur-md dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.55)]">
                 <span className="relative flex h-2.5 w-2.5 shrink-0">
                     <span
                         className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-50"
                         style={{ backgroundColor: solid }}
                     />
                     <span
-                        className="relative inline-flex h-2.5 w-2.5 rounded-full ring-2 ring-white/85"
+                        className="relative inline-flex h-2.5 w-2.5 rounded-full ring-2 ring-background/90"
                         style={{ backgroundColor: solid }}
                     />
                 </span>
-                <span className="truncate font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-100">
+                <span className="truncate font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">
                     {peer.label}
                 </span>
             </div>

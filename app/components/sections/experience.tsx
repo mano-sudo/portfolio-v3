@@ -112,17 +112,17 @@ export default function Experience() {
                     {/* Left — Title */}
                     <div className="experience-panel-left lg:w-5/12 space-y-6">
                         <div className="flex items-center gap-3">
-                            <span className="experience-anim text-[10px] sm:text-xs uppercase tracking-[0.35em] text-black/45 font-mono">
+                            <span className="experience-anim text-[10px] sm:text-xs uppercase tracking-[0.35em] text-foreground/45 font-mono">
                                 Experience
                             </span>
-                            <div className="h-px flex-1 bg-black/10" />
+                            <div className="h-px flex-1 bg-border" />
                         </div>
 
-                        <h2 className="experience-anim text-[clamp(2rem,5vw,5rem)] font-black uppercase leading-[0.95] text-black tracking-tight">
+                        <h2 className="experience-anim text-[clamp(2rem,5vw,5rem)] font-black uppercase leading-[0.95] text-foreground tracking-tight">
                             Work History
                         </h2>
 
-                        <p className="experience-anim text-base sm:text-lg text-black/65 leading-relaxed max-w-lg">
+                        <p className="experience-anim text-base sm:text-lg text-foreground/65 leading-relaxed max-w-lg">
                             Roles and innovation work across enterprise and academic projects.
                         </p>
                     </div>
@@ -131,26 +131,26 @@ export default function Experience() {
                     <div className="experience-panel-right lg:w-7/12 lg:self-center">
                         <div className="grid gap-10 md:gap-12">
                             {experiences.map((exp) => (
-                                <article key={`${exp.company}-${exp.period}-${exp.title}`} className="experience-anim border border-black/10 bg-black/2 p-6 md:p-8 lg:p-10">
-                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-black/60 text-xs md:text-sm font-medium mb-4">
-                                        <span className="flex items-center gap-2 text-black/85">
-                                            <Briefcase className="w-4 h-4 opacity-50 text-black" />
+                                <article key={`${exp.company}-${exp.period}-${exp.title}`} className="experience-anim border border-border bg-muted/30 p-6 md:p-8 lg:p-10">
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-foreground/60 text-xs md:text-sm font-medium mb-4">
+                                        <span className="flex items-center gap-2 text-foreground/85">
+                                            <Briefcase className="w-4 h-4 opacity-50 text-foreground" />
                                             {exp.company}
                                         </span>
-                                        <span className="flex items-center gap-2 text-black/55">
+                                        <span className="flex items-center gap-2 text-foreground/55">
                                             <MapPin className="w-4 h-4 opacity-40" />
                                             {exp.location}
                                         </span>
-                                        <span className="text-black/45 font-mono uppercase tracking-widest text-[10px] md:text-xs">
+                                        <span className="text-foreground/45 font-mono uppercase tracking-widest text-[10px] md:text-xs">
                                             {exp.period}
                                         </span>
                                     </div>
 
-                                    <h3 className="text-2xl md:text-4xl lg:text-5xl font-black text-black tracking-tight leading-none mb-4">
+                                    <h3 className="text-2xl md:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-none mb-4">
                                         {exp.title}
                                     </h3>
 
-                                    <p className="text-black/65 text-sm md:text-base leading-relaxed max-w-3xl mb-6">
+                                    <p className="text-foreground/65 text-sm md:text-base leading-relaxed max-w-3xl mb-6">
                                         {exp.description}
                                     </p>
 
@@ -158,7 +158,7 @@ export default function Experience() {
                                         {exp.tech.map((tech) => (
                                             <span
                                                 key={tech}
-                                                className="experience-tech-anim text-[10px] md:text-xs px-3 py-1.5 md:px-4 md:py-2 bg-black/3 text-black/60 border border-black/10 font-mono uppercase tracking-widest"
+                                                className="experience-tech-anim text-[10px] md:text-xs px-3 py-1.5 md:px-4 md:py-2 bg-muted text-foreground/60 border border-border font-mono uppercase tracking-widest"
                                             >
                                                 {tech}
                                             </span>

@@ -46,9 +46,9 @@ const ProjectGridCard = memo(function ProjectGridCard({
             <button
                 type="button"
                 onClick={() => onSelect(project.slug)}
-                className="group w-full cursor-pointer text-left outline-none ring-black/30 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="group w-full cursor-pointer text-left outline-none ring-foreground/30 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
-                <div className="relative isolate aspect-16/10 w-full overflow-hidden rounded-sm border border-black/10 bg-black/5">
+                <div className="relative isolate aspect-16/10 w-full overflow-hidden rounded-sm border border-border bg-muted">
                     <Image
                         src={project.image}
                         alt={project.title}
@@ -61,25 +61,25 @@ const ProjectGridCard = memo(function ProjectGridCard({
                     <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/15 via-transparent to-transparent" />
                 </div>
                 <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 sm:mt-5">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-black/40 sm:text-[11px]">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/40 sm:text-[11px]">
                         {project.year}
                     </span>
                     {project.featured ? (
-                        <span className="rounded-sm border border-black/15 bg-black/3 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-black/50 sm:text-[10px]">
+                        <span className="rounded-sm border border-border bg-muted/80 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-foreground/50 sm:text-[10px]">
                             Featured
                         </span>
                     ) : null}
                 </div>
-                <h2 className="mt-2 font-black uppercase leading-tight tracking-tight text-black sm:text-xl md:text-2xl">
+                <h2 className="mt-2 font-black uppercase leading-tight tracking-tight text-foreground sm:text-xl md:text-2xl">
                     {project.title}
                 </h2>
-                <p className="mt-2 font-mono text-[10px] uppercase leading-relaxed tracking-[0.2em] text-black/45 sm:text-[11px]">
+                <p className="mt-2 font-mono text-[10px] uppercase leading-relaxed tracking-[0.2em] text-foreground/45 sm:text-[11px]">
                     {projectTagsLine(project)}
                 </p>
-                <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-black/55 sm:text-base">
+                <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-foreground/55 sm:text-base">
                     {project.description}
                 </p>
-                <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-black/35 sm:text-[11px]">
+                <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/35 sm:text-[11px]">
                     View project details
                 </p>
             </button>
@@ -157,7 +157,7 @@ export default function ProjectsPage() {
     }, [isNavigating]);
 
     return (
-        <main className="min-h-screen w-full overflow-x-hidden border-t border-black/10 bg-background text-foreground">
+        <main className="min-h-screen w-full overflow-x-hidden border-t border-border bg-background text-foreground">
             {isNavigating && (
                 <div className="pointer-events-none fixed inset-0 z-9999 overflow-hidden">
                     <motion.div
@@ -182,21 +182,21 @@ export default function ProjectsPage() {
             >
                 <header className="mb-10 max-w-2xl md:mb-14 lg:mb-16">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-black/45 sm:text-[11px]">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-foreground/45 sm:text-[11px]">
                             Portfolio
                         </span>
-                        <span className="hidden h-px w-8 bg-black/10 sm:block" aria-hidden />
+                        <span className="hidden h-px w-8 bg-border sm:block" aria-hidden />
                         <Link
                             href="/"
-                            className="font-mono text-[10px] uppercase tracking-[0.24em] text-black/40 transition-colors hover:text-black/70 sm:text-[11px]"
+                            className="font-mono text-[10px] uppercase tracking-[0.24em] text-foreground/40 transition-colors hover:text-foreground/70 sm:text-[11px]"
                         >
                             Back to home
                         </Link>
                     </div>
-                    <h1 className="mt-4 text-3xl font-black uppercase leading-[0.95] tracking-tighter text-black sm:mt-5 sm:text-4xl md:text-5xl lg:text-6xl">
+                    <h1 className="mt-4 text-3xl font-black uppercase leading-[0.95] tracking-tighter text-foreground sm:mt-5 sm:text-4xl md:text-5xl lg:text-6xl">
                         All Projects
                     </h1>
-                    <p className="mt-5 text-sm leading-relaxed text-black/55 sm:text-base md:text-lg">
+                    <p className="mt-5 text-sm leading-relaxed text-foreground/55 sm:text-base md:text-lg">
                         Full list of work—same craft as the featured section. Open any card for the full case study.
                     </p>
                 </header>

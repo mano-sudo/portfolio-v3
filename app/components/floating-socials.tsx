@@ -93,7 +93,7 @@ export default function FloatingSocials() {
                     target={social.href.startsWith("mailto") ? undefined : "_blank"}
                     rel={social.href.startsWith("mailto") ? undefined : "noopener noreferrer"}
                     aria-label={social.name}
-                    className="group flex items-center justify-center w-11 h-11 rounded-full border border-black/15 text-black/55 hover:text-black hover:border-black/40 hover:bg-black/5 transition-all duration-300"
+                    className="group flex items-center justify-center w-11 h-11 rounded-full border border-border text-foreground/55 hover:text-foreground hover:border-foreground/40 hover:bg-muted transition-all duration-300"
                 >
                     {social.icon}
                 </a>

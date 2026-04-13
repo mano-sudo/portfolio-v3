@@ -30,9 +30,9 @@ export default function Hero() {
                 <HeroMotionRoot className="md:hidden flex h-full flex-col justify-center gap-4 py-4 sm:py-6">
                     <HeroEnterSplitRow
                         left={
-                            <div className="font-mono uppercase tracking-[0.28em] text-[10px] text-black/70">
+                            <div className="font-mono uppercase tracking-[0.28em] text-[10px] text-foreground/70">
                                 <div>01/</div>
-                                <div className="mt-2 text-black/55 tracking-[0.26em]">
+                                <div className="mt-2 text-foreground/55 tracking-[0.26em]">
                                     From Philippines with
                                     <br />
                                     Love
@@ -46,7 +46,7 @@ export default function Hero() {
                         <h1
                             data-shoot-target="1"
                             data-shoot-granularity="char"
-                            className="text-black font-black uppercase leading-[0.9] tracking-[-0.05em] text-[clamp(2.6rem,11vw,4.6rem)]"
+                            className="text-foreground font-black uppercase leading-[0.9] tracking-[-0.05em] text-[clamp(2.6rem,11vw,4.6rem)]"
                         >
                             Software
                             <br />
@@ -59,7 +59,7 @@ export default function Hero() {
                     </HeroEnterBlock>
 
                     <HeroEnterBlock drift="center">
-                        <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-black/70 mb-2">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-foreground/70 mb-2">
                             Dr &amp; Me
                         </div>
                         <HeroInteractivePortrait frameClassName="w-full aspect-video">
@@ -78,12 +78,12 @@ export default function Hero() {
 
                     <HeroEnterBlock drift="right">
                         <div className="text-right">
-                            <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-black/72">
+                            <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-foreground/72">
                                 Building fast, clean web apps
                                 <br />
                                 for real users.
                             </p>
-                            <div className="mt-2 text-[10px] font-mono uppercase tracking-[0.24em] text-black/55">
+                            <div className="mt-2 text-[10px] font-mono uppercase tracking-[0.24em] text-foreground/55">
                                 Open for freelance / full-time
                                 <br />
                                 Based in Quezon City, PH
@@ -95,7 +95,7 @@ export default function Hero() {
                         <div
                             data-shoot-target="1"
                             data-shoot-granularity="char"
-                            className="text-right text-black font-black uppercase leading-[0.88] tracking-[-0.06em] text-[clamp(3.1rem,13vw,5.2rem)]"
+                            className="text-right text-foreground font-black uppercase leading-[0.88] tracking-[-0.06em] text-[clamp(3.1rem,13vw,5.2rem)]"
                         >
                             Roman
                             <br />
@@ -104,18 +104,18 @@ export default function Hero() {
                     </HeroEnterBlock>
 
                     <HeroEnterBlock>
-                        <div className="text-right text-[10px] font-mono uppercase tracking-[0.26em] text-black/55">
+                        <div className="text-right text-[10px] font-mono uppercase tracking-[0.26em] text-foreground/55">
                             {new Date().getFullYear()} Portfolio
                         </div>
                     </HeroEnterBlock>
 
                     <HeroEnterBlock>
                         <div className="grid grid-cols-12 items-start gap-4">
-                            <div className="col-span-2 text-black/70 text-lg leading-none select-none">
+                            <div className="col-span-2 text-foreground/70 text-lg leading-none select-none">
                                 <span aria-hidden="true">-&gt;</span>
                             </div>
                             <div className="col-span-10">
-                                <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-black/70">
+                                <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-foreground/70">
                                     I based in
                                     <br />
                                     Quezon City,
@@ -131,7 +131,7 @@ export default function Hero() {
                     </HeroEnterBlock>
 
                     <HeroEnterBlock drift="right">
-                        <div className="text-right text-[10px] font-mono uppercase tracking-[0.28em] text-black/55">
+                        <div className="text-right text-[10px] font-mono uppercase tracking-[0.28em] text-foreground/55">
                             Design &amp; code by Roman
                         </div>
                     </HeroEnterBlock>
@@ -144,9 +144,9 @@ export default function Hero() {
                         <HeroEnterBlock className="col-span-12 md:col-span-5 md:order-2">
                             <div className="flex flex-col items-end gap-3 md:items-end">
                                 <HeroAvailability />
-                                <div className="font-mono uppercase tracking-[0.28em] text-[10px] text-black/70 md:text-right">
+                                <div className="font-mono uppercase tracking-[0.28em] text-[10px] text-foreground/70 md:text-right">
                                     <div>01/</div>
-                                    <div className="mt-2 text-black/55 tracking-[0.26em]">
+                                    <div className="mt-2 text-foreground/55 tracking-[0.26em]">
                                         From Philippines with
                                         <br />
                                         Love
@@ -159,7 +159,7 @@ export default function Hero() {
                             <h1
                                 data-shoot-target="1"
                                 data-shoot-granularity="char"
-                                className="text-black font-black uppercase leading-[0.88] tracking-[-0.04em] text-[clamp(2.8rem,6.6vw,6.6rem)]"
+                                className="text-foreground font-black uppercase leading-[0.88] tracking-[-0.04em] text-[clamp(2.8rem,6.6vw,6.6rem)]"
                             >
                                 Software
                                 <br />
@@ -175,12 +175,12 @@ export default function Hero() {
                     <div className="grid grid-cols-12 items-start gap-x-6 gap-y-8">
                         <HeroEnterBlock className="col-span-12 md:col-span-5 md:order-2" drift="right">
                             <div className="mb-8 max-w-104 md:ml-auto md:text-right">
-                                <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-black/72">
+                                <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-foreground/72">
                                     Building fast, clean web apps
                                     <br />
                                     for real users.
                                 </p>
-                                <div className="mt-3 text-[10px] font-mono uppercase tracking-[0.24em] text-black/55">
+                                <div className="mt-3 text-[10px] font-mono uppercase tracking-[0.24em] text-foreground/55">
                                     Open for freelance / full-time
                                     <br />
                                     Based in Quezon City, PH
@@ -190,14 +190,14 @@ export default function Hero() {
                             <div
                                 data-shoot-target="1"
                                 data-shoot-granularity="char"
-                                className="text-black font-black uppercase leading-[0.88] tracking-[-0.05em] text-[clamp(3.4rem,6.7vw,6.4rem)] md:text-right"
+                                className="text-foreground font-black uppercase leading-[0.88] tracking-[-0.05em] text-[clamp(3.4rem,6.7vw,6.4rem)] md:text-right"
                             >
                                 Roman
                                 <br />
                                 Caseres
                             </div>
 
-                            <div className="mt-8 text-[10px] font-mono uppercase tracking-[0.26em] text-black/55 md:text-right">
+                            <div className="mt-8 text-[10px] font-mono uppercase tracking-[0.26em] text-foreground/55 md:text-right">
                                 {new Date().getFullYear()} Portfolio
                             </div>
 
@@ -223,11 +223,11 @@ export default function Hero() {
                                     </HeroInteractivePortrait>
 
                                     <div className="mt-6 grid grid-cols-12 items-start gap-4">
-                                        <div className="col-span-2 text-black/70 text-lg leading-none select-none">
+                                        <div className="col-span-2 text-foreground/70 text-lg leading-none select-none">
                                             <span aria-hidden="true">-&gt;</span>
                                         </div>
                                         <div className="col-span-10">
-                                            <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-black/70">
+                                            <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-foreground/70">
                                                 I based in
                                                 <br />
                                                 Quezon City,
@@ -237,7 +237,7 @@ export default function Hero() {
                                         </div>
                                     </div>
 
-                                    <div className="mt-10 text-left text-[10px] font-mono uppercase tracking-[0.28em] text-black/55">
+                                    <div className="mt-10 text-left text-[10px] font-mono uppercase tracking-[0.28em] text-foreground/55">
                                         Design &amp; code by Roman
                                     </div>
                                 </div>

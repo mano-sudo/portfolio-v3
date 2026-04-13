@@ -19,7 +19,7 @@ function GunLoadingFallback(): React.JSX.Element {
     return (
         <div className="h-64 w-[min(92vw,30rem)] sm:h-80 sm:w-xl md:h-96 md:w-176 overflow-visible flex items-end justify-center">
             <div className="h-60 w-[min(88vw,24rem)] sm:h-72 sm:w-md md:h-88 md:w-xl flex items-center justify-center">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-black/20 border-t-black/70" />
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-foreground/70" />
             </div>
         </div>
     );
@@ -653,10 +653,10 @@ export default function FloatingShootToggle(): React.JSX.Element {
                     data-shoot-ui="1"
                 >
                     <div className="relative h-7 w-7">
-                        <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-black/70" />
-                        <span className="absolute top-1/2 left-0 h-px w-full -translate-y-1/2 bg-black/70" />
-                        <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/80" />
-                        <span className="absolute right-[-8px] top-1/2 h-[2px] w-3 -translate-y-1/2 bg-black/80" />
+                        <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-foreground/70" />
+                        <span className="absolute top-1/2 left-0 h-px w-full -translate-y-1/2 bg-foreground/70" />
+                        <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-foreground/80" />
+                        <span className="absolute right-[-8px] top-1/2 h-[2px] w-3 -translate-y-1/2 bg-foreground/80" />
                     </div>
                 </div>
             )}
@@ -687,7 +687,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
                                 "px-4 py-2",
                                 "shadow-[0_18px_50px_-30px_rgba(0,0,0,0.35)]",
                                 "transition-[border-color,background-color] duration-200",
-                                isOn ? "border-black/35 bg-[#f4f3ee]" : "",
+                                isOn ? "border-border bg-card" : "",
                             ].join(" ")}
                             aria-pressed={isOn}
                             aria-label="Toggle shoot mode"
@@ -696,22 +696,22 @@ export default function FloatingShootToggle(): React.JSX.Element {
                                 aria-hidden="true"
                                 className={[
                                     "relative inline-flex h-5 w-9 items-center rounded-full",
-                                    "border border-black/25 bg-transparent",
+                                    "border border-border bg-transparent",
                                     "transition-[border-color,background-color] duration-200",
-                                    isOn ? "bg-black/5 border-black/35" : "",
+                                    isOn ? "bg-muted border-foreground/35" : "",
                                 ].join(" ")}
                             >
                                 <span
                                     className={[
                                         "absolute left-0.5 top-1/2 -translate-y-1/2",
-                                        "h-4 w-4 rounded-full bg-black",
+                                        "h-4 w-4 rounded-full bg-foreground",
                                         "transition-transform duration-200 ease-out",
                                         isOn ? "translate-x-4" : "translate-x-0",
                                     ].join(" ")}
                                 />
                             </span>
 
-                            <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-black/80 select-none">
+                            <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-foreground/80 select-none">
                                 Shoot
                             </span>
                         </button>
@@ -722,7 +722,7 @@ export default function FloatingShootToggle(): React.JSX.Element {
                     {/* Right: date/time */}
                     <div className="pointer-events-none">
                         <div className="rounded-full  backdrop-blur-md px-4 py-2">
-                            <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-black/70 select-none">
+                            <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-foreground/70 select-none">
                                 {dateTimeText}
                             </div>
                         </div>

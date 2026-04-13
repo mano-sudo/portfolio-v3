@@ -52,10 +52,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AppNavbar />
-        <CollaborativeCursors />
-        <FloatingShootToggleHost />
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <AppNavbar />
+          <CollaborativeCursors />
+          <FloatingShootToggleHost />
           <SmoothScroll>
             <PageTransition>{children}</PageTransition>
           </SmoothScroll>

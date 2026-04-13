@@ -90,8 +90,8 @@ export default function Testimonials() {
         <section ref={containerRef} className="testimonials-section relative w-full py-32 overflow-hidden bg-background">
             <div className="max-w-[1920px] mx-auto px-4 sm:px-6 md:px-12 lg:px-20 mb-20">
                 <div className="flex flex-col gap-4">
-                    <span className="testimonial-header text-xs uppercase tracking-[0.3em] text-black/45 font-medium">Testimonials</span>
-                    <h2 className="testimonial-header text-[clamp(2.5rem,6vw,6rem)] font-black uppercase leading-[0.9] text-black">
+                    <span className="testimonial-header text-xs uppercase tracking-[0.3em] text-foreground/45 font-medium">Testimonials</span>
+                    <h2 className="testimonial-header text-[clamp(2.5rem,6vw,6rem)] font-black uppercase leading-[0.9] text-foreground">
                         What People <br /> Say
                     </h2>
                 </div>
@@ -108,28 +108,28 @@ export default function Testimonials() {
                             key={index} 
                             className="w-[350px] md:w-[500px] shrink-0 group relative"
                         >
-                            <div className="h-full bg-transparent border-t border-black/20 hover:border-black/40 transition-colors duration-500 pt-8 flex flex-col justify-between">
+                            <div className="h-full bg-transparent border-t border-border hover:border-foreground/40 transition-colors duration-500 pt-8 flex flex-col justify-between">
                                 <div>
-                                    <div className="mb-6 text-black/40">
+                                    <div className="mb-6 text-foreground/40">
                                         <Quote className="w-8 h-8 opacity-50" />
                                     </div>
                                     
-                                    <p className="text-lg md:text-xl text-black/80 leading-relaxed font-light mb-8">
+                                    <p className="text-lg md:text-xl text-foreground/80 leading-relaxed font-light mb-8">
                                         "{testimonial.content}"
                                     </p>
                                 </div>
 
                                 <div className="flex items-center gap-4 mt-auto">
-                                    <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center text-lg border border-black/10">
+                                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-lg border border-border">
                                         {testimonial.image}
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-black uppercase tracking-wider text-xs">{testimonial.name}</h4>
-                                        <p className="text-[10px] text-black/45 uppercase tracking-widest mt-1">{testimonial.company}</p>
+                                        <h4 className="font-bold text-foreground uppercase tracking-wider text-xs">{testimonial.name}</h4>
+                                        <p className="text-[10px] text-foreground/45 uppercase tracking-widest mt-1">{testimonial.company}</p>
                                     </div>
                                     <div className="ml-auto flex gap-0.5 opacity-50">
                                         {[...Array(testimonial.rating)].map((_, i) => (
-                                            <span key={i} className="text-black text-[10px]">★</span>
+                                            <span key={i} className="text-foreground text-[10px]">★</span>
                                         ))}
                                     </div>
                                 </div>

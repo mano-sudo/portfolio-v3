@@ -171,22 +171,15 @@ export function HeroBackdrop(): React.JSX.Element {
             aria-hidden
             style={HERO_MOTION_ORIGIN}
         >
-            <div
-                className="absolute inset-0 opacity-[0.04]"
-                style={{
-                    backgroundImage:
-                        "linear-gradient(to right, rgb(0 0 0 / 0.5) 1px, transparent 1px), linear-gradient(to bottom, rgb(0 0 0 / 0.5) 1px, transparent 1px)",
-                    backgroundSize: "44px 44px",
-                }}
-            />
+            <div className="hero-backdrop-grid absolute inset-0 opacity-[0.04]" />
             {!reduceMotion ? (
                 <>
                     <div
-                        className="hero-backdrop-orb-a absolute -left-[18%] top-[12%] h-[min(42vw,420px)] w-[min(42vw,420px)] rounded-full bg-black/4.5 blur-2xl"
+                        className="hero-backdrop-orb-a absolute -left-[18%] top-[12%] h-[min(42vw,420px)] w-[min(42vw,420px)] rounded-full bg-foreground/4.5 blur-2xl"
                         aria-hidden
                     />
                     <div
-                        className="hero-backdrop-orb-b absolute -right-[12%] bottom-[18%] h-[min(36vw,360px)] w-[min(36vw,360px)] rounded-full bg-black/5.5 blur-2xl"
+                        className="hero-backdrop-orb-b absolute -right-[12%] bottom-[18%] h-[min(36vw,360px)] w-[min(36vw,360px)] rounded-full bg-foreground/5.5 blur-2xl"
                         aria-hidden
                     />
                 </>
@@ -210,16 +203,15 @@ export function HeroInteractivePortrait({
         <div className="group relative">
             <div
                 className={cn(
-                    "relative overflow-hidden border border-black/20 bg-black/5",
+                    "relative overflow-hidden border border-border bg-muted/60",
                     "shadow-none transition-shadow duration-300 ease-out",
-                    !reduceMotion &&
-                        "hover:shadow-[0_22px_55px_-28px_rgb(0_0_0/.22)]",
+                    !reduceMotion && "hover:shadow-xl",
                     frameClassName
                 )}
             >
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 z-1 bg-linear-to-t from-black/18 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                    className="pointer-events-none absolute inset-0 z-1 bg-linear-to-t from-foreground/18 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 />
                 <div className="relative z-0 h-full w-full">
                     <div
@@ -232,19 +224,19 @@ export function HeroInteractivePortrait({
                     </div>
                 </div>
                 <span
-                    className="pointer-events-none absolute left-2 top-2 z-2 h-3 w-3 border-l border-t border-black/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
+                    className="pointer-events-none absolute left-2 top-2 z-2 h-3 w-3 border-l border-t border-foreground/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
                     aria-hidden
                 />
                 <span
-                    className="pointer-events-none absolute right-2 top-2 z-2 h-3 w-3 border-r border-t border-black/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
+                    className="pointer-events-none absolute right-2 top-2 z-2 h-3 w-3 border-r border-t border-foreground/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
                     aria-hidden
                 />
                 <span
-                    className="pointer-events-none absolute bottom-2 left-2 z-2 h-3 w-3 border-l border-b border-black/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
+                    className="pointer-events-none absolute bottom-2 left-2 z-2 h-3 w-3 border-l border-b border-foreground/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
                     aria-hidden
                 />
                 <span
-                    className="pointer-events-none absolute bottom-2 right-2 z-2 h-3 w-3 border-r border-b border-black/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
+                    className="pointer-events-none absolute bottom-2 right-2 z-2 h-3 w-3 border-r border-b border-foreground/30 opacity-50 transition-opacity duration-300 group-hover:opacity-100"
                     aria-hidden
                 />
             </div>
@@ -266,11 +258,11 @@ export function HeroTechChips(): React.JSX.Element {
                     key={item.label}
                     href={item.href}
                     className={cn(
-                        "inline-flex items-center rounded-full border border-black/18 bg-black/2",
-                        "px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.22em] text-black/65",
+                        "inline-flex items-center rounded-full border border-border bg-muted/50",
+                        "px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.22em] text-foreground/65",
                         "transition-[border-color,background-color,transform,box-shadow] duration-200",
-                        "hover:border-black/35 hover:bg-black/5 hover:text-black/85",
-                        "active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/30"
+                        "hover:border-foreground/35 hover:bg-muted hover:text-foreground/85",
+                        "active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                     )}
                 >
                     {item.label}
@@ -286,7 +278,7 @@ export function HeroAvailability(): React.JSX.Element {
     return (
         <div
             data-shoot-ui="1"
-            className="inline-flex max-w-44 items-center gap-2 rounded-full border border-black/15 bg-black/3 px-2.5 py-1 sm:max-w-none"
+            className="inline-flex max-w-44 items-center gap-2 rounded-full border border-border bg-muted/60 px-2.5 py-1 sm:max-w-none"
         >
             <span className="relative flex h-2 w-2 shrink-0">
                 {!reduceMotion ? (
@@ -294,7 +286,7 @@ export function HeroAvailability(): React.JSX.Element {
                 ) : null}
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600/90" />
             </span>
-            <span className="text-[9px] font-mono uppercase leading-tight tracking-[0.18em] text-black/58">
+            <span className="text-[9px] font-mono uppercase leading-tight tracking-[0.18em] text-foreground/58">
                 Open for work
             </span>
         </div>
@@ -309,11 +301,11 @@ export function HeroExploreLink({ className }: { className?: string }): React.JS
             <Link
                 href="#projects"
                 className={cn(
-                    "group inline-flex items-center gap-2 rounded-full border border-black/20 bg-transparent",
-                    "px-3 py-2 text-[10px] font-mono uppercase tracking-[0.24em] text-black/70",
+                    "group inline-flex items-center gap-2 rounded-full border border-border bg-transparent",
+                    "px-3 py-2 text-[10px] font-mono uppercase tracking-[0.24em] text-foreground/70",
                     "transition-[border-color,background-color,color,transform] duration-200",
-                    "hover:border-black/40 hover:bg-black/4 hover:text-black",
-                    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/30"
+                    "hover:border-foreground/40 hover:bg-muted hover:text-foreground",
+                    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                 )}
             >
                 <span>Selected work</span>

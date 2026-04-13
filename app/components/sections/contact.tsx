@@ -80,8 +80,8 @@ export default function Contact() {
     return (
         <section ref={containerRef} id="contact" className="contact-section relative w-full py-32 bg-background overflow-hidden">
             {/* Background Atmosphere */}
-            <div className="absolute top-0 right-0 w-[520px] h-[520px] bg-black/4 blur-[110px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[420px] h-[420px] bg-black/3 blur-[100px] rounded-full pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[520px] h-[520px] bg-foreground/4 blur-[110px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[420px] h-[420px] bg-foreground/3 blur-[100px] rounded-full pointer-events-none" />
 
             <div className="max-w-[1920px] mx-auto px-4 sm:px-6 md:px-12 lg:px-20 relative z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
@@ -90,24 +90,24 @@ export default function Contact() {
                     <div className="space-y-12">
                         <div className="space-y-2 overflow-hidden">
                             <div className="overflow-hidden">
-                                <span className="contact-header-text block text-xs uppercase tracking-[0.3em] text-black/45 font-medium mb-4">
+                                <span className="contact-header-text block text-xs uppercase tracking-[0.3em] text-foreground/45 font-medium mb-4">
                                     Contact
                                 </span>
                             </div>
                             <div className="overflow-hidden">
-                                <h2 className="contact-header-text block text-[clamp(3.5rem,9vw,8rem)] font-black uppercase leading-[0.9] text-black">
+                                <h2 className="contact-header-text block text-[clamp(3.5rem,9vw,8rem)] font-black uppercase leading-[0.9] text-foreground">
                                     Let's Work
                                 </h2>
                             </div>
                             <div className="overflow-hidden">
-                                <h2 className="contact-header-text block text-[clamp(3.5rem,9vw,8rem)] font-black uppercase leading-[0.9] text-black/30">
+                                <h2 className="contact-header-text block text-[clamp(3.5rem,9vw,8rem)] font-black uppercase leading-[0.9] text-foreground/30">
                                     Together
                                 </h2>
                             </div>
                         </div>
 
                         <div className="space-y-8 max-w-md">
-                            <p className="contact-content text-lg text-black/65 leading-relaxed font-light">
+                            <p className="contact-content text-lg text-foreground/65 leading-relaxed font-light">
                                 Have a project in mind? Looking for a partner to help build your next big idea? 
                                 I'm always open to discussing new opportunities and challenges.
                             </p>
@@ -117,10 +117,10 @@ export default function Contact() {
                                     <a 
                                         key={link.name}
                                         href={link.url}
-                                        className="group flex items-center justify-center w-12 h-12 rounded-full border border-black/10 bg-black/2 hover:bg-black hover:border-transparent transition-all duration-300"
+                                        className="group flex items-center justify-center w-12 h-12 rounded-full border border-border bg-muted/30 hover:bg-foreground hover:border-transparent transition-all duration-300"
                                         aria-label={link.name}
                                     >
-                                        <link.icon className="w-5 h-5 text-black/60 group-hover:text-background transition-colors duration-300" />
+                                        <link.icon className="w-5 h-5 text-foreground/60 group-hover:text-background transition-colors duration-300" />
                                     </a>
                                 ))}
                             </div>
@@ -132,28 +132,28 @@ export default function Contact() {
                         <a 
                             ref={emailRef}
                             href="mailto:romancaseres929@gmail.com"
-                            className="email-card group relative block w-full h-[300px] lg:h-[400px] overflow-hidden bg-transparent border-t border-black/20 hover:border-black/50 transition-colors duration-500 pt-8 sm:pt-12"
+                            className="email-card group relative block w-full h-[300px] lg:h-[400px] overflow-hidden bg-transparent border-t border-border hover:border-foreground/50 transition-colors duration-500 pt-8 sm:pt-12"
                         >
                             <div className="relative h-full flex flex-col justify-between z-10 px-2 sm:px-0">
                                 <div className="flex justify-between items-start">
                                     <div className="p-0">
-                                        <Mail className="w-8 h-8 text-black/50 group-hover:text-black transition-colors duration-500" />
+                                        <Mail className="w-8 h-8 text-foreground/50 group-hover:text-foreground transition-colors duration-500" />
                                     </div>
                                     <div className="email-icon">
-                                        <ArrowUpRight className="w-8 h-8 text-black/35 group-hover:text-black group-hover:rotate-45 transition-all duration-300" />
+                                        <ArrowUpRight className="w-8 h-8 text-foreground/35 group-hover:text-foreground group-hover:rotate-45 transition-all duration-300" />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <span className="text-xs uppercase tracking-[0.2em] text-black/45 mb-4 block">Drop me a line</span>
-                                    <h3 className="flex flex-col text-xl sm:text-3xl md:text-4xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-black uppercase text-black mb-8 leading-[0.9]">
+                                    <span className="text-xs uppercase tracking-[0.2em] text-foreground/45 mb-4 block">Drop me a line</span>
+                                    <h3 className="flex flex-col text-xl sm:text-3xl md:text-4xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-black uppercase text-foreground mb-8 leading-[0.9]">
                                         <span>romancaseres929</span>
-                                        <span className="text-black/50">@gmail.com</span>
+                                        <span className="text-foreground/50">@gmail.com</span>
                                     </h3>
                                     
                                     <button 
                                         onClick={copyEmail}
-                                        className="inline-flex items-center gap-3 text-sm uppercase tracking-wider text-black/50 hover:text-black transition-all group/btn"
+                                        className="inline-flex items-center gap-3 text-sm uppercase tracking-wider text-foreground/50 hover:text-foreground transition-all group/btn"
                                     >
                                         {copied ? (
                                             <>
@@ -163,7 +163,7 @@ export default function Contact() {
                                         ) : (
                                             <>
                                                 <Copy className="w-4 h-4" />
-                                                <span className="group-hover/btn:underline decoration-black/30 underline-offset-4">Copy Address</span>
+                                                <span className="group-hover/btn:underline decoration-foreground/30 underline-offset-4">Copy Address</span>
                                             </>
                                         )}
                                     </button>

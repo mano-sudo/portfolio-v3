@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Github, MessageCircle, Send, Star, Users } from "lucide-react";
+import { Github, MessageCircle, Moon, Send, Star, Sun, Users } from "lucide-react";
+import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser-client";
@@ -136,6 +137,7 @@ type DbChatMessageRow = {
 };
 
 export default function AppNavbar() {
+    const { resolvedTheme, setTheme } = useTheme();
     const pathname = usePathname();
     const isProjectDetailPage = pathname.startsWith("/projects/") && pathname !== "/projects";
     const navRef = useRef<HTMLElement | null>(null);
@@ -154,6 +156,7 @@ export default function AppNavbar() {
     const [stars, setStars] = useState<number | null>(null);
     const [activeUsers, setActiveUsers] = useState<number>(1);
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const [themeReady, setThemeReady] = useState(false);
     const supabaseRef = useRef<ReturnType<typeof getSupabaseBrowserClient>>(null);
     /** Set in init effect from localStorage (stable guest or saved name). */
     const userNameRef = useRef<string>("");
@@ -191,6 +194,10 @@ export default function AppNavbar() {
             countryCode: fromDb ?? selfFallback,
         };
     };
+
+    useEffect(() => {
+        setThemeReady(true);
+    }, []);
 
     useEffect(() => {
         const updateTime = () => {
@@ -521,11 +528,12 @@ export default function AppNavbar() {
         { name: "CONTACTS", href: "/#contact" },
     ];
 
-    const topTextClass = isProjectDetailPage ? "text-background/85" : "text-black/70";
+    const topTextClass = isProjectDetailPage ? "text-white/85" : "text-foreground/70";
     const topButtonClass = isProjectDetailPage
-        ? "border-background/30 bg-black/25 text-background/90 hover:border-background/50 hover:bg-black/35"
-        : "border-black/20 bg-background text-black/80 hover:border-black/35 hover:bg-black/5";
-    const menuBarClass = isProjectDetailPage ? "bg-background" : "bg-black";
+        ? "border-white/25 bg-white/10 text-white/90 hover:border-white/40 hover:bg-white/15"
+        : "border-border bg-background text-foreground/80 hover:border-foreground/20 hover:bg-muted";
+    const menuBarClass = isProjectDetailPage ? "bg-white" : "bg-foreground";
+    const themeToggleClass = topButtonClass;
 
     /** Full-width default at the top of the page (no glass, no bar line). */
     const navSurfaceTopClass = "border-0 bg-transparent backdrop-blur-none";
@@ -761,23 +769,23 @@ export default function AppNavbar() {
                                 </button>
 
                             {chatOpen && (
-                                <div className="z-61 w-[min(calc(100vw-1.25rem),360px)] rounded-2xl border border-black/15 bg-[#f4f3ee] p-3 text-black shadow-[0_24px_55px_-30px_rgba(0,0,0,0.35)] max-sm:fixed max-sm:left-1/2 max-sm:right-auto max-sm:top-[calc(var(--app-header-h,56px)+0.5rem)] max-sm:mt-0 max-sm:-translate-x-1/2 sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:translate-x-0">
-                                <div className="mb-2 flex items-center justify-between border-b border-black/10 pb-2">
-                                    <span className="text-xs font-mono uppercase tracking-[0.2em] text-black/80"># general</span>
+                                <div className="z-61 w-[min(calc(100vw-1.25rem),360px)] rounded-2xl border border-border bg-card p-3 text-foreground shadow-[0_24px_55px_-30px_rgba(0,0,0,0.35)] max-sm:fixed max-sm:left-1/2 max-sm:right-auto max-sm:top-[calc(var(--app-header-h,56px)+0.5rem)] max-sm:mt-0 max-sm:-translate-x-1/2 sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:translate-x-0 dark:shadow-[0_24px_55px_-30px_rgba(0,0,0,0.55)]">
+                                <div className="mb-2 flex items-center justify-between border-b border-border pb-2">
+                                    <span className="text-xs font-mono uppercase tracking-[0.2em] text-foreground/80"># general</span>
                                     <div className="flex items-center gap-3">
                                         <button
                                             type="button"
                                             onClick={() => setIsEditingName((prev) => !prev)}
-                                            className="text-[10px] font-mono uppercase tracking-[0.18em] text-black/55 transition-colors hover:text-black/90"
+                                            className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
                                         >
                                             {isEditingName ? "cancel" : "change name"}
                                         </button>
-                                        <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-black/45">live chat</span>
+                                        <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground">live chat</span>
                                     </div>
                                 </div>
 
                                 {isEditingName && (
-                                    <div className="mb-2 flex items-center gap-2 rounded-lg border border-black/12 bg-black/3 p-2">
+                                    <div className="mb-2 flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-2">
                                         <input
                                             type="text"
                                             value={nameDraft}
@@ -786,12 +794,12 @@ export default function AppNavbar() {
                                                 if (event.key === "Enter") saveDisplayName();
                                             }}
                                             placeholder="Your display name"
-                                            className="h-8 w-full rounded-md border border-black/10 bg-background px-2 text-sm text-black outline-none placeholder:text-black/40 focus:border-black/35"
+                                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-ring"
                                         />
                                         <button
                                             type="button"
                                             onClick={saveDisplayName}
-                                            className="rounded-md border border-black/20 bg-black/5 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-black/85 hover:bg-black/10"
+                                            className="rounded-md border border-border bg-muted px-2 py-1 text-xs font-semibold uppercase tracking-wide text-foreground hover:bg-muted/80"
                                         >
                                             Save
                                         </button>
@@ -816,11 +824,11 @@ export default function AppNavbar() {
                                             <img
                                                 src={getAvatarUrl(message.user)}
                                                 alt={`${message.user} avatar`}
-                                                className="h-9 w-9 shrink-0 rounded-full border border-black/20 bg-black/5"
+                                                className="h-9 w-9 shrink-0 rounded-full border border-border bg-muted"
                                             />
                                             <div className="min-w-0">
                                                 <div className="flex min-w-0 items-center gap-2">
-                                                    <span className="min-w-0 truncate text-base font-bold leading-none text-black/85">{message.user}</span>
+                                                    <span className="min-w-0 truncate text-base font-bold leading-none text-foreground">{message.user}</span>
                                                     {message.countryCode ? (
                                                         <span
                                                             className="shrink-0 text-base leading-none"
@@ -830,19 +838,19 @@ export default function AppNavbar() {
                                                             {countryCodeToFlagEmoji(message.countryCode)}
                                                         </span>
                                                     ) : null}
-                                                    <span className="shrink-0 text-[10px] font-mono uppercase tracking-[0.12em] text-black/45">{message.time}</span>
+                                                    <span className="shrink-0 text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">{message.time}</span>
                                                 </div>
-                                                <p className="mt-1 wrap-break-word text-base leading-tight text-black/80">{message.text}</p>
+                                                <p className="mt-1 wrap-break-word text-base leading-tight text-foreground/85">{message.text}</p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="mt-3 flex items-center gap-2 border-t border-black/10 pt-2">
+                                <div className="mt-3 flex items-center gap-2 border-t border-border pt-2">
                                     <img
                                         src={getAvatarUrl(displayName || userNameRef.current)}
                                         alt="Your avatar"
-                                        className="h-8 w-8 shrink-0 rounded-full border border-black/20 bg-black/5"
+                                        className="h-8 w-8 shrink-0 rounded-full border border-border bg-muted"
                                     />
                                     <input
                                         type="text"
@@ -852,19 +860,19 @@ export default function AppNavbar() {
                                             if (event.key === "Enter") sendMessage();
                                         }}
                                         placeholder="Message #general"
-                                        className="h-9 w-full rounded-lg border border-black/10 bg-background px-3 text-sm text-black outline-none placeholder:text-black/35 focus:border-black/35"
+                                        className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-ring"
                                     />
                                     <button
                                         type="button"
                                         onClick={sendMessage}
-                                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-black/20 bg-black/5 text-black/85 transition-colors hover:border-black/35 hover:bg-black/10"
+                                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-muted text-foreground transition-colors hover:bg-muted/80"
                                         aria-label="Send message"
                                     >
                                         <Send className="h-4 w-4" />
                                     </button>
                                 </div>
 
-                                <div className="mt-1 pl-10 text-[10px] font-mono uppercase tracking-[0.16em] text-black/40">
+                                <div className="mt-1 pl-10 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
                                     You are chatting as {displayName || userNameRef.current}
                                 </div>
                             </div>
@@ -882,9 +890,34 @@ export default function AppNavbar() {
                             <span className="text-[10px] font-semibold tabular-nums tracking-wide sm:text-xs">
                                 {stars?.toLocaleString() ?? "1,017"}
                             </span>
-                            <Star className={`h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5 ${isProjectDetailPage ? "fill-background/90 text-background/90" : "fill-black/80 text-black/80"}`} />
+                            <Star className={`h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5 ${isProjectDetailPage ? "fill-white/90 text-white/90" : "fill-foreground/80 text-foreground/80"}`} />
                         </Link>
                     </div>
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                        }
+                        className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors ${themeToggleClass}`}
+                        aria-label={
+                            themeReady
+                                ? resolvedTheme === "dark"
+                                    ? "Switch to light theme"
+                                    : "Switch to dark theme"
+                                : "Toggle color theme"
+                        }
+                    >
+                        {themeReady ? (
+                            resolvedTheme === "dark" ? (
+                                <Sun className="h-4 w-4" aria-hidden />
+                            ) : (
+                                <Moon className="h-4 w-4" aria-hidden />
+                            )
+                        ) : (
+                            <Moon className="h-4 w-4 opacity-0" aria-hidden />
+                        )}
+                    </button>
 
                     {/* Menu Button */}
                     <button
@@ -928,7 +961,7 @@ export default function AppNavbar() {
                     {/* Close Button */}
                     <button
                         onClick={() => setMenuOpen(false)}
-                        className="absolute top-6 right-8 w-10 h-10 flex items-center justify-center text-black/60 hover:text-black transition-colors duration-300"
+                        className="absolute top-6 right-8 w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors duration-300"
                         aria-label="Close menu"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -957,14 +990,14 @@ export default function AppNavbar() {
                                 <span
                                     className={`text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-wider transition-colors duration-300 ${
                                         isActive
-                                            ? "text-black"
-                                            : "text-black/40 group-hover:text-black"
+                                            ? "text-foreground"
+                                            : "text-foreground/40 group-hover:text-foreground"
                                     }`}
                                 >
                                     {item.name}
                                 </span>
                                 {isActive && (
-                                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-black" />
+                                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-foreground" />
                                 )}
                             </Link>
                         );
@@ -972,7 +1005,7 @@ export default function AppNavbar() {
 
                     {/* Divider */}
                     <div
-                        className={`w-16 h-px bg-black/20 my-4 transition-all duration-500 ${
+                        className={`w-16 h-px bg-border my-4 transition-all duration-500 ${
                             menuOpen
                                 ? "opacity-100 scale-x-100"
                                 : "opacity-0 scale-x-0"
@@ -984,7 +1017,7 @@ export default function AppNavbar() {
                     <Link
                         href="#contact"
                         onClick={() => setMenuOpen(false)}
-                        className={`text-lg sm:text-xl font-semibold uppercase tracking-widest text-black/60 hover:text-black transition-all duration-500 ${
+                        className={`text-lg sm:text-xl font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-500 ${
                             menuOpen
                                 ? "opacity-100 translate-y-0"
                                 : "opacity-0 translate-y-8"
@@ -996,7 +1029,7 @@ export default function AppNavbar() {
 
                     {/* Time display at bottom */}
                     <div
-                        className={`absolute bottom-12 left-1/2 -translate-x-1/2 text-black/30 text-xs font-mono tracking-widest transition-all duration-500 ${
+                        className={`absolute bottom-12 left-1/2 -translate-x-1/2 text-muted-foreground text-xs font-mono tracking-widest transition-all duration-500 ${
                             menuOpen
                                 ? "opacity-100 translate-y-0"
                                 : "opacity-0 translate-y-4"

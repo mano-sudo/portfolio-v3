@@ -75,7 +75,7 @@ function VelocityText({
   const numCopies = isMobile ? 4 : 6;
   for (let i = 0; i < numCopies; i++) {
     spans.push(
-      <span key={i} ref={i === 0 ? copyRef : null} className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-black/20 hover:text-black/40 transition-colors duration-300 uppercase tracking-tighter italic whitespace-nowrap shrink-0">
+      <span key={i} ref={i === 0 ? copyRef : null} className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-foreground/20 hover:text-foreground/40 transition-colors duration-300 uppercase tracking-tighter italic whitespace-nowrap shrink-0">
         {children}
       </span>
     );
