@@ -409,6 +409,21 @@ body.shoot-mode-active *::selection {
   background-size: 44px 44px;
 }
 
+/* Dark mode: stronger lines + higher layer opacity (see hero-backdrop-grid-layer). */
+.dark .hero-backdrop-grid {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--foreground) 38%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--foreground) 38%, transparent) 1px,
+      transparent 1px
+    );
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .hero-backdrop-reveal {
     animation: hero-backdrop-reveal 0.32s ease-out both;

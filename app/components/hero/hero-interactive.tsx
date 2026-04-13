@@ -171,7 +171,7 @@ export function HeroBackdrop(): React.JSX.Element {
             aria-hidden
             style={HERO_MOTION_ORIGIN}
         >
-            <div className="hero-backdrop-grid absolute inset-0 opacity-[0.04]" />
+            <div className="hero-backdrop-grid absolute inset-0 opacity-[0.04] dark:opacity-[0.12]" />
             {!reduceMotion ? (
                 <>
                     <div
