@@ -3,6 +3,10 @@
 import * as React from "react";
 import dynamic from "next/dynamic";
 import { gsap } from "gsap";
+import {
+    ensurePaintballAudioRunning,
+    playPaintballShotSound,
+} from "@/app/utils/play-paintball-shot-sound";
 
 type ShootToggleState = "on" | "off";
 
@@ -284,6 +288,9 @@ export default function FloatingShootToggle(): React.JSX.Element {
         setIsOn((prev) => {
             const next = !prev;
             writeStateToStorage(next);
+            if (next) {
+                void ensurePaintballAudioRunning();
+            }
             return next;
         });
     }, []);
@@ -349,6 +356,8 @@ export default function FloatingShootToggle(): React.JSX.Element {
             if (raw?.closest(SHOOT_SCROLL_INTERACTIVE_SEL)) {
                 return;
             }
+
+            playPaintballShotSound();
 
             const id = Date.now() + Math.floor(Math.random() * 1000);
             const size = 26 + Math.random() * 20;
