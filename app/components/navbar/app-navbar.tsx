@@ -13,6 +13,9 @@ const CHAT_MESSAGE_TTL_MS = 10 * 60 * 1000;
 /** Past this scroll offset the navbar gets a solid surface; at the top it stays transparent. */
 const NAV_SOLID_BG_SCROLL_PX = 24;
 
+/** Match Tailwind `lg:` — desktop projects gallery / pin behavior. */
+const NAV_PROJECTS_SUPPRESS_MQ = "(min-width: 1024px)";
+
 const PRESENCE_SESSION_STORAGE_KEY = "portfolio-navbar-presence-session";
 
 /** Per-tab presence key (sessionStorage). Avoids double-count when dev Strict Mode remounts resets guest refs. */
@@ -157,6 +160,8 @@ export default function AppNavbar() {
     const countryCodeRef = useRef<string | null>(null);
     /** In-memory only: null = try country_code in REST; false = column missing this session. */
     const chatCountryColumnOkRef = useRef<boolean | null>(null);
+    /** Home `#projects` visible on lg+: do not reveal navbar on scroll-up (immersive scrub section). */
+    const projectsNavRevealSuppressedRef = useRef(false);
 
     const toTimeText = (isoValue: string) => {
         const date = new Date(isoValue);
@@ -215,6 +220,61 @@ export default function AppNavbar() {
         return () => { document.body.style.overflow = ""; };
     }, [menuOpen]);
 
+    // On home (lg+), while #projects intersects the viewport: keep scroll-up from revealing the bar.
+    useEffect(() => {
+        if (pathname !== "/") {
+            projectsNavRevealSuppressedRef.current = false;
+            return;
+        }
+
+        if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") {
+            return;
+        }
+
+        const section = document.getElementById("projects");
+        if (!section) {
+            projectsNavRevealSuppressedRef.current = false;
+            return;
+        }
+
+        const mq = window.matchMedia(NAV_PROJECTS_SUPPRESS_MQ);
+
+        const sync = (isIntersecting: boolean) => {
+            projectsNavRevealSuppressedRef.current = mq.matches && isIntersecting;
+        };
+
+        const io = new IntersectionObserver(
+            (entries) => {
+                const entry = entries[0];
+                if (!entry) return;
+                sync(entry.isIntersecting);
+            },
+            { threshold: [0, 0.02, 0.08, 0.15, 0.3], rootMargin: "0px" }
+        );
+
+        io.observe(section);
+
+        const onMq = () => {
+            if (!mq.matches) {
+                projectsNavRevealSuppressedRef.current = false;
+                return;
+            }
+            const r = section.getBoundingClientRect();
+            const vh = window.innerHeight;
+            const intersects = r.bottom > 0 && r.top < vh;
+            sync(intersects);
+        };
+
+        mq.addEventListener("change", onMq);
+        onMq();
+
+        return () => {
+            mq.removeEventListener("change", onMq);
+            io.disconnect();
+            projectsNavRevealSuppressedRef.current = false;
+        };
+    }, [pathname]);
+
     // Hide navbar on scroll down, show on scroll up; solid bar only after leaving the top
     useEffect(() => {
         let lastY = window.scrollY;
@@ -228,7 +288,9 @@ export default function AppNavbar() {
             if (currentY > lastY && currentY > 80) {
                 setNavHidden(true);
             } else if (currentY < lastY) {
-                setNavHidden(false);
+                if (!projectsNavRevealSuppressedRef.current) {
+                    setNavHidden(false);
+                }
             }
             lastY = currentY;
         };

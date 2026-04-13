@@ -57,6 +57,37 @@ const ProjectsDesktopGallery = memo(function ProjectsDesktopGallery({
 }: DesktopGalleryProps) {
     const project = featured[activeIndex] ?? featured[0];
     const slug = project?.slug ?? "";
+    const sourceTitle = project?.title ?? "";
+    const [typedTitle, setTypedTitle] = useState(sourceTitle);
+
+    useEffect(() => {
+        const reduceMotion =
+            typeof window !== "undefined" &&
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduceMotion) {
+            setTypedTitle(sourceTitle);
+            return;
+        }
+
+        if (!sourceTitle) {
+            setTypedTitle("");
+            return;
+        }
+
+        setTypedTitle("");
+        let i = 0;
+        const intervalId = window.setInterval(() => {
+            i += 1;
+            setTypedTitle(sourceTitle.slice(0, i));
+            if (i >= sourceTitle.length) {
+                window.clearInterval(intervalId);
+            }
+        }, 28);
+
+        return () => {
+            window.clearInterval(intervalId);
+        };
+    }, [sourceTitle]);
 
     return (
         <div
@@ -118,11 +149,10 @@ const ProjectsDesktopGallery = memo(function ProjectsDesktopGallery({
                             {String(activeIndex + 1).padStart(2, "0")} / {String(featured.length).padStart(2, "0")}
                         </p>
                         <h3
-                            key={slug}
                             className="mt-3 min-h-[2.6em] max-w-[95%] font-black uppercase leading-[0.95] tracking-tight text-white text-[clamp(1.15rem,2.1vw,1.85rem)] wrap-break-word sm:min-h-[2.4em] lg:max-w-[90%]"
                             aria-live="polite"
                         >
-                            {project?.title ?? ""}
+                            {typedTitle}
                         </h3>
                         <div className="mt-2 min-h-5 max-w-full">
                             <p
@@ -353,7 +383,7 @@ export default function Projects() {
 
     /** Outer shell height (desktop preview column). Inner clip is shorter due to padding so gaps show between slides. */
     const viewportShell =
-        "h-[72dvh] min-h-[300px] lg:h-[min(88vh,860px)] lg:min-h-[360px]";
+        "h-[72dvh] min-h-[300px] lg:h-[min(95vh,1040px)] lg:min-h-[520px] xl:h-[min(97vh,1180px)]";
 
     const transitionOverlay =
         portalReady && isNavigating
@@ -391,7 +421,7 @@ export default function Projects() {
                 className="projects-section scroll-mt-24  bg-background text-foreground"
                 aria-label="Projects"
             >
-                <div className="mx-auto max-w-[1920px] px-5 py-14 sm:px-8 md:px-12 lg:px-16 xl:px-24">
+                <div className="mx-auto w-full max-w-[1920px] px-5 py-14 sm:px-8 md:px-12 lg:px-14 xl:px-18 2xl:max-w-none 2xl:pl-24 2xl:pr-0">
                 {/* ——— Below lg: single column, stacked projects (theme) ——— */}
                 <div className="lg:hidden">
                     <h2 className="text-3xl font-black uppercase leading-[0.95] tracking-tighter text-black sm:text-4xl md:text-5xl">
@@ -443,8 +473,8 @@ export default function Projects() {
                 </div>
 
                 {/* ——— lg+ : split column + pinned scrub gallery ——— */}
-                <div className="hidden gap-10 lg:flex lg:flex-row lg:items-start lg:gap-14 xl:gap-20">
-                    <div className="flex w-full shrink-0 flex-col lg:w-[min(100%,380px)] xl:w-[420px]">
+                <div className="hidden gap-8 lg:flex lg:flex-row lg:items-start lg:gap-10 xl:gap-14">
+                    <div className="flex w-full shrink-0 flex-col lg:w-[min(100%,320px)] xl:w-[360px]">
                         <span className="mb-3 block font-mono text-[10px] uppercase tracking-[0.35em] text-black/45">
                             Selected Projects
                         </span>
@@ -468,34 +498,67 @@ export default function Projects() {
                                         onClick={() => scrollToProject(index)}
                                         className="group flex items-center gap-3 rounded-sm text-left outline-none ring-black/30 focus-visible:ring-2"
                                     >
-                                        <div
-                                            className="relative h-14 w-24 shrink-0 overflow-hidden rounded-sm border border-black/10 bg-black/5 sm:h-16 sm:w-28"
+                                        <motion.div
+                                            animate={{ scale: isActive ? 1 : 0.78 }}
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 340,
+                                                damping: 28,
+                                                mass: 0.72,
+                                            }}
+                                            className="relative h-14 w-24 shrink-0 origin-left overflow-hidden rounded-sm border border-border bg-transparent sm:h-16 sm:w-28"
                                             aria-hidden
                                         >
-                                            <Image
+                                            <img
                                                 src={project.image}
                                                 alt=""
-                                                fill
-                                                sizes="112px"
-                                                className="object-cover opacity-95 transition-opacity group-hover:opacity-100"
+                                                width={160}
+                                                height={90}
+                                                loading="eager"
+                                                decoding="async"
+                                                draggable={false}
+                                                className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover"
                                             />
-                                        </div>
+                                            {isActive ? (
+                                                <motion.span
+                                                    layoutId="projects-left-active-frame"
+                                                    className="pointer-events-none absolute inset-0 z-30 rounded-sm border-2 border-primary/45"
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 420,
+                                                        damping: 34,
+                                                        mass: 0.7,
+                                                    }}
+                                                    aria-hidden
+                                                />
+                                            ) : null}
+                                            {!isActive ? (
+                                                <span
+                                                    className="pointer-events-none absolute inset-0 z-20 bg-black/55"
+                                                    aria-hidden
+                                                />
+                                            ) : null}
+                                        </motion.div>
                                         <span
-                                            className={`h-2 w-2 shrink-0 rounded-[1px] transition-colors ${
-                                                isActive
-                                                    ? "bg-black"
-                                                    : "bg-black/20 group-hover:bg-black/40"
-                                            }`}
+                                            className="relative h-2 w-2 shrink-0"
                                             aria-hidden
-                                        />
-                                        <span
-                                            className={`min-w-0 truncate font-mono text-[10px] uppercase tracking-widest transition-colors ${
-                                                isActive
-                                                    ? "text-black"
-                                                    : "text-black/40 group-hover:text-black/70"
-                                            }`}
                                         >
-                                            {project.title}
+                                            {isActive ? (
+                                                <>
+                                                    <motion.span
+                                                        layoutId="projects-left-active-dot"
+                                                        className="absolute inset-0 rounded-[2px] bg-primary"
+                                                        transition={{
+                                                            type: "spring",
+                                                            stiffness: 460,
+                                                            damping: 32,
+                                                            mass: 0.6,
+                                                        }}
+                                                    />
+                                                </>
+                                            ) : (
+                                                <span className="absolute inset-0 rounded-[2px] bg-muted-foreground/40 transition-colors group-hover:bg-muted-foreground/60" />
+                                            )}
                                         </span>
                                     </button>
                                 );
@@ -512,7 +575,7 @@ export default function Projects() {
                         </div>
                     </div>
 
-                    <div className="min-h-0 flex-1 lg:pl-2">
+                    <div className="min-h-0 flex-1 lg:flex-[1.45] lg:pl-2">
                         <ProjectsDesktopGallery
                             viewportRef={viewportRef}
                             trackRef={trackRef}
