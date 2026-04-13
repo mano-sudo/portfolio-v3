@@ -527,11 +527,13 @@ export default function AppNavbar() {
         : "border-black/20 bg-background text-black/80 hover:border-black/35 hover:bg-black/5";
     const menuBarClass = isProjectDetailPage ? "bg-background" : "bg-black";
 
-    const navSurfaceSolidClass = isProjectDetailPage
-        ? "border-b border-white/10 bg-black/50 backdrop-blur-md"
-        : "border-b border-black/10 bg-background/90 backdrop-blur-md";
-    const navSurfaceTopClass = "border-b border-transparent bg-transparent backdrop-blur-none";
-    const navSurfaceClass = navSolidBg ? navSurfaceSolidClass : navSurfaceTopClass;
+    /** Full-width default at the top of the page (no glass, no bar line). */
+    const navSurfaceTopClass = "border-0 bg-transparent backdrop-blur-none";
+    /** After scrolling: frosted glass only — no `border-b`. */
+    const navSurfaceGlassClass = isProjectDetailPage
+        ? "border-0 bg-black/45 backdrop-blur-xl backdrop-saturate-150"
+        : "border-0 bg-background/65 backdrop-blur-xl backdrop-saturate-150";
+    const navSurfaceClass = navSolidBg ? navSurfaceGlassClass : navSurfaceTopClass;
 
     const sendMessage = async () => {
         const value = chatInput.trim();
@@ -705,7 +707,7 @@ export default function AppNavbar() {
             <nav
                 ref={navRef}
                 data-shoot-ui="1"
-                className={`fixed top-0 z-50 flex w-full min-w-0 items-center justify-between gap-2 py-4 pl-4 pr-3 will-change-transform transition-[transform,opacity,background-color,border-color] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] sm:gap-3 sm:p-6 sm:px-8 md:px-12 lg:px-20 ${navSurfaceClass} ${navHidden && !menuOpen ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
+                className={`fixed top-0 z-50 flex w-full min-w-0 items-center justify-between gap-2 py-2 pl-4 pr-3 will-change-transform transition-[transform,opacity,background-color,border-color] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] sm:gap-3 sm:py-3 sm:px-8 md:px-12 lg:px-20 ${navSurfaceClass} ${navHidden && !menuOpen ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
             >
                 {/* Left - Logo */}
                 <Link href="/" aria-label="Go to home" className="inline-flex min-w-0 shrink items-center">
@@ -716,7 +718,7 @@ export default function AppNavbar() {
 
                 {/* Right Side - Menu + Status/Chat (visible on all breakpoints; compact on xs) */}
                 <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2 md:gap-4">
-                    <div className="flex min-w-0 items-center gap-1 rounded-xl px-0 py-0 sm:gap-2 sm:px-2 sm:py-1.5 md:gap-3">
+                    <div className="flex min-w-0 items-center gap-1 rounded-xl px-0 py-0 sm:gap-2 sm:px-2 sm:py-0.5 md:gap-3">
                         <div className={`flex items-center gap-1 px-0 sm:gap-2 sm:px-1.5 ${topTextClass}`}>
                             <Users className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" aria-hidden />
                             <span className="hidden lg:inline text-xs md:text-sm font-semibold tracking-wide">
@@ -734,7 +736,7 @@ export default function AppNavbar() {
                                 <button
                                     type="button"
                                     onClick={() => setChatOpen((prev) => !prev)}
-                                    className={`relative inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-colors sm:gap-2 sm:px-3 ${topButtonClass}`}
+                                    className={`relative inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 transition-colors sm:gap-2 sm:px-2.5 ${topButtonClass}`}
                                     aria-expanded={chatOpen}
                                     aria-label={
                                         showMessengerParticipantBadge
@@ -759,7 +761,7 @@ export default function AppNavbar() {
                                 </button>
 
                             {chatOpen && (
-                                <div className="z-61 w-[min(calc(100vw-1.25rem),360px)] rounded-2xl border border-black/15 bg-[#f4f3ee] p-3 text-black shadow-[0_24px_55px_-30px_rgba(0,0,0,0.35)] max-sm:fixed max-sm:left-1/2 max-sm:right-auto max-sm:top-[calc(var(--app-header-h,80px)+0.5rem)] max-sm:mt-0 max-sm:-translate-x-1/2 sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:translate-x-0">
+                                <div className="z-61 w-[min(calc(100vw-1.25rem),360px)] rounded-2xl border border-black/15 bg-[#f4f3ee] p-3 text-black shadow-[0_24px_55px_-30px_rgba(0,0,0,0.35)] max-sm:fixed max-sm:left-1/2 max-sm:right-auto max-sm:top-[calc(var(--app-header-h,56px)+0.5rem)] max-sm:mt-0 max-sm:-translate-x-1/2 sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:translate-x-0">
                                 <div className="mb-2 flex items-center justify-between border-b border-black/10 pb-2">
                                     <span className="text-xs font-mono uppercase tracking-[0.2em] text-black/80"># general</span>
                                     <div className="flex items-center gap-3">
@@ -873,7 +875,7 @@ export default function AppNavbar() {
                             href="https://github.com/mano-sudo/portfolio-v3"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1.5 transition-colors sm:gap-2 sm:px-3 ${topButtonClass}`}
+                            className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 transition-colors sm:gap-2 sm:px-2.5 ${topButtonClass}`}
                             aria-label="Open GitHub repository"
                         >
                             <Github className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
@@ -887,22 +889,22 @@ export default function AppNavbar() {
                     {/* Menu Button */}
                     <button
                         onClick={() => setMenuOpen(!menuOpen)}
-                        className="relative z-60 flex flex-col items-center justify-center w-10 h-10 gap-[6px]"
+                        className="relative z-60 flex h-9 w-9 flex-col items-center justify-center gap-[5px]"
                         aria-label="Toggle menu"
                     >
                         <span
-                            className={`block w-6 h-[2px] ${menuBarClass} transition-all duration-300 origin-center ${
-                                menuOpen ? "rotate-45 translate-y-[8px]" : ""
+                            className={`block w-5 h-[2px] ${menuBarClass} transition-all duration-300 origin-center ${
+                                menuOpen ? "rotate-45 translate-y-[7px]" : ""
                             }`}
                         />
                         <span
-                            className={`block w-6 h-[2px] ${menuBarClass} transition-all duration-300 ${
+                            className={`block w-5 h-[2px] ${menuBarClass} transition-all duration-300 ${
                                 menuOpen ? "opacity-0 scale-x-0" : "opacity-100"
                             }`}
                         />
                         <span
-                            className={`block w-6 h-[2px] ${menuBarClass} transition-all duration-300 origin-center ${
-                                menuOpen ? "-rotate-45 -translate-y-[8px]" : ""
+                            className={`block w-5 h-[2px] ${menuBarClass} transition-all duration-300 origin-center ${
+                                menuOpen ? "-rotate-45 -translate-y-[7px]" : ""
                             }`}
                         />
                     </button>
