@@ -343,6 +343,7 @@ export default function Projects() {
                             end: () => `+=${pinScrollPx()}`,
                             pin: true,
                             pinSpacing: true,
+                            pinType: "transform",
                             scrub: 0.38,
                             anticipatePin: 1,
                             invalidateOnRefresh: true,
