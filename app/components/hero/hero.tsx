@@ -17,8 +17,8 @@ export default function Hero() {
     return (
         <LazyMotion features={domAnimation} strict>
         <section
-            data-shoot-target="1"
-            data-shoot-granularity="char"
+            data-blast-target="1"
+            data-blast-granularity="char"
             className="relative isolate w-full overflow-hidden bg-background contain-layout pb-8 min-h-[calc(100svh-var(--app-header-h,88px))] sm:min-h-[calc(72dvh-var(--app-header-h,88px))] sm:pb-10 md:min-h-0 md:pb-14 lg:pb-6 xl:flex xl:min-h-[calc(100svh-var(--app-header-h,88px))] xl:flex-col xl:justify-center xl:pb-8"
             style={{
                 marginTop: "var(--app-header-h, 88px)",
@@ -44,8 +44,8 @@ export default function Hero() {
 
                     <HeroEnterBlock drift="center">
                         <h1
-                            data-shoot-target="1"
-                            data-shoot-granularity="char"
+                            data-blast-target="1"
+                            data-blast-granularity="char"
                             className="text-foreground font-black uppercase leading-[0.9] tracking-[-0.05em] text-[clamp(2.6rem,11vw,4.6rem)]"
                         >
                             Software
@@ -93,8 +93,8 @@ export default function Hero() {
 
                     <HeroEnterBlock drift="right">
                         <div
-                            data-shoot-target="1"
-                            data-shoot-granularity="char"
+                            data-blast-target="1"
+                            data-blast-granularity="char"
                             className="text-right text-foreground font-black uppercase leading-[0.88] tracking-[-0.06em] text-[clamp(3.1rem,13vw,5.2rem)]"
                         >
                             Roman
@@ -157,8 +157,8 @@ export default function Hero() {
 
                         <HeroEnterBlock className="col-span-12 md:col-span-7 md:order-1 md:text-left" drift="left">
                             <h1
-                                data-shoot-target="1"
-                                data-shoot-granularity="char"
+                                data-blast-target="1"
+                                data-blast-granularity="char"
                                 className="text-foreground font-black uppercase leading-[0.88] tracking-[-0.04em] text-[clamp(2.8rem,6.6vw,6.6rem)]"
                             >
                                 Software
@@ -188,8 +188,8 @@ export default function Hero() {
                             </div>
 
                             <div
-                                data-shoot-target="1"
-                                data-shoot-granularity="char"
+                                data-blast-target="1"
+                                data-blast-granularity="char"
                                 className="text-foreground font-black uppercase leading-[0.88] tracking-[-0.05em] text-[clamp(3.4rem,6.7vw,6.4rem)] md:text-right"
                             >
                                 Roman

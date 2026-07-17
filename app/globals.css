@@ -247,99 +247,99 @@ body.route-transition-lock *::-webkit-scrollbar {
   display: none !important;
 }
 
-html.shoot-mode-active,
-html.shoot-mode-active *,
-body.shoot-mode-active,
-body.shoot-mode-active *,
-html.shoot-mode-active *::before,
-html.shoot-mode-active *::after,
-body.shoot-mode-active *::before,
-body.shoot-mode-active *::after {
+html.blast-mode-active,
+html.blast-mode-active *,
+body.blast-mode-active,
+body.blast-mode-active *,
+html.blast-mode-active *::before,
+html.blast-mode-active *::after,
+body.blast-mode-active *::before,
+body.blast-mode-active *::after {
   user-select: none !important;
   -webkit-user-select: none !important;
 }
 
-/* Disable real clicks on links/controls while shoot mode is on (shoot uses window listeners). */
-html.shoot-mode-active a[href],
-html.shoot-mode-active button:not(:disabled),
-html.shoot-mode-active [role="button"],
-html.shoot-mode-active [role="link"],
-html.shoot-mode-active [role="tab"],
-html.shoot-mode-active [role="menuitem"],
-html.shoot-mode-active input:not([type="hidden"]),
-html.shoot-mode-active textarea,
-html.shoot-mode-active select,
-html.shoot-mode-active summary {
+/* Disable real clicks on links/controls while blast mode is on (blast uses window listeners). */
+html.blast-mode-active a[href],
+html.blast-mode-active button:not(:disabled),
+html.blast-mode-active [role="button"],
+html.blast-mode-active [role="link"],
+html.blast-mode-active [role="tab"],
+html.blast-mode-active [role="menuitem"],
+html.blast-mode-active input:not([type="hidden"]),
+html.blast-mode-active textarea,
+html.blast-mode-active select,
+html.blast-mode-active summary {
   pointer-events: none !important;
 }
 
-html.shoot-mode-active [data-shoot-controls] a[href],
-html.shoot-mode-active [data-shoot-controls] button:not(:disabled),
-html.shoot-mode-active [data-shoot-controls] [role="button"],
-html.shoot-mode-active [data-shoot-controls] [role="link"],
-html.shoot-mode-active [data-shoot-controls] [role="tab"],
-html.shoot-mode-active [data-shoot-controls] [role="menuitem"],
-html.shoot-mode-active [data-shoot-controls] input:not([type="hidden"]),
-html.shoot-mode-active [data-shoot-controls] textarea,
-html.shoot-mode-active [data-shoot-controls] select,
-html.shoot-mode-active [data-shoot-controls] summary {
+html.blast-mode-active [data-blast-controls] a[href],
+html.blast-mode-active [data-blast-controls] button:not(:disabled),
+html.blast-mode-active [data-blast-controls] [role="button"],
+html.blast-mode-active [data-blast-controls] [role="link"],
+html.blast-mode-active [data-blast-controls] [role="tab"],
+html.blast-mode-active [data-blast-controls] [role="menuitem"],
+html.blast-mode-active [data-blast-controls] input:not([type="hidden"]),
+html.blast-mode-active [data-blast-controls] textarea,
+html.blast-mode-active [data-blast-controls] select,
+html.blast-mode-active [data-blast-controls] summary {
   pointer-events: auto !important;
 }
 
 /* Pinned / scroll-scrub regions (e.g. projects gallery): real clicks + wheel/touch scroll. */
-html.shoot-mode-active [data-shoot-scroll-interactive] a[href],
-html.shoot-mode-active [data-shoot-scroll-interactive] button:not(:disabled),
-html.shoot-mode-active [data-shoot-scroll-interactive] [role="button"],
-html.shoot-mode-active [data-shoot-scroll-interactive] [role="link"],
-html.shoot-mode-active [data-shoot-scroll-interactive] [role="tab"],
-html.shoot-mode-active [data-shoot-scroll-interactive] [role="menuitem"],
-html.shoot-mode-active [data-shoot-scroll-interactive] input:not([type="hidden"]),
-html.shoot-mode-active [data-shoot-scroll-interactive] textarea,
-html.shoot-mode-active [data-shoot-scroll-interactive] select,
-html.shoot-mode-active [data-shoot-scroll-interactive] summary {
+html.blast-mode-active [data-blast-scroll-interactive] a[href],
+html.blast-mode-active [data-blast-scroll-interactive] button:not(:disabled),
+html.blast-mode-active [data-blast-scroll-interactive] [role="button"],
+html.blast-mode-active [data-blast-scroll-interactive] [role="link"],
+html.blast-mode-active [data-blast-scroll-interactive] [role="tab"],
+html.blast-mode-active [data-blast-scroll-interactive] [role="menuitem"],
+html.blast-mode-active [data-blast-scroll-interactive] input:not([type="hidden"]),
+html.blast-mode-active [data-blast-scroll-interactive] textarea,
+html.blast-mode-active [data-blast-scroll-interactive] select,
+html.blast-mode-active [data-blast-scroll-interactive] summary {
   pointer-events: auto !important;
 }
 
 /*
- * Touchscreens: keep pan/pinch in shoot mode (class from JS via maxTouchPoints;
+ * Touchscreens: keep pan/pinch in blast mode (class from JS via maxTouchPoints;
  * media queries alone miss many tablets that report fine pointer + hover).
  */
-html.shoot-mode-active.shoot-mode-touch-ui,
-html.shoot-mode-active.shoot-mode-touch-ui *,
-body.shoot-mode-active.shoot-mode-touch-ui,
-body.shoot-mode-active.shoot-mode-touch-ui *,
-html.shoot-mode-active.shoot-mode-touch-ui *::before,
-html.shoot-mode-active.shoot-mode-touch-ui *::after,
-body.shoot-mode-active.shoot-mode-touch-ui *::before,
-body.shoot-mode-active.shoot-mode-touch-ui *::after {
+html.blast-mode-active.blast-mode-touch-ui,
+html.blast-mode-active.blast-mode-touch-ui *,
+body.blast-mode-active.blast-mode-touch-ui,
+body.blast-mode-active.blast-mode-touch-ui *,
+html.blast-mode-active.blast-mode-touch-ui *::before,
+html.blast-mode-active.blast-mode-touch-ui *::after,
+body.blast-mode-active.blast-mode-touch-ui *::before,
+body.blast-mode-active.blast-mode-touch-ui *::after {
   touch-action: manipulation !important;
 }
 
-html.shoot-cursor-hidden,
-html.shoot-cursor-hidden *,
-body.shoot-cursor-hidden,
-body.shoot-cursor-hidden *,
-html.shoot-cursor-hidden *::before,
-html.shoot-cursor-hidden *::after,
-body.shoot-cursor-hidden *::before,
-body.shoot-cursor-hidden *::after {
+html.blast-cursor-hidden,
+html.blast-cursor-hidden *,
+body.blast-cursor-hidden,
+body.blast-cursor-hidden *,
+html.blast-cursor-hidden *::before,
+html.blast-cursor-hidden *::after,
+body.blast-cursor-hidden *::before,
+body.blast-cursor-hidden *::after {
   cursor: none !important;
 }
 
-/* Shoot toggle: show normal pointer so users can see they can turn mode off. */
-html.shoot-cursor-hidden [data-shoot-controls],
-html.shoot-cursor-hidden [data-shoot-controls] *,
-html.shoot-cursor-hidden [data-shoot-controls]::before,
-html.shoot-cursor-hidden [data-shoot-controls]::after,
-body.shoot-cursor-hidden [data-shoot-controls],
-body.shoot-cursor-hidden [data-shoot-controls] *,
-body.shoot-cursor-hidden [data-shoot-controls]::before,
-body.shoot-cursor-hidden [data-shoot-controls]::after {
+/* Blast toggle: show normal pointer so users can see they can turn mode off. */
+html.blast-cursor-hidden [data-blast-controls],
+html.blast-cursor-hidden [data-blast-controls] *,
+html.blast-cursor-hidden [data-blast-controls]::before,
+html.blast-cursor-hidden [data-blast-controls]::after,
+body.blast-cursor-hidden [data-blast-controls],
+body.blast-cursor-hidden [data-blast-controls] *,
+body.blast-cursor-hidden [data-blast-controls]::before,
+body.blast-cursor-hidden [data-blast-controls]::after {
   cursor: pointer !important;
 }
 
-html.shoot-mode-active *::selection,
-body.shoot-mode-active *::selection {
+html.blast-mode-active *::selection,
+body.blast-mode-active *::selection {
   background: transparent !important;
   color: inherit !important;
 }
@@ -451,4 +451,45 @@ body.shoot-mode-active *::selection {
 
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
+}
+
+/* Glitch Mode Animations & Effects */
+.bg-glitch-overlay {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.22) 50%
+  ), 
+  linear-gradient(
+    90deg, 
+    rgba(255, 0, 0, 0.05), 
+    rgba(0, 255, 0, 0.02), 
+    rgba(0, 0, 255, 0.05)
+  );
+  background-size: 100% 4px, 6px 100%;
+  animation: crt-flicker 0.15s infinite;
+}
+
+@keyframes crt-flicker {
+  0% { opacity: 0.25; }
+  50% { opacity: 0.35; }
+  100% { opacity: 0.25; }
+}
+
+@keyframes glitch-block-fade {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) skewX(-15deg);
+  }
+  30% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.15, 0.8) skewX(15deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5, 1.3) skewX(0deg);
+  }
+}
+
+.animate-glitch-block-fade {
+  animation: glitch-block-fade 0.35s cubic-bezier(0.19, 1, 0.22, 1) forwards;
 }
