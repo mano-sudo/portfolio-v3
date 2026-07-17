@@ -15,7 +15,7 @@ import {
     projectDetailPath,
 } from "@/app/utils/project-detail-navigation";
 import { logPrefersHardNavContext, logProjectsScroll } from "@/app/utils/projects-scroll-debug";
-import { useShootModeOn } from "@/app/utils/shoot-mode-store";
+import { useBlastModeOn } from "@/app/utils/blast-mode-store";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -213,7 +213,7 @@ const ProjectsDesktopGallery = memo(function ProjectsDesktopGallery({
 });
 
 export default function Projects() {
-    const shootModeOn = useShootModeOn();
+    const blastModeOn = useBlastModeOn();
     const router = useRouter();
     const featured = useMemo(() => projects.slice(0, FEATURED_COUNT), []);
     const sectionRef = useRef<HTMLElement>(null);
@@ -235,7 +235,7 @@ export default function Projects() {
 
     const scrollToProject = useCallback(
         (index: number) => {
-            if (shootModeOn) return;
+            if (blastModeOn) return;
             if (typeof window === "undefined") return;
             if (!window.matchMedia(DESKTOP_MQ).matches) return;
 
@@ -249,12 +249,12 @@ export default function Projects() {
             lastScrubIndexRef.current = index;
             setActiveIndex(index);
         },
-        [shootModeOn],
+        [blastModeOn],
     );
 
     const goToProject = useCallback(
         (slug: string) => {
-            if (shootModeOn) return;
+            if (blastModeOn) return;
             if (isNavigating) return;
 
             const hard = prefersHardNavigationToProjectDetail();
@@ -288,7 +288,7 @@ export default function Projects() {
                 router.push(projectDetailPath(slug));
             }, 620);
         },
-        [isNavigating, router, shootModeOn],
+        [isNavigating, router, blastModeOn],
     );
 
     useEffect(() => {
@@ -428,7 +428,7 @@ export default function Projects() {
             <section
                 ref={sectionRef}
                 id="projects"
-                data-shoot-scroll-interactive="1"
+                data-blast-scroll-interactive="1"
                 className="projects-section scroll-mt-24  bg-background text-foreground"
                 aria-label="Projects"
             >
@@ -477,11 +477,11 @@ export default function Projects() {
                         <Link
                             href="/projects"
                             onClick={(e) => {
-                                if (shootModeOn) e.preventDefault();
+                                if (blastModeOn) e.preventDefault();
                             }}
-                            aria-disabled={shootModeOn}
-                            tabIndex={shootModeOn ? -1 : undefined}
-                            className={`inline-flex items-center gap-3 bg-foreground px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85${shootModeOn ? " pointer-events-none opacity-50" : ""}`}
+                            aria-disabled={blastModeOn}
+                            tabIndex={blastModeOn ? -1 : undefined}
+                            className={`inline-flex items-center gap-3 bg-foreground px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85${blastModeOn ? " pointer-events-none opacity-50" : ""}`}
                         >
                             View all
                         </Link>
@@ -511,7 +511,7 @@ export default function Projects() {
                                     <button
                                         key={project.slug}
                                         type="button"
-                                        disabled={shootModeOn}
+                                        disabled={blastModeOn}
                                         onClick={() => scrollToProject(index)}
                                         className="group flex items-center gap-3 rounded-sm text-left outline-none ring-foreground/30 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
@@ -586,11 +586,11 @@ export default function Projects() {
                             <Link
                                 href="/projects"
                                 onClick={(e) => {
-                                    if (shootModeOn) e.preventDefault();
+                                    if (blastModeOn) e.preventDefault();
                                 }}
-                                aria-disabled={shootModeOn}
-                                tabIndex={shootModeOn ? -1 : undefined}
-                                className={`inline-flex items-center gap-3 bg-foreground px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85${shootModeOn ? " pointer-events-none opacity-50" : ""}`}
+                                aria-disabled={blastModeOn}
+                                tabIndex={blastModeOn ? -1 : undefined}
+                                className={`inline-flex items-center gap-3 bg-foreground px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-background transition-colors hover:bg-foreground/85${blastModeOn ? " pointer-events-none opacity-50" : ""}`}
                             >
                                 View all
                             </Link>
@@ -605,7 +605,7 @@ export default function Projects() {
                             activeIndex={activeIndex}
                             viewportShell={viewportShell}
                             goToProject={goToProject}
-                            interactionsDisabled={shootModeOn}
+                            interactionsDisabled={blastModeOn}
                         />
                     </div>
                 </div>

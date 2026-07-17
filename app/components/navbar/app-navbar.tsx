@@ -714,7 +714,7 @@ export default function AppNavbar() {
         <>
             <nav
                 ref={navRef}
-                data-shoot-ui="1"
+                data-blast-ui="1"
                 className={`fixed top-0 z-50 flex w-full min-w-0 items-center justify-between gap-2 py-2 pl-4 pr-3 will-change-transform transition-[transform,opacity,background-color,border-color] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] sm:gap-3 sm:py-3 sm:px-8 md:px-12 lg:px-20 ${navSurfaceClass} ${navHidden && !menuOpen ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
             >
                 {/* Left - Logo */}
@@ -946,7 +946,7 @@ export default function AppNavbar() {
 
             {/* Full-Screen Menu Overlay */}
             <div
-                data-shoot-ui="1"
+                data-blast-ui="1"
                 className={`fixed inset-0 z-55 transition-all duration-500 ${
                     menuOpen
                         ? "opacity-100 pointer-events-auto"

@@ -252,7 +252,7 @@ const STACK_LINKS = [
 
 export function HeroTechChips(): React.JSX.Element {
     return (
-        <div className="flex flex-wrap gap-2" data-shoot-ui="1">
+        <div className="flex flex-wrap gap-2" data-blast-ui="1">
             {STACK_LINKS.map((item) => (
                 <Link
                     key={item.label}
@@ -277,7 +277,7 @@ export function HeroAvailability(): React.JSX.Element {
 
     return (
         <div
-            data-shoot-ui="1"
+            data-blast-ui="1"
             className="inline-flex max-w-44 items-center gap-2 rounded-full border border-border bg-muted/60 px-2.5 py-1 sm:max-w-none"
         >
             <span className="relative flex h-2 w-2 shrink-0">
@@ -297,7 +297,7 @@ export function HeroExploreLink({ className }: { className?: string }): React.JS
     const reduceMotion = useHydrationSafeReducedMotion();
 
     return (
-        <div className={className} data-shoot-ui="1">
+        <div className={className} data-blast-ui="1">
             <Link
                 href="#projects"
                 className={cn(
