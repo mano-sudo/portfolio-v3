@@ -3,8 +3,6 @@
  * Kept separate from the main project list so detail routing and static generation stay predictable.
  */
 export const PROJECT_DESCRIPTIONS: Readonly<Record<string, string>> = {
-    "attendance-monitoring-system":
-        "A web-based attendance monitoring system with real-time time-in/time-out logging, admin controls, and automated attendance reporting.",
     "outfit-haven-ecommerce-platform":
         "A modern e-commerce platform for local fashion brands in the Philippines with dynamic storefront experiences and secure order handling.",
     "burger-ka-samen-ordering-system":

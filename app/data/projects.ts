@@ -18,23 +18,6 @@ type ProjectCore = Omit<Project, "description">;
 
 const projectCoreList: readonly ProjectCore[] = [
     {
-        slug: "attendance-monitoring-system",
-        title: "Attendance Monitoring System",
-        role: "Full-Stack Developer",
-        highlights: [
-            "Built real-time attendance logging for employee time-in and time-out.",
-            "Implemented admin dashboard tools for employee and schedule management.",
-            "Automated attendance report generation to reduce manual processing.",
-            "Delivered a responsive interface for daily workforce operations.",
-        ],
-        tech: ["HTML", "CSS", "PHP", "MySQL", "Bootstrap", "JavaScript"],
-        github: "https://github.com/mano-sudo/AMS",
-        live: "https://ams.manosudo.com",
-        featured: true,
-        year: "2024",
-        image: "/images/projects/atms.webp",
-    },
-    {
         slug: "outfit-haven-ecommerce-platform",
         title: "OutfitHaven: Responsive E-Commerce Platform",
         role: "Full-Stack Developer",
